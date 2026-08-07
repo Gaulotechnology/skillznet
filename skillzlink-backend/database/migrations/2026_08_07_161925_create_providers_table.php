@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedInteger('service_radius')->default(10);
             $table->string('service_category', 100);
             $table->text('description')->nullable();
+            $table->string('profile_image')->nullable();
             $table->decimal('rating', 3, 2)->default(0);
             $table->unsignedInteger('total_ratings')->default(0);
             $table->enum('subscription_tier', ['free', 'premium_monthly', 'premium_quarterly'])->default('free');

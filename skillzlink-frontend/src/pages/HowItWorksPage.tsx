@@ -128,7 +128,7 @@ export function HowItWorksPage() {
                                       {openAccordion === 'hire-3' && (
                                         <div className="wt-accordiondetails">
                                           <div className="wt-description">
-                                            <p>Contact the professional directly via WhatsApp or our internal messaging system. Discuss project details, agree on terms, and hire them for your job.</p>
+                                            <p>Contact the professional directly via WhatsApp or our internal messaging system. Discuss project details, agree on terms, and hire them for your service.</p>
                                           </div>
                                         </div>
                                       )}
@@ -205,7 +205,7 @@ export function HowItWorksPage() {
                                       {openAccordion === 'pro-3' && (
                                         <div className="wt-accordiondetails">
                                           <div className="wt-description">
-                                            <p>Communicate clearly, complete the job to the client's satisfaction, and earn positive reviews. Good ratings will help you secure more work in the future.</p>
+                                            <p>Communicate clearly, complete the service to the client's satisfaction, and earn positive reviews. Good ratings will help you secure more work in the future.</p>
                                           </div>
                                         </div>
                                       )}

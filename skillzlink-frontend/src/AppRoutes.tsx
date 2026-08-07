@@ -10,32 +10,41 @@ import { ProfessionalsListingPage } from "./pages/ProfessionalsListingPage"
 import { ProfessionalProfilePage } from "./pages/ProfessionalProfilePage"
 import { AboutPage } from "./pages/AboutPage"
 import { HowItWorksPage } from "./pages/HowItWorksPage"
-import { DashboardProfilePage } from "./pages/DashboardProfilePage"
+import { DashboardProfilePage } from "./pages/dashboard/shared/DashboardProfilePage"
 import { CompanyGridPage } from './pages/CompanyGridPage';
 import { CompanySinglePage } from './pages/CompanySinglePage';
 import { ArticleListPage } from './pages/ArticleListPage';
 import { ArticleGridPage } from './pages/ArticleGridPage';
 import { ArticleSinglePage } from './pages/ArticleSinglePage';
 import { ArticleClassicPage } from './pages/ArticleClassicPage';
-import { DashboardAccountSettingsPage } from './pages/DashboardAccountSettingsPage';
-import { DashboardHelpSupportPage } from './pages/DashboardHelpSupportPage';
-import { DashboardManageJobsPage } from './pages/DashboardManageJobsPage';
-import { DashboardPostJobPage } from './pages/DashboardPostJobPage';
-import { DashboardProposalsPage } from './pages/DashboardProposalsPage';
-import { DashboardSaveItemsPage } from './pages/DashboardSaveItemsPage';
-import { DashboardMessagesPage } from './pages/DashboardMessagesPage';
-import { DashboardInvoicesPage } from './pages/DashboardInvoicesPage';
-import { DashboardCategoryPage } from './pages/DashboardCategoryPage';
-import { DashboardPackagesPage } from './pages/DashboardPackagesPage';
-import { DashboardOngoingJobPage } from './pages/DashboardOngoingJobPage';
-import { DashboardOngoingSinglePage } from './pages/DashboardOngoingSinglePage';
-import { DashboardCompleteJobsPage } from './pages/DashboardCompleteJobsPage';
-import { DashboardCancelJobsPage } from './pages/DashboardCancelJobsPage';
-import { DashboardInsightsPage } from './pages/DashboardInsightsPage';
-import { DashboardInsightsUserPage } from './pages/DashboardInsightsUserPage';
-import { JobListingPage } from './pages/JobListingPage';
-import { JobProposalPage } from './pages/JobProposalPage';
-import { JobSinglePage } from "./pages/JobSinglePage"
+import { DashboardAccountSettingsPage } from './pages/dashboard/shared/DashboardAccountSettingsPage';
+import { DashboardHelpSupportPage } from './pages/dashboard/shared/DashboardHelpSupportPage';
+import { DashboardSaveItemsPage } from './pages/dashboard/shared/DashboardSaveItemsPage';
+import { DashboardMessagesPage } from './pages/dashboard/shared/DashboardMessagesPage';
+import { DashboardInvoicesPage } from './pages/dashboard/shared/DashboardInvoicesPage';
+import { DashboardManageRequestsPage } from './pages/dashboard/customer/DashboardManageRequestsPage';
+import { DashboardPostRequestPage } from './pages/dashboard/customer/DashboardPostRequestPage';
+import { DashboardSeekerOverviewPage } from './pages/dashboard/customer/DashboardSeekerOverviewPage';
+import { DashboardQuotesPage } from './pages/dashboard/provider/DashboardQuotesPage';
+import { DashboardOngoingServicePage } from './pages/dashboard/provider/DashboardOngoingServicePage';
+import { DashboardOngoingServiceSinglePage } from './pages/dashboard/provider/DashboardOngoingServiceSinglePage';
+import { DashboardCompleteServicesPage } from './pages/dashboard/provider/DashboardCompleteServicesPage';
+import { DashboardCancelServicesPage } from './pages/dashboard/provider/DashboardCancelServicesPage';
+import { DashboardInsightsUserPage } from './pages/dashboard/provider/DashboardInsightsUserPage';
+import { DashboardSubscriptionPage } from './pages/dashboard/provider/DashboardSubscriptionPage';
+import { DashboardProviderOverviewPage } from './pages/dashboard/provider/DashboardProviderOverviewPage';
+import { DashboardAdminOverviewPage } from './pages/dashboard/admin/DashboardAdminOverviewPage';
+import { DashboardCategoryPage } from './pages/dashboard/admin/DashboardCategoryPage';
+import { DashboardThemeSettingsPage } from './pages/dashboard/admin/DashboardThemeSettingsPage';
+import { DashboardFormBuilderPage } from './pages/dashboard/admin/DashboardFormBuilderPage';
+import { DashboardApiLogsPage } from './pages/dashboard/admin/DashboardApiLogsPage';
+import { DashboardPackagesPage } from './pages/dashboard/admin/DashboardPackagesPage';
+import { DashboardUsersPage } from './pages/dashboard/admin/DashboardUsersPage';
+import { DashboardProfessionalsPage } from './pages/dashboard/admin/DashboardProfessionalsPage';
+import { DashboardInsightsPage } from './pages/dashboard/admin/DashboardInsightsPage';
+import { ServiceListingPage } from './pages/ServiceListingPage';
+import { ServiceQuotePage } from './pages/ServiceQuotePage';
+import { ServiceSinglePage } from "./pages/ServiceSinglePage"
 import { NotFoundPage } from "./pages/NotFoundPage"
 
 const quickLinks = [
@@ -55,146 +64,35 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={withLayout(<App />)} />
-
       <Route path="/about" element={withLayout(<AboutPage />)} />
 
-      <Route
-        path="/privacy-policy"
-        element={withLayout(
-          <InfoPage
-            title="Privacy Policy"
-            breadcrumb="Privacy Policy"
-            subtitle="How We Protect Your Data"
-            sections={[
-              {
-                heading: "Data Protection",
-                content: [
-                  "We protect personal data with strong storage controls and role-based access.",
-                  "Sensitive provider details are masked where required and only shared through approved flows.",
-                ],
-              },
-              {
-                heading: "Usage Transparency",
-                content: [
-                  "Search and contact interactions are logged for quality, safety, and fraud prevention.",
-                  "We align platform behavior with privacy and compliance principles applicable to Zimbabwean operations.",
-                ],
-              },
-            ]}
-            quickLinks={quickLinks}
-          />,
-        )}
-      />
+      <Route path="/privacy-policy" element={withLayout(
+        <InfoPage title="Privacy Policy" breadcrumb="Privacy Policy" subtitle="How We Protect Your Data"
+          sections={[
+            { heading: "Data Protection", content: ["We protect personal data with strong storage controls and role-based access.", "Sensitive provider details are masked where required and only shared through approved flows."] },
+            { heading: "Usage Transparency", content: ["Search and contact interactions are logged for quality, safety, and fraud prevention.", "We align platform behavior with privacy and compliance principles applicable to Zimbabwean operations."] },
+          ]} quickLinks={quickLinks} />
+      )} />
 
       <Route path="/how-it-works" element={withLayout(<HowItWorksPage />)} />
 
-      <Route
-        path="/service-categories"
-        element={withLayout(
-          <InfoPage
-            title="Service Categories"
-            breadcrumb="Service Categories"
-            subtitle="Popular Services on SkillzLink"
-            sections={[
-              {
-                heading: "Home & Technical Services",
-                content: [
-                  "Plumbing, electrical, carpentry, painting, and appliance repair.",
-                  "Built for urgent fixes and planned maintenance jobs.",
-                ],
-              },
-              {
-                heading: "Family & Lifestyle Services",
-                content: [
-                  "Cleaning, tutoring, and other local support services.",
-                  "Choose professionals by location, reliability, and performance signals.",
-                ],
-              },
-            ]}
-            quickLinks={quickLinks}
-          />,
-        )}
-      />
+      <Route path="/service-request" element={withLayout(
+        <InfoPage title="Service Request" breadcrumb="Service Request" subtitle="Request the Right Professional"
+          sections={[
+            { heading: "Describe Your Need Clearly", content: ["Share your service category, city, and expected timeline to get relevant matches.", "Clear requests improve speed and quality of provider responses."] },
+            { heading: "Track Responses", content: ["Review responses, compare providers, and continue through your preferred communication channel."] },
+          ]} quickLinks={quickLinks} />
+      )} />
 
-      <Route
-        path="/service-request"
-        element={withLayout(
-          <InfoPage
-            title="Service Request"
-            breadcrumb="Service Request"
-            subtitle="Request the Right Professional"
-            sections={[
-              {
-                heading: "Describe Your Need Clearly",
-                content: [
-                  "Share your service category, city, and expected timeline to get relevant matches.",
-                  "Clear requests improve speed and quality of provider responses.",
-                ],
-              },
-              {
-                heading: "Track Responses",
-                content: [
-                  "Review responses, compare providers, and continue through your preferred communication channel.",
-                ],
-              },
-            ]}
-            quickLinks={quickLinks}
-          />,
-        )}
-      />
+      <Route path="/book-professional" element={withLayout(
+        <InfoPage title="Book a Professional" breadcrumb="Book a Professional" subtitle="From Discovery to Booking"
+          sections={[
+            { heading: "Compare Before Booking", content: ["Use provider profiles, trust indicators, and service details to make informed decisions."] },
+            { heading: "Book with Confidence", content: ["Choose the best-fit professional and proceed with direct contact and scheduling."] },
+          ]} quickLinks={quickLinks} />
+      )} />
 
-      <Route
-        path="/book-professional"
-        element={withLayout(
-          <InfoPage
-            title="Book a Professional"
-            breadcrumb="Book a Professional"
-            subtitle="From Discovery to Booking"
-            sections={[
-              {
-                heading: "Compare Before Booking",
-                content: [
-                  "Use provider profiles, trust indicators, and service details to make informed decisions.",
-                ],
-              },
-              {
-                heading: "Book with Confidence",
-                content: [
-                  "Choose the best-fit professional and proceed with direct contact and scheduling.",
-                ],
-              },
-            ]}
-            quickLinks={quickLinks}
-          />,
-        )}
-      />
-
-      <Route
-        path="/nearby-professionals"
-        element={withLayout(
-          <InfoPage
-            title="Nearby Professionals"
-            breadcrumb="Nearby Professionals"
-            subtitle="Search Professionals Near Your Location"
-            sections={[
-              {
-                heading: "City-Aware Matching",
-                content: [
-                  "SkillzLink prioritizes local relevance with city and radius filters for Zimbabwe.",
-                ],
-              },
-              {
-                heading: "Quality Ranking",
-                content: [
-                  "Ranking balances subscription priority, verification status, proximity, and ratings.",
-                ],
-              },
-            ]}
-            quickLinks={quickLinks}
-          />,
-        )}
-      />
-
+      <Route path="/nearby-professionals" element={withLayout(<ProfessionalsListingPage />)} />
       <Route path="/professional-profile/:id" element={withLayout(<ProfessionalProfilePage />)} />
 
       <Route path="/careers" element={withLayout(<InfoPage title="Careers" breadcrumb="Careers" subtitle="Join the SkillzLink Team" sections={[{ heading: "Build Local Impact", content: ["We are building a trusted marketplace for real services across Zimbabwe.", "We welcome people who care about product quality, reliability, and community-first growth."] }]} quickLinks={quickLinks} />)} />
@@ -206,36 +104,59 @@ export function AppRoutes() {
       <Route path="/tutors" element={withLayout(<InfoPage title="Tutors Near You" breadcrumb="Tutors" subtitle="Find Qualified Tutors" sections={[{ heading: "Tutoring Services", content: ["Academic and skills tutoring professionals for children, youth, and adults."] }]} quickLinks={quickLinks} />)} />
       <Route path="/find-professionals" element={<Navigate to="/nearby-professionals" replace />} />
       <Route path="/news" element={withLayout(<InfoPage title="News" breadcrumb="News" subtitle="SkillzLink Product and Market Updates" sections={[{ heading: "Latest Updates", content: ["Follow platform releases, service expansion updates, and trust & safety improvements."] }]} quickLinks={quickLinks} />)} />
+
       <Route path="/login" element={withLayout(<LoginPage />)} />
       <Route path="/register" element={withLayout(<RegisterPage />)} />
       <Route path="/register-provider" element={<Navigate to="/register" replace />} />
       <Route path="/search" element={withLayout(<SearchPage />)} />
-      <Route path="/professionals" element={withLayout(<ProfessionalsListingPage />)} />
-      <Route path="/jobs" element={withLayout(<JobListingPage />)} />
-      <Route path="/job-proposal" element={withLayout(<JobProposalPage />)} />
+      <Route path="/services" element={<ServiceListingPage />} />
+      <Route path="/service-quote" element={withLayout(<ServiceQuotePage />)} />
       <Route path="/companies" element={withLayout(<CompanyGridPage />)} />
       <Route path="/company-single" element={withLayout(<CompanySinglePage />)} />
       <Route path="/articles" element={withLayout(<ArticleListPage />)} />
       <Route path="/articles-grid" element={withLayout(<ArticleGridPage />)} />
       <Route path="/article-single" element={withLayout(<ArticleSinglePage />)} />
       <Route path="/articles-classic" element={withLayout(<ArticleClassicPage />)} />
-      <Route path="/job/:id" element={withLayout(<JobSinglePage />)} />
+      <Route path="/service/:id" element={withLayout(<ServiceSinglePage />)} />
+
+      {/* ─── Shared Dashboard Routes ─────────────────────────────────────── */}
       <Route path="/dashboard-profile" element={<DashboardProfilePage />} />
+      <Route path="/dashboard/profile" element={<DashboardProfilePage />} />
+      <Route path="/dashboard/settings" element={<DashboardAccountSettingsPage />} />
+      <Route path="/dashboard/help" element={<DashboardHelpSupportPage />} />
       <Route path="/dashboard/help-support" element={<DashboardHelpSupportPage />} />
-      <Route path="/dashboard/manage-jobs" element={<DashboardManageJobsPage />} />
-      <Route path="/dashboard/post-job" element={<DashboardPostJobPage />} />
-      <Route path="/dashboard/insights" element={<DashboardInsightsPage />} />
-      <Route path="/dashboard/insights-user" element={<DashboardInsightsUserPage />} />
-      <Route path="/dashboard/ongoing-job" element={<DashboardOngoingJobPage />} />
-      <Route path="/dashboard/ongoing-single" element={<DashboardOngoingSinglePage />} />
-      <Route path="/dashboard/completed-jobs" element={<DashboardCompleteJobsPage />} />
-      <Route path="/dashboard/cancelled-jobs" element={<DashboardCancelJobsPage />} />
-      <Route path="/dashboard/proposals" element={<DashboardProposalsPage />} />
+      <Route path="/dashboard/saved" element={<DashboardSaveItemsPage />} />
       <Route path="/dashboard/saved-items" element={<DashboardSaveItemsPage />} />
       <Route path="/dashboard/messages" element={<DashboardMessagesPage />} />
       <Route path="/dashboard/invoices" element={<DashboardInvoicesPage />} />
-      <Route path="/dashboard/categories" element={<DashboardCategoryPage />} />
+
+      {/* ─── Seeker / Customer Dashboard Routes ──────────────────────────── */}
+      <Route path="/dashboard/seeker/overview" element={<DashboardSeekerOverviewPage />} />
+      <Route path="/dashboard/manage-requests" element={<DashboardManageRequestsPage />} />
+      <Route path="/dashboard/post-request" element={<DashboardPostRequestPage />} />
+
+      {/* ─── Provider Dashboard Routes ────────────────────────────────────── */}
+      <Route path="/dashboard/provider/overview" element={<DashboardProviderOverviewPage />} />
+      <Route path="/dashboard/insights" element={<DashboardInsightsUserPage />} />
+      <Route path="/dashboard/insights-user" element={<DashboardInsightsUserPage />} />
+      <Route path="/dashboard/subscription" element={<DashboardSubscriptionPage />} />
+      <Route path="/dashboard/ongoing-service" element={<DashboardOngoingServicePage />} />
+      <Route path="/dashboard/ongoing-single" element={<DashboardOngoingServiceSinglePage />} />
+      <Route path="/dashboard/completed-services" element={<DashboardCompleteServicesPage />} />
+      <Route path="/dashboard/cancelled-services" element={<DashboardCancelServicesPage />} />
+      <Route path="/dashboard/quotes" element={<DashboardQuotesPage />} />
+
+      {/* ─── Admin Dashboard Routes ───────────────────────────────────────── */}
+      <Route path="/dashboard/admin/overview" element={<DashboardAdminOverviewPage />} />
+      <Route path="/dashboard/admin/users" element={<DashboardUsersPage />} />
+      <Route path="/dashboard/admin/professionals" element={<DashboardProfessionalsPage />} />
+      <Route path="/dashboard/admin/theme-settings" element={<DashboardThemeSettingsPage />} />
+      <Route path="/dashboard/admin/form-builder" element={<DashboardFormBuilderPage />} />
+      <Route path="/dashboard/admin/api-logs" element={<DashboardApiLogsPage />} />
+      <Route path="/dashboard/admin/categories" element={<DashboardCategoryPage />} />
+      <Route path="/dashboard/admin/insights" element={<DashboardInsightsPage />} />
       <Route path="/dashboard/packages" element={<DashboardPackagesPage />} />
+
       <Route path="*" element={withLayout(<NotFoundPage />)} />
     </Routes>
   )

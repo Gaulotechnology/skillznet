@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ArticleListPage: React.FC = () => {
+export const ArticleListPage: React.FC = () => {
   return (
     <>
       {/* Inner Home Banner Start */}
@@ -244,4 +244,3 @@ const ArticleListPage: React.FC = () => {
   );
 };
 
-export default ArticleListPage;

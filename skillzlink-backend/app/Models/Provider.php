@@ -18,12 +18,19 @@ class Provider extends Model
         'service_radius',
         'service_category',
         'description',
+        'profile_image',
         'rating',
         'total_ratings',
         'subscription_tier',
         'subscription_expiry',
         'is_featured',
         'contact_opt_in',
+        'phone',
+        'hourly_rate',
+        'completed_services',
+        'success_rate',
+        'response_time',
+        'skills',
     ];
 
     protected function casts(): array
@@ -34,6 +41,7 @@ class Provider extends Model
             'contact_opt_in' => 'boolean',
             'subscription_expiry' => 'datetime',
             'rating' => 'decimal:2',
+            'skills' => 'array',
         ];
     }
 
@@ -50,5 +58,25 @@ class Provider extends Model
     public function views(): HasMany
     {
         return $this->hasMany(ProviderView::class);
+    }
+
+    public function experiences(): HasMany
+    {
+        return $this->hasMany(ProviderExperience::class);
+    }
+
+    public function portfolios(): HasMany
+    {
+        return $this->hasMany(ProviderPortfolio::class);
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(ProviderService::class);
+    }
+
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(Rating::class);
     }
 }

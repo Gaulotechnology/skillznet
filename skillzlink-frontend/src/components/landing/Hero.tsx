@@ -1,15 +1,7 @@
-import { Link } from "react-router-dom"
+import { useState, useRef, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
-const serviceOptions = [
-  { value: "plumbing", label: "Plumbing" },
-  { value: "electrical", label: "Electrical" },
-  { value: "cleaning", label: "Cleaning" },
-  { value: "tutoring", label: "Tutoring" },
-  { value: "carpentry", label: "Carpentry" },
-  { value: "painting", label: "Painting" },
-  { value: "gardening", label: "Gardening" },
-  { value: "appliance-repair", label: "Appliance Repair" },
-]
+import { publicApi } from "../../services/api"
 
 interface HeroProps {
   selectedService: string
@@ -17,6 +9,34 @@ interface HeroProps {
 }
 
 export function Hero({ selectedService, onServiceChange }: HeroProps) {
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [searchText, setSearchText] = useState("")
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+  const [categories, setCategories] = useState<any[]>([])
+
+  useEffect(() => {
+    publicApi.getCategories().then(res => setCategories(res.categories || []))
+  }, [])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const selectedLabel = categories.find(o => o.slug === selectedService)?.name || "All Categories"
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault()
+    navigate(`/nearby-professionals?service=${selectedService}&q=${encodeURIComponent(searchText)}`)
+  }
+
   return (
     <div className="wt-haslayout wt-bannerholder">
       <div className="container">
@@ -25,16 +45,8 @@ export function Hero({ selectedService, onServiceChange }: HeroProps) {
             <div className="wt-bannerimages">
               <figure className="wt-bannermanimg">
                 <img src="/images/bannerimg/img-01.png" alt="Banner" />
-                <img
-                  src="/images/bannerimg/img-02.png"
-                  className="wt-bannermanimgone"
-                  alt="Banner layer one"
-                />
-                <img
-                  src="/images/bannerimg/img-03.png"
-                  className="wt-bannermanimgtwo"
-                  alt="Banner layer two"
-                />
+                <img src="/images/bannerimg/img-02.png" className="wt-bannermanimgone" alt="Banner layer one" />
+                <img src="/images/bannerimg/img-03.png" className="wt-bannermanimgtwo" alt="Banner layer two" />
               </figure>
             </div>
           </div>
@@ -47,37 +59,81 @@ export function Hero({ selectedService, onServiceChange }: HeroProps) {
                   </h1>
                 </div>
                 <div className="wt-description">
-                  <p>
-                    Find top-rated plumbers, electricians, cleaners, tutors, and other service
-                    providers in minutes.
-                  </p>
+                  <p>Find top-rated plumbers, electricians, cleaners, tutors, and other service providers in minutes.</p>
                 </div>
               </div>
-              <form className="wt-formtheme wt-formbanner">
+              <form className="wt-formtheme wt-formbanner" onSubmit={handleSearch}>
                 <fieldset>
                   <div className="form-group">
-                    <input type="text" name="fullname" className="form-control" placeholder="I’m looking for" />
+                    <input
+                      type="text"
+                      name="fullname"
+                      className="form-control"
+                      placeholder="I'm looking for"
+                      value={searchText}
+                      onChange={e => setSearchText(e.target.value)}
+                    />
                     <div className="wt-formoptions">
-                      <div className="wt-dropdown">
-                        <span>In: <em className="selected-search-type">Freelancers </em><i className="lnr lnr-chevron-down"></i></span>
+                      <div className="wt-dropdown" ref={dropdownRef} style={{ position: 'relative' }}>
+                        <span
+                          onClick={() => setDropdownOpen(prev => !prev)}
+                          style={{ cursor: 'pointer', userSelect: 'none' }}
+                        >
+                          In: <em className="selected-search-type">{selectedLabel} </em>
+                          <i className="lnr lnr-chevron-down"></i>
+                        </span>
+                        {dropdownOpen && (
+                          <div
+                            className="wt-radioholder"
+                            style={{
+                              display: 'block',
+                              position: 'absolute',
+                              top: '100%',
+                              right: 0,
+                              background: '#fff',
+                              boxShadow: '0 5px 20px rgba(0,0,0,0.15)',
+                              borderRadius: '4px',
+                              padding: '15px',
+                              zIndex: 9999,
+                              minWidth: '200px',
+                            }}
+                          >
+                              <span className="wt-radio" key="all">
+                                <input
+                                  id="service-all"
+                                  type="radio"
+                                  name="searchtype"
+                                  value="all"
+                                  checked={selectedService === "all"}
+                                  onChange={() => {
+                                    onServiceChange("all")
+                                    setDropdownOpen(false)
+                                  }}
+                                />
+                                <label htmlFor="service-all">All Categories</label>
+                              </span>
+                              {categories.map(option => (
+                                <span className="wt-radio" key={option.slug}>
+                                  <input
+                                    id={`service-${option.slug}`}
+                                    type="radio"
+                                    name="searchtype"
+                                    value={option.slug}
+                                    checked={selectedService === option.slug}
+                                    onChange={() => {
+                                      onServiceChange(option.slug)
+                                      setDropdownOpen(false)
+                                    }}
+                                  />
+                                  <label htmlFor={`service-${option.slug}`}>{option.name}</label>
+                                </span>
+                              ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="wt-radioholder">
-                        <span className="wt-radio">
-                          <input id="wt-freelancers" data-title="Freelancers" type="radio" name="searchtype" value="freelancer" defaultChecked />
-                          <label htmlFor="wt-freelancers">Freelancers</label>
-                        </span>
-                        <span className="wt-radio">
-                          <input id="wt-jobs" data-title="Jobs" type="radio" name="searchtype" value="job" />
-                          <label htmlFor="wt-jobs">Jobs</label>
-                        </span>
-                        <span className="wt-radio">
-                          <input id="wt-company" data-title="Companies" type="radio" name="searchtype" value="job" />
-                          <label htmlFor="wt-company">Companies</label>
-                        </span>
-                      </div>
-                      <Link to={`/search`} className="wt-searchbtn" aria-label="Find professionals">
+                      <button type="submit" className="wt-searchbtn" aria-label="Find professionals">
                         <i className="lnr lnr-magnifier" />
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </fieldset>
@@ -89,9 +145,7 @@ export function Hero({ selectedService, onServiceChange }: HeroProps) {
                   </a>
                 </div>
                 <div className="wt-videocontent">
-                  <span>
-                    See For Yourself!<em>How it works &amp; experience the ultimate joy.</em>
-                  </span>
+                  <span>See For Yourself!<em>How it works &amp; experience the ultimate joy.</em></span>
                 </div>
               </div>
             </div>

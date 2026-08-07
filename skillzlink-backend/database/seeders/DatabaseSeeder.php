@@ -15,11 +15,44 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Admin
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Admin User',
+            'email' => 'admin@skillzlink.local',
+            'phone_number' => '+263771111111',
+            'role' => 'admin',
+            'is_active' => true,
         ]);
+
+        // Provider
+        $providerUser = User::factory()->create([
+            'name' => 'Demo Provider',
+            'email' => 'provider@skillzlink.local',
+            'phone_number' => '+263772222222',
+            'role' => 'provider',
+            'is_active' => true,
+        ]);
+        \App\Models\Provider::create([
+            'user_id' => $providerUser->id,
+            'identity_number' => encrypt('ID-123456789'),
+            'address' => '123 Demo St, Harare',
+            'service_category' => 'plumbing',
+            'service_radius' => 20,
+            'description' => 'Demo provider for testing.',
+        ]);
+
+        // Seeker
+        $seekerUser = User::factory()->create([
+            'name' => 'Demo Seeker',
+            'email' => 'seeker@skillzlink.local',
+            'phone_number' => '+263773333333',
+            'role' => 'seeker',
+            'is_active' => true,
+        ]);
+        \App\Models\Seeker::create([
+            'user_id' => $seekerUser->id,
+        ]);
+
+        $this->call(ProviderSeeder::class);
     }
 }

@@ -1,9 +1,33 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { isLoggedIn, getCurrentUser, logout } from "../../services/api"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
+  const [_isLoginOpen, _setIsLoginOpen] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [user, setUser] = useState<{name: string, role: string} | null>(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const checkAuth = () => {
+      setLoggedIn(isLoggedIn())
+      setUser(getCurrentUser())
+    }
+    
+    checkAuth()
+    
+    window.addEventListener("auth_change", checkAuth)
+    return () => window.removeEventListener("auth_change", checkAuth)
+  }, [])
+
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault()
+    logout()
+    setLoggedIn(false)
+    setUser(null)
+    navigate("/")
+  }
 
   return (
     <header id="wt-header" className="wt-header wt-haslayout">
@@ -35,11 +59,7 @@ export function Header() {
                           Home
                         </Link>
                       </li>
-                      <li className="nav-item">
-                        <Link to="/service-categories" onClick={() => setIsMenuOpen(false)}>
-                          Browse Services
-                        </Link>
-                      </li>
+
                       <li className="nav-item">
                         <Link to="/nearby-professionals" onClick={() => setIsMenuOpen(false)}>
                           Find Professionals
@@ -58,60 +78,49 @@ export function Header() {
                     </ul>
                   </div>
                 </nav>
+
                 <div className="wt-loginarea">
-                  <figure className="wt-userimg">
-                    <img src="/images/user-login.png" alt="User" />
-                  </figure>
-                  <div className="wt-loginoption">
-                    <a
-                      href="#/"
-                      id="wt-loginbtn"
-                      className="wt-loginbtn"
-                      onClick={(e) => { e.preventDefault(); setIsLoginOpen(!isLoginOpen) }}
-                    >
-                      Login
-                    </a>
-                    {isLoginOpen && (
-                      <div className="wt-loginformhold" style={{ display: "block" }}>
-                        <div className="wt-loginheader">
-                          <span>Login</span>
-                          <a href="#/" onClick={(e) => { e.preventDefault(); setIsLoginOpen(false) }}>
-                            <i className="fa fa-times" />
-                          </a>
-                        </div>
-                        <form className="wt-formtheme wt-loginform">
-                          <fieldset>
-                            <div className="form-group">
-                              <input type="text" name="username" className="form-control" placeholder="Username" />
-                            </div>
-                            <div className="form-group">
-                              <input type="password" name="password" className="form-control" placeholder="Password" />
-                            </div>
-                            <div className="wt-logininfo">
-                              <Link to="/login" className="wt-btn" onClick={() => { setIsLoginOpen(false); setIsMenuOpen(false) }}>
-                                Login
-                              </Link>
-                              <span className="wt-checkbox">
-                                <input id="wt-login" type="checkbox" name="rememberme" />
-                                <label htmlFor="wt-login">Keep me logged in</label>
-                              </span>
-                            </div>
-                          </fieldset>
-                          <div className="wt-loginfooterinfo">
-                            <Link to="/login" onClick={() => { setIsLoginOpen(false); setIsMenuOpen(false) }}>
-                              Forgot password?
-                            </Link>
-                            <Link to="/register" onClick={() => { setIsLoginOpen(false); setIsMenuOpen(false) }}>
-                              Create account
-                            </Link>
-                          </div>
-                        </form>
+                  {loggedIn && user ? (
+                    <div className="wt-userlogedin">
+                      <figure className="wt-userimg">
+                        <img src="/images/user-avatar.png" alt="User Avatar" style={{width: '40px', borderRadius: '50%'}} />
+                      </figure>
+                      <div className="wt-username">
+                        <h3>{user.name}</h3>
+                        <span>{user.role}</span>
                       </div>
-                    )}
-                  </div>
-                  <Link to="/register" className="wt-btn" onClick={() => setIsMenuOpen(false)}>
-                    Join Now
-                  </Link>
+                      <nav className="wt-usernav">
+                        <ul>
+                          <li>
+                            <Link to="/dashboard-profile">
+                              <i className="ti-dashboard"></i>
+                              <span>Dashboard</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <a href="#/" onClick={handleLogout}>
+                              <i className="ti-shift-right"></i>
+                              <span>Logout</span>
+                            </a>
+                          </li>
+                        </ul>
+                      </nav>
+                    </div>
+                  ) : (
+                    <>
+                      <figure className="wt-userimg">
+                        <img src="/images/user-login.png" alt="User" />
+                      </figure>
+                      <div className="wt-loginoption">
+                        <Link to="/login" className="wt-loginbtn" onClick={() => setIsMenuOpen(false)}>
+                          Login
+                        </Link>
+                      </div>
+                      <Link to="/register" className="wt-btn" onClick={() => setIsMenuOpen(false)}>
+                        Join Now
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -121,3 +130,4 @@ export function Header() {
     </header>
   )
 }
+

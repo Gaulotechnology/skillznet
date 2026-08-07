@@ -6,24 +6,26 @@ import { PopularServices } from "./components/landing/PopularServices"
 import { JoinInfo } from "./components/landing/JoinInfo"
 import { LimitlessExperience } from "./components/landing/LimitlessExperience"
 import { SkillsFooter } from "./components/landing/SkillsFooter"
-const allowedServices = new Set([
-  "plumbing",
-  "electrical",
-  "tutoring",
-  "cleaning",
-  "carpentry",
-  "painting",
-  "gardening",
-  "appliance-repair",
-])
+import { publicApi } from "./services/api"
 
 function App() {
   const [searchParams] = useSearchParams()
-  const [selectedService, setSelectedService] = useState("plumbing")
+  const [selectedService, setSelectedService] = useState("all")
+
+  // Load Global Theme Settings
+  useEffect(() => {
+    publicApi.getThemeSettings().then(res => {
+      if (res.settings) {
+        Object.entries(res.settings).forEach(([key, value]) => {
+          document.documentElement.style.setProperty(`--${key.replace(/_/g, '-')}`, value as string);
+        });
+      }
+    }).catch(console.error);
+  }, []);
 
   useEffect(() => {
     const serviceParam = searchParams.get("service")
-    if (serviceParam && allowedServices.has(serviceParam)) {
+    if (serviceParam) {
       setSelectedService(serviceParam)
     }
   }, [searchParams])

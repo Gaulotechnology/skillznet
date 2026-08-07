@@ -1,4 +1,4 @@
-import { MainLayout } from '../components/layout/MainLayout';
+import { MainLayout } from "../layouts/MainLayout";
 
 export function CompanySinglePage() {
   return (
@@ -54,7 +54,7 @@ export function CompanySinglePage() {
                           </div>
                         </div>
                         <div className="wt-clicksavearea">
-                          <span>Job ID: tQu5DW9F2G</span>
+                          <span>Service ID: tQu5DW9F2G</span>
                           <a href="#!" className="wt-clicksavebtn"><i className="far fa-heart"></i> Click to Follow</a>
                         </div>
                       </div>
@@ -155,9 +155,9 @@ export function CompanySinglePage() {
                               <li><span><em><img src="/images/flag/img-04.png" alt="img description" /></em>England</span></li>
                               <li><span><i className="far fa-folder wt-viewjobfolder"></i>Type: Per Hour</span></li>
                               <li><span><i className="far fa-clock wt-viewjobclock"></i>Duration: 03 Months</span></li>
-                              <li><span><i className="fa fa-tag wt-viewjobtag"></i>Job ID: gy3yV2Vm5u</span></li>
+                              <li><span><i className="fa fa-tag wt-viewjobtag"></i>Service ID: gy3yV2Vm5u</span></li>
                               <li><a href="#!" className="wt-clicklike wt-clicksave"><i className="fa fa-heart"></i> Save</a></li>
-                              <li className="wt-btnarea"><a href="/job-single" className="wt-btn">View Job</a></li>
+                              <li className="wt-btnarea"><a href="/service-single" className="wt-btn">View Service</a></li>
                             </ul>
                           </div>
                         </div>

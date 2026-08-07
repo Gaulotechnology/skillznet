@@ -1,4 +1,4 @@
-import { MainLayout } from '../components/layout/MainLayout';
+import { MainLayout } from "../layouts/MainLayout";
 
 export function CompanyGridPage() {
   return (
@@ -128,7 +128,7 @@ export function CompanyGridPage() {
                                 <ul className="wt-postarticlemeta">
                                   <li>
                                     <a href="#!">
-                                      <span>Open Jobs</span>
+                                      <span>Open Services</span>
                                     </a>
                                   </li>
                                   <li>
@@ -161,7 +161,7 @@ export function CompanyGridPage() {
                                 <ul className="wt-postarticlemeta">
                                   <li>
                                     <a href="#!">
-                                      <span>Open Jobs</span>
+                                      <span>Open Services</span>
                                     </a>
                                   </li>
                                   <li>

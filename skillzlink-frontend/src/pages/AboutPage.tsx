@@ -37,7 +37,7 @@ export function AboutPage() {
                             </div>
                             <div className="wt-description">
                               <p>Welcome to SkillzLink, the premier platform connecting skilled professionals with clients who need their expertise. We believe in empowering local talent and providing a seamless, reliable experience for both service providers and seekers.</p>
-                              <p>Our mission is to create a community where quality work is recognized and rewarded, making it easier than ever to find the right person for the job, right in your neighborhood.</p>
+                              <p>Our mission is to create a community where quality work is recognized and rewarded, making it easier than ever to find the right person for the service, right in your neighborhood.</p>
                             </div>
                           </div>
                           <div id="wt-statistics" className="wt-statistics">
