@@ -1,0 +1,75 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: skillzlink-mysql
+    environment:
+      MYSQL_DATABASE: skillzlink
+      MYSQL_USER: skillzlink
+      MYSQL_PASSWORD: skillzlink
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: skillzlink-redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./skillzlink-backend
+      dockerfile: Dockerfile
+    container_name: skillzlink-backend
+    command: sh -lc "php artisan serve --host=0.0.0.0 --port=8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:18080
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: skillzlink
+      DB_USERNAME: skillzlink
+      DB_PASSWORD: skillzlink
+      CACHE_STORE: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      LIVE_HELPER_CHAT_URL: ${LIVE_HELPER_CHAT_URL:-}
+      LIVE_HELPER_CHAT_API_KEY: ${LIVE_HELPER_CHAT_API_KEY:-}
+      LIVE_HELPER_CHAT_BOT_ID: ${LIVE_HELPER_CHAT_BOT_ID:-}
+      WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-skillzlink-verify-token}
+    volumes:
+      - ./skillzlink-backend:/var/www
+    ports:
+      - "18080:8000"
+
+  frontend:
+    build:
+      context: ./skillzlink-frontend
+      dockerfile: Dockerfile
+    container_name: skillzlink-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:18080/api
+    volumes:
+      - ./skillzlink-frontend:/app
+      - /app/node_modules
+
+volumes:
+  mysql_data:

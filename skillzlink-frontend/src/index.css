@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+#wt-nav .wt-navigation {
+  display: block;
+}
+
+@media (max-width: 991px) {
+  #wt-nav .wt-navigation {
+    display: none;
+  }
+
+  #wt-nav .wt-navigation.is-open {
+    display: block;
+  }
+}
+
+.wt-service-provider-search .form-row {
+  margin-left: -10px;
+  margin-right: -10px;
+}
+
+.wt-service-provider-search .form-row > [class*="col-"] {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.wt-service-provider-search .form-group {
+  margin-bottom: 1rem;
+}
+
+.wt-service-provider-search .seeker-search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  margin-top: 0;
+}
