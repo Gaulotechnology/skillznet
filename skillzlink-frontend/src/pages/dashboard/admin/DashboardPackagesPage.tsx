@@ -1,92 +1,219 @@
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
+import { adminApi } from "../../../services/api";
 
 export function DashboardPackagesPage() {
+  const [packages, setPackages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingPkg, setEditingPkg] = useState<any | null>(null);
+  const [form, setForm] = useState({ name: "", description: "", price: "", period: "/ Month", popular: false, features: "" });
+  const [saving, setSaving] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error">("success");
+
+  const showToast = (message: string, type: "success" | "error") => {
+    setToastMessage(message);
+    setToastType(type);
+    setTimeout(() => setToastMessage(""), 3000);
+  };
+
+  useEffect(() => {
+    fetchPackages();
+  }, []);
+
+  const fetchPackages = async () => {
+    setLoading(true);
+    try {
+      const res = await adminApi.getPackages();
+      setPackages(res.packages || []);
+    } catch (err) {
+      showToast("Failed to load packages", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openCreate = () => {
+    setEditingPkg(null);
+    setForm({ name: "", description: "", price: "", period: "/ Month", popular: false, features: "" });
+    setModalOpen(true);
+  };
+
+  const openEdit = (pkg: any) => {
+    setEditingPkg(pkg);
+    setForm({
+      name: pkg.name || "",
+      description: pkg.description || "",
+      price: String(pkg.price || ""),
+      period: pkg.period || "/ Month",
+      popular: !!pkg.popular,
+      features: JSON.stringify(pkg.features || [], null, 2),
+    });
+    setModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      let features: any[] = [];
+      try { features = JSON.parse(form.features); } catch { features = []; }
+      const payload = { ...form, features };
+      if (editingPkg) {
+        await adminApi.updatePackage(editingPkg.id, payload);
+        showToast("Package updated!", "success");
+      } else {
+        await adminApi.createPackage(payload);
+        showToast("Package created!", "success");
+      }
+      setModalOpen(false);
+      fetchPackages();
+    } catch (err) {
+      showToast("Failed to save package", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Delete this package?")) return;
+    try {
+      await adminApi.deletePackage(id);
+      showToast("Package deleted!", "success");
+      fetchPackages();
+    } catch (err) {
+      showToast("Failed to delete package", "error");
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="w-12 h-12 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
-      <section className="wt-haslayout wt-dbsectionspace">
-        <div className="row">
-          <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12 float-left">
-            <div className="wt-dashboardbox">
-              <div className="wt-dashboardboxtitle">
-                <h2>Packages</h2>
-              </div>
-              <div className="wt-dashboardboxcontent wt-packages">
-                <div className="wt-package wt-packagedetails">
-                  <div className="wt-packagehead">
-                  </div>
-                  <div className="wt-packagecontent">
-                    <ul className="wt-packageinfo">
-                      <li className="wt-packageprices"><span>Price</span></li>
-                      <li><span>No. Of Offer To Post</span></li>
-                      <li><span>No. Of Featured Services</span></li>
-                      <li><span>Package Duration</span></li>
-                      <li><span>Best Provider Search</span></li>
-                      <li><span>Professional Offer Template</span></li>
-                      <li><span>Free 07 Days Extension</span></li>
-                    </ul>
-                  </div>
+      <div className="p-6 md:p-8 max-w-7xl mx-auto">
+        <div className="mb-12 text-center max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-slate-800">Subscription Packages</h2>
+          <p className="text-slate-500 mt-2">Manage pricing plans and subscription tiers available to service providers.</p>
+          <button onClick={openCreate} className="mt-4 px-6 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-xl transition-colors text-sm shadow-sm">
+            + Create Package
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          {packages.map((pkg: any, idx: number) => (
+            <div 
+              key={pkg.id || idx} 
+              className={`relative bg-white rounded-3xl p-8 border ${
+                pkg.popular 
+                  ? 'border-rose-500 shadow-2xl shadow-rose-500/10 scale-105 z-10' 
+                  : 'border-slate-100 shadow-xl shadow-slate-200/50'
+              } flex flex-col`}
+            >
+              {pkg.popular && (
+                <div className="absolute -top-4 inset-x-0 flex justify-center">
+                  <span className="bg-rose-500 text-white text-xs font-bold uppercase tracking-wider py-1 px-4 rounded-full flex items-center gap-1.5 shadow-md">
+                    <i className="lnr lnr-star"></i> Most Popular
+                  </span>
                 </div>
-                <div className="wt-package wt-baiscpackage">
-                  <div className="wt-packagehead">
-                    <h3>Basic Plan</h3>
-                    <span>Starter Plan For Newbie</span>
-                  </div>
-                  <div className="wt-packagecontent">
-                    <ul className="wt-packageinfo">
-                      <li className="wt-packageprice"><span><sup>$</sup>37<sub>\ Month</sub></span></li>
-                      <li><span>10</span></li>
-                      <li><span><i className="ti-na"></i></span></li>
-                      <li><span>30 Days</span></li>
-                      <li><span><i className="ti-check"></i></span></li>
-                      <li><span><i className="ti-na"></i></span></li>
-                      <li><span><i className="ti-na"></i></span></li>
-                    </ul>
-                    <a className="wt-btn" href="#!"><span>Buy Now</span></a>
-                  </div>
-                </div>
-                <div className="wt-package wt-standardpackage">
-                  <div className="wt-packagehead">
-                    <span className="wt-featuredtag"><i className="fa fa-star"></i></span>
-                    <h3>Standard</h3>
-                    <span>Popular Plan For Professionals</span>
-                    <em>24 Days Left</em>
-                  </div>
-                  <div className="wt-packagecontent">
-                    <ul className="wt-packageinfo">
-                      <li className="wt-packageprice"><span><sup>$</sup>79<sub>\ Month</sub></span></li>
-                      <li><span>30</span></li>
-                      <li><span><i className="ti-check"></i></span></li>
-                      <li><span>30 Days</span></li>
-                      <li><span><i className="ti-check"></i></span></li>
-                      <li><span><i className="ti-na"></i></span></li>
-                      <li><span><i className="ti-na"></i></span></li>
-                    </ul>
-                    <a className="wt-btn" href="#!"><span>Buy Now</span></a>
-                  </div>
-                </div>
-                <div className="wt-package wt-extendedpackage">
-                  <div className="wt-packagehead">
-                    <h3>Extended</h3>
-                    <span>Extended Plan For Managerial</span>
-                  </div>
-                  <div className="wt-packagecontent">
-                    <ul className="wt-packageinfo">
-                      <li className="wt-packageprice"><span><sup>$</sup>199<sub>\ Month</sub></span></li>
-                      <li><span>Unlimited</span></li>
-                      <li><span><i className="ti-check"></i></span></li>
-                      <li><span>30 Days</span></li>
-                      <li><span><i className="ti-check"></i></span></li>
-                      <li><span><i className="ti-check"></i></span></li>
-                      <li><span><i className="ti-check"></i></span></li>
-                    </ul>
-                    <a className="wt-btn" href="#!"><span>Buy Now</span></a>
-                  </div>
+              )}
+
+              <div className="text-center mb-8 pt-4">
+                <h3 className="text-xl font-bold text-slate-800 mb-2">{pkg.name}</h3>
+                <p className="text-sm text-slate-500 mb-6 h-10">{pkg.description}</p>
+                <div className="flex items-end justify-center gap-1">
+                  <span className="text-4xl font-black text-slate-900 tracking-tight">${pkg.price}</span>
+                  <span className="text-slate-500 font-medium mb-1">{pkg.period}</span>
                 </div>
               </div>
+
+              <ul className="space-y-4 mb-8 flex-1">
+                {(pkg.features || []).map((feature: any, fIdx: number) => (
+                  <li key={fIdx} className="flex items-center gap-3 text-sm">
+                    {feature.value === true ? (
+                      <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
+                        <i className="lnr lnr-checkmark-circle"></i>
+                      </div>
+                    ) : feature.value === false ? (
+                      <div className="w-6 h-6 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center shrink-0">
+                        <i className="lnr lnr-cross-circle"></i>
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0 font-bold text-xs">
+                        {feature.value}
+                      </div>
+                    )}
+                    <span className={feature.value === false ? "text-slate-400" : "text-slate-700 font-medium"}>
+                      {feature.name}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => openEdit(pkg)}
+                  className={`flex-1 py-4 rounded-xl font-bold text-sm transition-all duration-300 ${
+                    pkg.popular 
+                      ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-lg shadow-rose-200' 
+                      : 'bg-slate-900 text-white hover:bg-slate-800'
+                  }`}
+                >
+                  Edit Package
+                </button>
+                <button 
+                  onClick={() => handleDelete(pkg.id)}
+                  className="px-4 py-4 rounded-xl font-bold text-sm bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors"
+                >
+                  <i className="lnr lnr-trash"></i>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 space-y-5">
+            <h3 className="text-xl font-bold text-slate-800">{editingPkg ? "Edit Package" : "Create Package"}</h3>
+            <div className="space-y-4">
+              <input className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-fuchsia-400" placeholder="Package Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+              <input className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-fuchsia-400" placeholder="Description" value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+              <input className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-fuchsia-400" placeholder="Price (e.g. 37)" value={form.price} onChange={e => setForm({...form, price: e.target.value})} />
+              <input className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-fuchsia-400" placeholder="Period (e.g. / Month)" value={form.period} onChange={e => setForm({...form, period: e.target.value})} />
+              <label className="flex items-center gap-2 text-sm text-slate-700">
+                <input type="checkbox" checked={form.popular} onChange={e => setForm({...form, popular: e.target.checked})} /> Mark as Popular
+              </label>
+              <textarea className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-fuchsia-400 h-32 font-mono" placeholder='Features JSON array e.g. [{"name":"...", "value": true}]' value={form.features} onChange={e => setForm({...form, features: e.target.value})} />
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setModalOpen(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50">Cancel</button>
+              <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-xl text-sm shadow-sm">
+                {saving ? "Saving..." : "Save"}
+              </button>
             </div>
           </div>
         </div>
-      </section>
+      )}
+
+      {/* Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-4 right-4 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-slide-up z-50">
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${toastType === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+            <i className={`lnr ${toastType === 'success' ? 'lnr-checkmark-circle' : 'lnr-warning'}`}></i>
+          </div>
+          <span className="font-medium text-sm">{toastMessage}</span>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

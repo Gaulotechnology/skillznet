@@ -9,7 +9,7 @@ use App\Models\ProviderReport;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 use App\Models\Seeker;
 use Illuminate\Support\Facades\Hash;
 
@@ -17,7 +17,7 @@ class AdminController extends Controller
 {
     public function users(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         return response()->json([
@@ -27,7 +27,7 @@ class AdminController extends Controller
 
     public function storeUser(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -56,7 +56,7 @@ class AdminController extends Controller
 
     public function updateUser(Request $request, int $id): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -65,7 +65,14 @@ class AdminController extends Controller
             'email' => 'sometimes|string|email|max:255|unique:users,email,' . $id,
             'role' => 'sometimes|in:admin,seeker,provider',
             'is_active' => 'sometimes|boolean',
+            'password' => 'nullable|string|min:8',
         ]);
+
+        if (!empty($validated['password'])) {
+            $validated['password'] = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
 
         $user = User::findOrFail($id);
         $user->update($validated);
@@ -75,7 +82,7 @@ class AdminController extends Controller
 
     public function deleteUser(Request $request, int $id): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -86,9 +93,30 @@ class AdminController extends Controller
         return response()->json(['message' => 'User deleted successfully']);
     }
 
+    public function impersonateUser(Request $request, int $id): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        // Prevent impersonating another super_admin
+        $target = User::findOrFail($id);
+        if ($target->role === 'super_admin' && $request->user()->role !== 'super_admin') {
+            return response()->json(['message' => 'Cannot impersonate a super admin'], 403);
+        }
+
+        // Create a new Sanctum token for the target user
+        $token = $target->createToken('impersonation')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user'  => ['name' => $target->name, 'role' => $target->role],
+        ]);
+    }
+
     public function verifyProvider(Request $request, int $id): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $provider = Provider::findOrFail($id);
@@ -98,7 +126,7 @@ class AdminController extends Controller
 
     public function suspendProvider(Request $request, int $id): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $provider = Provider::with('user')->findOrFail($id);
@@ -108,7 +136,7 @@ class AdminController extends Controller
 
     public function subscriptions(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         return response()->json([
@@ -124,7 +152,7 @@ class AdminController extends Controller
 
     public function stats(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         return response()->json([
@@ -140,7 +168,7 @@ class AdminController extends Controller
 
     public function overrideSubscription(Request $request, int $id): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $validated = $request->validate([
@@ -156,9 +184,11 @@ class AdminController extends Controller
             'is_featured' => $validated['tier'] === 'premium_quarterly',
         ]);
         return response()->json(['message' => 'Subscription updated', 'provider' => $provider]);
+    }
+
     public function categories(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         return response()->json([
@@ -168,7 +198,7 @@ class AdminController extends Controller
 
     public function storeCategory(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $validated = $request->validate([
@@ -183,7 +213,7 @@ class AdminController extends Controller
 
     public function updateCategory(Request $request, int $id): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $category = \App\Models\ServiceCategory::findOrFail($id);
@@ -199,15 +229,17 @@ class AdminController extends Controller
 
     public function deleteCategory(Request $request, int $id): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $category = \App\Models\ServiceCategory::findOrFail($id);
         $category->delete();
         return response()->json(['message' => 'Category deleted']);
+    }
+
     public function themeSettings(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $settings = \App\Models\ThemeSetting::all()->pluck('value', 'key');
@@ -216,7 +248,7 @@ class AdminController extends Controller
 
     public function updateThemeSettings(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $validated = $request->validate([
@@ -233,11 +265,33 @@ class AdminController extends Controller
         return response()->json(['message' => 'Theme settings updated successfully']);
     }
 
+    public function getSettings(Request $request): JsonResponse
+    {
+        $sections = ['general', 'email', 'payment', 'security', 'affiliate', 'agent', 'social', 'subscriptions'];
+        $all = [];
+        foreach ($sections as $section) {
+            $all[$section] = \App\Models\Setting::getSection($section);
+        }
+        return response()->json(['settings' => $all]);
+    }
+
+    public function updateSettings(Request $request): JsonResponse
+    {
+        $section = $request->input('section', 'general');
+        $data = $request->except(['section']);
+
+        foreach ($data as $key => $value) {
+            \App\Models\Setting::set($key, is_array($value) ? json_encode($value) : (string) $value, $section);
+        }
+
+        return response()->json(['message' => 'Settings updated successfully.']);
+    }
+
     // ─── Registration Form Builder ─────────────────────────────────────────────
 
     public function registrationFields(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         return response()->json([
@@ -247,7 +301,7 @@ class AdminController extends Controller
 
     public function storeRegistrationField(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $validated = $request->validate([
@@ -258,6 +312,7 @@ class AdminController extends Controller
             'is_required' => 'boolean',
             'sort_order'  => 'integer',
             'placeholder' => 'nullable|string|max:255',
+            'category_name' => 'nullable|string|max:255',
         ]);
         $field = \App\Models\RegistrationField::create($validated);
         return response()->json(['message' => 'Field created', 'field' => $field]);
@@ -265,7 +320,7 @@ class AdminController extends Controller
 
     public function updateRegistrationField(Request $request, int $id): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $field = \App\Models\RegistrationField::findOrFail($id);
@@ -276,6 +331,7 @@ class AdminController extends Controller
             'is_required' => 'boolean',
             'sort_order'  => 'integer',
             'placeholder' => 'nullable|string|max:255',
+            'category_name' => 'nullable|string|max:255',
         ]);
         $field->update($validated);
         return response()->json(['message' => 'Field updated', 'field' => $field]);
@@ -283,7 +339,7 @@ class AdminController extends Controller
 
     public function deleteRegistrationField(Request $request, int $id): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         \App\Models\RegistrationField::findOrFail($id)->delete();
@@ -292,10 +348,18 @@ class AdminController extends Controller
 
     // ─── Public endpoint (no auth) for fetching form fields ───────────────────
 
-    public function publicRegistrationFields(): JsonResponse
+    public function publicRegistrationFields(Request $request): JsonResponse
     {
+        $query = \App\Models\RegistrationField::orderBy('sort_order');
+        if ($request->filled('category')) {
+            $query->where(function($q) use ($request) {
+                $q->where('category_name', $request->query('category'))
+                  ->orWhereNull('category_name');
+            });
+        }
+        
         return response()->json([
-            'fields' => \App\Models\RegistrationField::orderBy('sort_order')->get()
+            'fields' => $query->get()
         ]);
     }
 
@@ -303,7 +367,7 @@ class AdminController extends Controller
 
     public function apiLogs(Request $request): JsonResponse
     {
-        if ($request->user()->role !== 'admin') {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
         $query = \App\Models\ApiLog::latest('created_at');
@@ -323,5 +387,97 @@ class AdminController extends Controller
 
         $logs = $query->limit(200)->get();
         return response()->json(['logs' => $logs]);
+    }
+
+    public function smsLogs(Request $request): JsonResponse
+    {
+        $query = \App\Models\SmsLog::with('user')->latest('sent_at');
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->query('type'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->query('status'));
+        }
+
+        $logs = $query->limit(200)->get();
+
+        $stats = [
+            'total' => \App\Models\SmsLog::count(),
+            'delivered' => \App\Models\SmsLog::where('status', 'delivered')->count(),
+            'failed' => \App\Models\SmsLog::where('status', 'failed')->count(),
+            'monthly_cost' => \App\Models\SmsLog::whereMonth('sent_at', now()->month)->sum('cost'),
+        ];
+
+        return response()->json(['logs' => $logs, 'stats' => $stats]);
+    }
+
+    public function commLogs(Request $request): JsonResponse
+    {
+        $query = \App\Models\CommLog::with(['fromUser', 'toUser'])->latest('sent_at');
+
+        if ($request->filled('channel')) {
+            $query->where('channel', $request->query('channel'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->query('status'));
+        }
+
+        $logs = $query->limit(200)->get();
+
+        $stats = [
+            'total' => \App\Models\CommLog::count(),
+            'today' => \App\Models\CommLog::whereDate('sent_at', today())->count(),
+            'unread' => \App\Models\CommLog::where('status', 'unread')->count(),
+        ];
+
+        return response()->json(['logs' => $logs, 'stats' => $stats]);
+    }
+
+    // ─── Roles & Permissions ──────────────────────────────────────────────────
+
+    public function permissions(Request $request): JsonResponse
+    {
+        $permissions = DB::table('permissions')->get();
+        
+        $rolePermissions = DB::table('role_permissions')->get()->groupBy('role')->map(function ($items) {
+            return $items->pluck('permission_id');
+        });
+
+        return response()->json([
+            'permissions' => $permissions,
+            'role_permissions' => $rolePermissions,
+        ]);
+    }
+
+    public function syncPermissions(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'role' => 'required|string',
+            'permissions' => 'present|array',
+            'permissions.*' => 'integer|exists:permissions,id',
+        ]);
+
+        $role = $validated['role'];
+        $permissionIds = $validated['permissions'];
+
+        DB::transaction(function () use ($role, $permissionIds) {
+            DB::table('role_permissions')->where('role', $role)->delete();
+            
+            $insertData = collect($permissionIds)->map(function ($id) use ($role) {
+                return [
+                    'role' => $role,
+                    'permission_id' => $id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
+            
+            if (!empty($insertData)) {
+                DB::table('role_permissions')->insert($insertData);
+            }
+        });
+
+        return response()->json(['message' => 'Permissions synchronized successfully']);
     }
 }

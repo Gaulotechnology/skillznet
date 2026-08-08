@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -18,6 +19,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'avatar',
         'phone_number',
         'password',
         'role',
@@ -51,5 +53,18 @@ class User extends Authenticatable
     public function seeker(): HasOne
     {
         return $this->hasOne(Seeker::class);
+    }
+
+    public function getPermissionsAttribute(): array
+    {
+        if ($this->role === 'super_admin') {
+            return DB::table('permissions')->pluck('key')->toArray();
+        }
+        
+        return DB::table('role_permissions')
+            ->join('permissions', 'role_permissions.permission_id', '=', 'permissions.id')
+            ->where('role_permissions.role', $this->role)
+            ->pluck('permissions.key')
+            ->toArray();
     }
 }

@@ -45,3 +45,19 @@ body {
   min-height: 50px;
   margin-top: 0;
 }
+
+/* DataTable reset - override Bootstrap table styles in dashboard */
+.border-collapse table,
+.border-collapse th,
+.border-collapse td {
+  border: none !important;
+  padding: inherit;
+  vertical-align: middle;
+}
+.border-collapse thead th {
+  border-bottom: 1px solid #e5e7eb !important;
+  background: transparent;
+}
+.border-collapse tbody td {
+  background: transparent;
+}

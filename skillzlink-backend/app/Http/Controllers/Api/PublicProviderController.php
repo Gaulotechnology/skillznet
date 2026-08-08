@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Provider;
+use App\Models\ProviderAvailability;
+use App\Models\Booking;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -134,9 +137,72 @@ class PublicProviderController extends Controller
                                         'rating' => $r->rating,
                                         'comment' => $r->comment,
                                         'reviewer_name' => $r->seeker->user->name ?? 'Anonymous',
-                                        'date' => $r->created_at->format('M Y'),
                                     ])
                                     : [],
+            'dynamic_data'       => $provider->dynamic_data ?? [],
         ];
+    }
+
+    public function getSlots(Request $request, int $id): JsonResponse
+    {
+        $provider = Provider::findOrFail($id);
+        $dateStr = $request->query('date', now()->format('Y-m-d'));
+        
+        try {
+            $date = Carbon::parse($dateStr);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Invalid date format'], 400);
+        }
+        
+        $dayOfWeek = $date->dayOfWeek; // 0 (Sunday) to 6 (Saturday)
+        
+        $availability = ProviderAvailability::where('provider_id', $provider->id)
+            ->where('day_of_week', $dayOfWeek)
+            ->where('is_available', true)
+            ->first();
+            
+        if (!$availability) {
+            return response()->json(['slots' => []]);
+        }
+        
+        // Find existing bookings for this date that are not rejected or cancelled
+        $bookings = Booking::where('provider_id', $provider->id)
+            ->where('booking_date', $date->format('Y-m-d'))
+            ->whereNotIn('status', ['rejected', 'cancelled'])
+            ->get();
+            
+        // Generate 1-hour slots
+        $slots = [];
+        $start = Carbon::parse($date->format('Y-m-d') . ' ' . $availability->start_time);
+        $end = Carbon::parse($date->format('Y-m-d') . ' ' . $availability->end_time);
+        
+        while ($start->copy()->addHour() <= $end) {
+            $slotStart = $start->format('H:i');
+            $slotEnd = $start->copy()->addHour()->format('H:i');
+            
+            // Check if slot overlaps with any booking
+            $isAvailable = true;
+            foreach ($bookings as $booking) {
+                $bStart = Carbon::parse($booking->booking_date . ' ' . $booking->start_time);
+                $bEnd = Carbon::parse($booking->booking_date . ' ' . $booking->end_time);
+                
+                // If our slot start is strictly before booking end, AND slot end is strictly after booking start
+                if ($start < $bEnd && $start->copy()->addHour() > $bStart) {
+                    $isAvailable = false;
+                    break;
+                }
+            }
+            
+            if ($isAvailable) {
+                $slots[] = [
+                    'start_time' => $slotStart,
+                    'end_time' => $slotEnd
+                ];
+            }
+            
+            $start->addHour();
+        }
+        
+        return response()->json(['slots' => $slots]);
     }
 }

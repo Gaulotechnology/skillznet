@@ -1,96 +1,56 @@
 import { useState, useEffect } from "react"
 import { Link, useSearchParams } from "react-router-dom"
-import { publicApi, type PublicProvider } from "../services/api"
+import { publicApi } from "../services/api"
+import type { PublicProvider } from "../services/api"
 
-const MOCK_PROVIDERS: PublicProvider[] = [
-  {
-    id: 1, name: "Tinashe Moyo", service_category: "Plumbing",
-    rate: "$15.00 / hr", location: "Harare", rating: 4.8, reviews: 124,
-    image: "/images/user/userlisting/img-01.jpg",
-    description: "Experienced plumber serving Harare. I handle emergency leaks, installations, and general maintenance with quick response times.",
-    skills: ["Pipe Fitting", "Geyser Repair", "Drain Unblocking"],
-    featured: true, premium_badge: true, id_verified: true,
-  },
-  {
-    id: 2, name: "Chipo Ndlovu", service_category: "Electrical",
-    rate: "$20.00 / hr", location: "Bulawayo", rating: 4.9, reviews: 86,
-    image: "/images/user/userlisting/img-02.jpg",
-    description: "Certified electrician for residential and commercial wiring, fault finding, and solar installations.",
-    skills: ["Wiring", "Solar", "Fault Finding", "Appliance Repair"],
-    featured: true, premium_badge: true, id_verified: true,
-  },
-  {
-    id: 3, name: "Tafadzwa Chigumba", service_category: "Carpentry",
-    rate: "$12.00 / hr", location: "Mutare", rating: 4.5, reviews: 42,
-    image: "/images/user/userlisting/img-03.jpg",
-    description: "Custom furniture making, roof timbering, and general woodwork. High quality finishes guaranteed.",
-    skills: ["Furniture", "Roofing", "Cabinet Making"],
-    featured: false, premium_badge: false, id_verified: false,
-  },
+const ITEMS_PER_PAGE = 6
+const zimbabweCities = [
+  "Harare", "Bulawayo", "Mutare", "Gweru", "Kwekwe",
+  "Masvingo", "Chinhoyi", "Marondera", "Kadoma", "Bindura",
+  "Hwange", "Victoria Falls",
 ]
 
 export function ProfessionalsListingPage() {
-  const [searchParams] = useSearchParams()
-  const [cityFilter, setCityFilter] = useState<string>("All")
-  const [categoryFilter, setCategoryFilter] = useState<string>("All")
-  const [searchText, setSearchText] = useState<string>("")
-  const [levelFilter, setLevelFilter] = useState<string>("All")
-  const [hourlyRateFilter, setHourlyRateFilter] = useState<string>("All")
-  const [successRateFilter, setSuccessRateFilter] = useState<string>("All")
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const [professionals, setProfessionals] = useState<PublicProvider[]>(MOCK_PROVIDERS)
-  const ITEMS_PER_PAGE = 10
-  const [loading, setLoading] = useState(false)
-  const [_apiError, setApiError] = useState(false)
-  const [dbCategories, setDbCategories] = useState<any[]>([])
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  // Fetch dynamic categories
+  const initialCity = searchParams.get("city") || "All"
+  const initialService = searchParams.get("service") || "All"
+
+  const [professionals, setProfessionals] = useState<PublicProvider[]>([])
+  const [categories, setCategories] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const [searchText, setSearchText] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState(initialService)
+  const [cityFilter, setCityFilter] = useState(initialCity)
+  const [levelFilter, setLevelFilter] = useState("All")
+  const [hourlyRateFilter, setHourlyRateFilter] = useState("All")
+  const [successRateFilter, setSuccessRateFilter] = useState("All")
+  const [currentPage, setCurrentPage] = useState(1)
+
   useEffect(() => {
-    publicApi.getCategories().then(res => setDbCategories(res.categories || []))
+    Promise.all([
+      publicApi.listProviders({}),
+      publicApi.getCategories()
+    ]).then(([proRes, catRes]) => {
+      setProfessionals(proRes.data || [])
+      setCategories(catRes.categories || [])
+    }).catch(() => {
+      setError("Failed to load data. Please try again later.")
+    }).finally(() => {
+      setLoading(false)
+    })
   }, [])
 
-  // Sync filters from URL params (coming from homepage search)
   useEffect(() => {
-    const service = searchParams.get("service")
-    const q = searchParams.get("q")
-    if (service && service !== "all") {
-      const capitalised = service.charAt(0).toUpperCase() + service.slice(1).replace(/-/g, " ")
-      setCategoryFilter(capitalised)
-    }
-    if (q) setSearchText(q)
-  }, [searchParams])
-
-  // Fetch from real API
-  useEffect(() => {
-    setLoading(true)
-    publicApi.listProviders({
-      category: categoryFilter !== "All" ? categoryFilter : undefined,
-      city: cityFilter !== "All" ? cityFilter : undefined,
-      q: searchText || undefined,
-    })
-      .then(res => {
-        if (res.data && res.data.length > 0) {
-          setProfessionals(res.data)
-          setApiError(false)
-        } else {
-          // API returned empty — show mock so UI isn't empty
-          setProfessionals(MOCK_PROVIDERS)
-        }
-      })
-      .catch(() => {
-        // API unreachable — fall back to mock data silently
-        setApiError(true)
-        setProfessionals(MOCK_PROVIDERS)
-      })
-      .finally(() => setLoading(false))
-  }, [categoryFilter, cityFilter, searchText])
-
-  // Reset page when filters change
-  useEffect(() => {
+    const params = new URLSearchParams()
+    if (cityFilter !== "All") params.set("city", cityFilter)
+    if (categoryFilter !== "All") params.set("service", categoryFilter)
+    setSearchParams(params, { replace: true })
     setCurrentPage(1)
-  }, [categoryFilter, cityFilter, searchText, levelFilter, hourlyRateFilter, successRateFilter])
+  }, [categoryFilter, cityFilter, searchText, levelFilter, hourlyRateFilter, successRateFilter, setSearchParams])
 
-  // Client-side filter on top of API results (for instant sidebar interaction)
   const filteredProfessionals = professionals.filter(pro => {
     const cat = pro.service_category ?? ""
     const loc = pro.location ?? ""
@@ -99,7 +59,6 @@ export function ProfessionalsListingPage() {
     const matchesCity = cityFilter === "All" || loc.toLowerCase().includes(cityFilter.toLowerCase())
     const matchesLevel = levelFilter === "All" || lvl === levelFilter
 
-    // Hourly rate filter
     let matchesRate = true
     if (hourlyRateFilter !== "All") {
       const rateStr = String(pro.rate || "0").replace(/[^0-9.]/g, '')
@@ -110,7 +69,6 @@ export function ProfessionalsListingPage() {
       else if (hourlyRateFilter === "Above $100") matchesRate = r > 100
     }
 
-    // Success rate filter
     let matchesSuccess = true
     if (successRateFilter !== "All") {
       const sr = pro.success_rate || 0
@@ -130,314 +88,298 @@ export function ProfessionalsListingPage() {
   const totalPages = Math.ceil(filteredProfessionals.length / ITEMS_PER_PAGE)
   const paginatedProfessionals = filteredProfessionals.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
-
+  const activeFiltersCount = [
+    categoryFilter !== "All", cityFilter !== "All", levelFilter !== "All",
+    hourlyRateFilter !== "All", successRateFilter !== "All", !!searchText
+  ].filter(Boolean).length
 
   return (
-    <>
-      <div className="wt-haslayout wt-innerbannerholder">
-        <div className="container">
-          <div className="row justify-content-md-center">
-            <div className="col-xs-12 col-sm-12 col-md-8 col-lg-6">
-              <div className="wt-innerbannercontent">
-                <div className="wt-title"><h2>Find Professionals</h2></div>
-                <ol className="wt-breadcrumb">
-                  <li><Link to="/">Home</Link></li>
-                  <li className="wt-active">Professionals</li>
-                </ol>
-              </div>
+    <div className="bg-slate-50 min-h-screen pb-24">
+      {/* Premium Header - Solid Background */}
+      <div className="relative bg-slate-900 pt-16 pb-24 overflow-hidden">
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <Link to="/" className="text-rose-400 font-semibold text-sm tracking-wide uppercase mb-2 block hover:text-rose-300">
+                ← Back to Home
+              </Link>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                Find Professionals
+              </h1>
+              <p className="text-slate-300 text-lg">
+                Discover {filteredProfessionals.length} verified experts ready to work.
+              </p>
+            </div>
+            
+            {/* Search Input in Header */}
+            <div className="w-full md:w-96 relative">
+              <input 
+                type="text" 
+                placeholder="Search by name, skill, or keyword..."
+                value={searchText}
+                onChange={e => setSearchText(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-slate-300 outline-none focus:bg-white/20 focus:border-white/40 transition-all shadow-xl"
+              />
+              <i className="lnr lnr-magnifier absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 text-lg" />
             </div>
           </div>
         </div>
       </div>
 
-      <main id="wt-main" className="wt-main wt-haslayout wt-innerbgcolor">
-        <div className="wt-main-section wt-haslayout">
-          <div className="wt-haslayout">
-            <div className="container">
-              <div className="row">
-                <div id="wt-twocolumns" className="wt-twocolumns wt-haslayout">
-                  {/* Sidebar */}
-                  <div className="col-xs-12 col-sm-12 col-md-5 col-lg-5 col-xl-4 float-left">
-                    <aside id="wt-sidebar" className="wt-sidebar wt-usersidebar">
-                      
-                      {/* Keyword Search */}
-                      <div className="wt-widget wt-effectiveholder">
-                        <div className="wt-widgettitle">
-                          <h2>Keyword Search</h2>
-                        </div>
-                        <div className="wt-widgetcontent">
-                          <form className="wt-formtheme wt-formsearch" onSubmit={(e) => e.preventDefault()}>
-                            <fieldset>
-                              <div className="form-group">
-                                <input 
-                                  type="text" 
-                                  className="form-control" 
-                                  placeholder="Search by name or skill..." 
-                                  value={searchText}
-                                  onChange={(e) => setSearchText(e.target.value)}
-                                />
-                                <a href="#/" className="wt-searchgbtn" onClick={(e) => e.preventDefault()}><i className="lnr lnr-magnifier"></i></a>
-                              </div>
-                            </fieldset>
-                          </form>
-                        </div>
-                      </div>
-                      <div className="wt-widget wt-effectiveholder">
-                        <div className="wt-widgettitle">
-                          <h2>Categories</h2>
-                        </div>
-                        <div className="wt-widgetcontent">
-                          <form className="wt-formtheme wt-formsearch">
-                            <fieldset>
-                              <div className="form-group">
-                                <input type="text" name="Search" className="form-control" placeholder="Search Category" />
-                                <a href="#/" className="wt-searchgbtn"><i className="lnr lnr-magnifier"></i></a>
-                              </div>
-                            </fieldset>
-                            <fieldset>
-                              <div className="wt-checkboxholder wt-verticalscrollbar" style={{maxHeight: '200px', overflowY: 'auto'}}>
-                                <span className="wt-radio" key="All">
-                                  <input 
-                                    id={`cat-All`} 
-                                    type="radio" 
-                                    name="category" 
-                                    checked={categoryFilter === "All"} 
-                                    onChange={() => setCategoryFilter("All")} 
-                                  />
-                                  <label htmlFor={`cat-All`}> All</label>
-                                </span>
-                                {dbCategories.map(cat => (
-                                  <span className="wt-radio" key={cat.id}>
-                                    <input 
-                                      id={`cat-${cat.id}`} 
-                                      type="radio" 
-                                      name="category" 
-                                      checked={categoryFilter === cat.name} 
-                                      onChange={() => setCategoryFilter(cat.name)} 
-                                    />
-                                    <label htmlFor={`cat-${cat.id}`}> {cat.name}</label>
-                                  </span>
-                                ))}
-                              </div>
-                            </fieldset>
-                          </form>
-                        </div>
-                      </div>
+      <div className="container mx-auto px-6 -mt-10 relative z-20">
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* Filter Sidebar */}
+          <div className="w-full lg:w-1/4 shrink-0">
+            <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sticky top-24">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i className="lnr lnr-funnel text-rose-500" />
+                  Filters
+                </h2>
+                {activeFiltersCount > 0 && (
+                  <span className="bg-rose-100 text-rose-600 text-xs font-bold px-2 py-1 rounded-lg">
+                    {activeFiltersCount} active
+                  </span>
+                )}
+              </div>
 
-                      <div className="wt-widget wt-effectiveholder">
-                        <div className="wt-widgettitle">
-                          <h2>Location</h2>
-                        </div>
-                        <div className="wt-widgetcontent">
-                          <form className="wt-formtheme wt-formsearch">
-                            <fieldset>
-                              <div className="form-group">
-                                <input type="text" name="fullname" className="form-control" placeholder="Search Location" />
-                                <a href="#/" className="wt-searchgbtn"><i className="lnr lnr-magnifier"></i></a>
-                              </div>
-                            </fieldset>
-                            <fieldset>
-                              <div className="wt-checkboxholder wt-verticalscrollbar" style={{maxHeight: '200px', overflowY: 'auto'}}>
-                                {["All", "Harare", "Bulawayo", "Mutare", "Gweru"].map(city => (
-                                  <span className="wt-radio" key={city}>
-                                    <input 
-                                      id={`city-${city}`} 
-                                      type="radio" 
-                                      name="city" 
-                                      checked={cityFilter === city} 
-                                      onChange={() => setCityFilter(city)} 
-                                    />
-                                    <label htmlFor={`city-${city}`}> {city}</label>
-                                  </span>
-                                ))}
-                              </div>
-                            </fieldset>
-                          </form>
-                        </div>
-                      </div>
-                      <div className="wt-widget wt-effectiveholder">
-                        <div className="wt-widgettitle">
-                          <h2>Expert Level</h2>
-                        </div>
-                        <div className="wt-widgetcontent">
-                          <form className="wt-formtheme wt-formsearch">
-                            <fieldset>
-                              <div className="wt-checkboxholder wt-verticalscrollbar" style={{maxHeight: '200px', overflowY: 'auto'}}>
-                                {["All", "Expert", "Intermediate", "Junior"].map(lvl => (
-                                  <span className="wt-radio" key={lvl}>
-                                    <input 
-                                      id={`lvl-${lvl}`} 
-                                      type="radio" 
-                                      name="level" 
-                                      checked={levelFilter === lvl} 
-                                      onChange={() => setLevelFilter(lvl)} 
-                                    />
-                                    <label htmlFor={`lvl-${lvl}`}> {lvl}</label>
-                                  </span>
-                                ))}
-                              </div>
-                            </fieldset>
-                          </form>
-                        </div>
-                      </div>
-                    </aside>
-                    
-                    <aside id="wt-sidebar" className="wt-sidebar wt-usersidebar" style={{ marginTop: '30px' }}>
-                      {/* Hourly Rate */}
-                      <div className="wt-widget wt-effectiveholder">
-                        <div className="wt-widgettitle">
-                          <h2>Hourly Rate</h2>
-                        </div>
-                        <div className="wt-widgetcontent">
-                          <form className="wt-formtheme wt-formsearch">
-                            <fieldset>
-                              <div className="wt-checkboxholder">
-                                {["All", "Under $20", "$20 - $50", "$50 - $100", "Above $100"].map(rate => (
-                                  <span className="wt-radio" key={rate}>
-                                    <input 
-                                      id={`rate-${rate}`} 
-                                      type="radio" 
-                                      name="hourlyRate" 
-                                      checked={hourlyRateFilter === rate} 
-                                      onChange={() => setHourlyRateFilter(rate)} 
-                                    />
-                                    <label htmlFor={`rate-${rate}`}> {rate}</label>
-                                  </span>
-                                ))}
-                              </div>
-                            </fieldset>
-                          </form>
-                        </div>
-                      </div>
-
-                      {/* Success Rate */}
-                      <div className="wt-widget wt-effectiveholder">
-                        <div className="wt-widgettitle">
-                          <h2>Success Rate</h2>
-                        </div>
-                        <div className="wt-widgetcontent">
-                          <form className="wt-formtheme wt-formsearch">
-                            <fieldset>
-                              <div className="wt-checkboxholder">
-                                {["All", "90% & Above", "80% & Above", "70% & Above"].map(sr => (
-                                  <span className="wt-radio" key={sr}>
-                                    <input 
-                                      id={`sr-${sr}`} 
-                                      type="radio" 
-                                      name="successRate" 
-                                      checked={successRateFilter === sr} 
-                                      onChange={() => setSuccessRateFilter(sr)} 
-                                    />
-                                    <label htmlFor={`sr-${sr}`}> {sr}</label>
-                                  </span>
-                                ))}
-                              </div>
-                            </fieldset>
-                          </form>
-                        </div>
-                      </div>
-                    </aside>
-                  </div>
-
-                  {/* Main Content */}
-                  <div className="col-xs-12 col-sm-12 col-md-7 col-lg-7 col-xl-8 float-left">
-                    <div className="wt-userlistingholder wt-userlisting wt-haslayout">
-                      <div className="wt-userlistingtitle">
-                        <span>{filteredProfessionals.length} results found{categoryFilter !== 'All' ? ` in "${categoryFilter}"` : ''}</span>
-                      </div>
-
-                      {loading && (
-                        <div style={{ padding: '30px', textAlign: 'center' }}>
-                          <i className="fa fa-spinner fa-spin" style={{ fontSize: '30px', color: '#ff5851' }}></i>
-                          <p style={{ marginTop: '10px', color: '#888' }}>Loading professionals...</p>
-                        </div>
-                      )}
-
-                      {filteredProfessionals.length === 0 && (
-                        <div style={{ padding: '40px', textAlign: 'center', color: '#888' }}>
-                          <i className="lnr lnr-sad" style={{ fontSize: '40px', display: 'block', marginBottom: '15px' }}></i>
-                          <p>No professionals found for <strong>{categoryFilter}</strong>. Try a different category or clear the filter.</p>
-                        </div>
-                      )}
-                      {paginatedProfessionals.map(pro => (
-                        <div className={`wt-userlistinghold ${pro.featured ? "wt-featured" : ""}`} key={pro.id}>
-                          {pro.featured && (
-                            <span className="wt-featuredtag"><img src="/images/featured.png" alt="Featured" /></span>
-                          )}
-                          <figure className="wt-userlistingimg">
-                            <Link to={`/professional-profile/${pro.id}`}>
-                              <img src={pro.image} alt={pro.name} style={{width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%'}} />
-                            </Link>
-                          </figure>
-                          <div className="wt-userlistingcontent">
-                            <div className="wt-contenthead">
-                              <div className="wt-title">
-                                <Link to={`/professional-profile/${pro.id}`}><i className="fa fa-check-circle"></i> {pro.name}</Link>
-                                <h2>{pro.service_category} Professional</h2>
-                              </div>
-                              <ul className="wt-userlisting-breadcrumb" style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', margin: '5px 0', padding: 0 }}>
-                                <li style={{ display: 'flex', alignItems: 'center', padding: 0, margin: 0, border: 'none' }}>
-                                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                    <i className="far fa-money-bill-alt"></i> {pro.rate}
-                                  </span>
-                                </li>
-                                <li style={{ display: 'flex', alignItems: 'center', padding: 0, margin: 0, border: 'none' }}>
-                                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                    <i className="lnr lnr-map-marker"></i> {pro.location ? pro.location.split(',').pop()?.trim() : 'Zimbabwe'}
-                                  </span>
-                                </li>
-                              </ul>
-                            </div>
-                            <div className="wt-rightarea">
-                              <span className="wt-starsvtwo">
-                                {[...Array(5)].map((_, i) => (
-                                  <i key={i} className={`fa fa-star ${i < Math.floor(pro.rating) ? 'fill' : ''}`}></i>
-                                ))}
-                              </span>
-                              <span className="wt-starcontent">{pro.rating}/<sub>5</sub> <em>({pro.reviews} Feedback)</em></span>
-                            </div>
-                          </div>
-                          <div className="wt-description">
-                            <p>{pro.description}</p>
-                          </div>
-                          <div className="wt-tag wt-widgettag">
-                            {(pro.skills ?? []).map(skill => (
-                              <Link to="#/" key={skill}>{skill}</Link>
-                            ))}
-                          </div>
-                          <div className="wt-btnarea" style={{ borderTop: '1px solid #f0f0f0', paddingTop: '15px', marginTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{color: '#999', fontSize: '13px'}}>{pro.level} Level</span>
-                            <Link to={`/professional-profile/${pro.id}`} className="wt-btn">View Profile</Link>
-                          </div>
-                        </div>
-                      ))}
-
-                      {totalPages > 1 && (
-                        <nav className="wt-pagination">
-                          <ul>
-                            <li className={`wt-prevpage ${currentPage === 1 ? 'd-none' : ''}`}>
-                              <a href="#/" onClick={(e) => { e.preventDefault(); setCurrentPage(prev => Math.max(1, prev - 1)); window.scrollTo(0, 0); }}><i className="lnr lnr-chevron-left"></i></a>
-                            </li>
-                            {[...Array(totalPages)].map((_, i) => (
-                              <li key={i} className={currentPage === i + 1 ? 'active' : ''}>
-                                <a href="#/" onClick={(e) => { e.preventDefault(); setCurrentPage(i + 1); window.scrollTo(0, 0); }}>{i + 1}</a>
-                              </li>
-                            ))}
-                            <li className={`wt-nextpage ${currentPage === totalPages ? 'd-none' : ''}`}>
-                              <a href="#/" onClick={(e) => { e.preventDefault(); setCurrentPage(prev => Math.min(totalPages, prev + 1)); window.scrollTo(0, 0); }}><i className="lnr lnr-chevron-right"></i></a>
-                            </li>
-                          </ul>
-                        </nav>
-                      )}
-
-                    </div>
+              <div className="space-y-6">
+                {/* Location Filter */}
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">Location</h3>
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                    {["All", ...zimbabweCities].map(city => (
+                      <label key={city} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="radio"
+                          name="city"
+                          value={city}
+                          checked={cityFilter === city}
+                          onChange={(e) => setCityFilter(e.target.value)}
+                          className="w-4 h-4 text-rose-500 border-slate-300 focus:ring-rose-500 cursor-pointer"
+                        />
+                        <span className={`text-sm group-hover:text-slate-800 transition-colors ${cityFilter === city ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>
+                          {city === "All" ? "Anywhere in Zimbabwe" : city}
+                        </span>
+                      </label>
+                    ))}
                   </div>
                 </div>
+
+                <hr className="border-slate-100" />
+
+                {/* Category Filter */}
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">Category</h3>
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                    {["All", ...categories.map(c => c.name)].map(cat => (
+                      <label key={cat} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="radio"
+                          name="category"
+                          value={cat}
+                          checked={categoryFilter === cat}
+                          onChange={(e) => setCategoryFilter(e.target.value)}
+                          className="w-4 h-4 text-rose-500 border-slate-300 focus:ring-rose-500 cursor-pointer"
+                        />
+                        <span className={`text-sm group-hover:text-slate-800 transition-colors ${categoryFilter === cat ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>
+                          {cat}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <hr className="border-slate-100" />
+
+                {/* Level Filter */}
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">Professional Level</h3>
+                  <div className="space-y-2">
+                    {["All", "Junior", "Intermediate", "Senior", "Expert"].map(lvl => (
+                      <label key={lvl} className="flex items-center gap-3 cursor-pointer group">
+                        <input
+                          type="radio"
+                          name="level"
+                          value={lvl}
+                          checked={levelFilter === lvl}
+                          onChange={(e) => setLevelFilter(e.target.value)}
+                          className="w-4 h-4 text-rose-500 border-slate-300 focus:ring-rose-500 cursor-pointer"
+                        />
+                        <span className={`text-sm group-hover:text-slate-800 transition-colors ${levelFilter === lvl ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>
+                          {lvl}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <hr className="border-slate-100" />
+
+                {/* Clear Filters */}
+                {activeFiltersCount > 0 && (
+                  <button 
+                    onClick={() => {
+                      setSearchText("")
+                      setCategoryFilter("All")
+                      setCityFilter("All")
+                      setLevelFilter("All")
+                      setHourlyRateFilter("All")
+                      setSuccessRateFilter("All")
+                    }}
+                    className="w-full py-3 rounded-xl border border-rose-200 text-rose-500 font-semibold text-sm hover:bg-rose-50 transition-colors"
+                  >
+                    Clear All Filters
+                  </button>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Results Area */}
+          <div className="w-full lg:w-3/4">
+            
+            {loading ? (
+              <div className="grid md:grid-cols-2 gap-6 pt-4">
+                {[1, 2, 3, 4].map(n => (
+                  <div key={n} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm animate-pulse">
+                    <div className="flex gap-4">
+                      <div className="w-20 h-20 rounded-2xl bg-slate-200 shrink-0" />
+                      <div className="flex-1 space-y-3 py-1">
+                        <div className="h-5 bg-slate-200 rounded w-2/3" />
+                        <div className="h-4 bg-slate-100 rounded w-1/2" />
+                        <div className="h-4 bg-slate-100 rounded w-1/3" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm mt-4">
+                <i className="lnr lnr-warning text-5xl text-rose-500 mb-4 block" />
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Oops! Something went wrong.</h3>
+                <p className="text-slate-500">{error}</p>
+              </div>
+            ) : filteredProfessionals.length === 0 ? (
+              <div className="bg-white rounded-3xl p-16 text-center border border-slate-100 shadow-sm mt-4">
+                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <i className="lnr lnr-magnifier text-4xl text-slate-300" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">No professionals found</h3>
+                <p className="text-slate-500 mb-6">We couldn't find anyone matching your exact filters.</p>
+                <button 
+                  onClick={() => {
+                    setCategoryFilter("All")
+                    setCityFilter("All")
+                    setSearchText("")
+                  }}
+                  className="px-6 py-3 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition-colors"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6 pt-4">
+                {paginatedProfessionals.map(pro => (
+                  <div key={pro.id} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl shadow-slate-200/50 transition-all group relative">
+                    
+                    <div className="flex items-start gap-5">
+                      <img 
+                        src={pro.image || "https://via.placeholder.com/150"} 
+                        alt={pro.name} 
+                        className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-sm border border-slate-100 group-hover:scale-105 transition-transform"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-bold text-lg text-slate-800 truncate mb-1">
+                            <Link to={`/professional-profile/${pro.id}`} className="hover:text-rose-500 transition-colors">
+                              {pro.name}
+                            </Link>
+                          </h3>
+                          {pro.id_verified && (
+                            <i className="lnr lnr-checkmark-circle text-blue-500 text-lg flex-shrink-0" title="Verified Professional" />
+                          )}
+                        </div>
+                        <p className="text-sm text-indigo-600 font-semibold mb-2 truncate">
+                          {pro.service_category || "General Services"}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
+                          <span className="flex items-center gap-1.5"><i className="lnr lnr-map-marker" /> {pro.location || "Zimbabwe"}</span>
+                          <span className="flex items-center gap-1.5"><i className="lnr lnr-briefcase" /> {pro.level || "Junior"}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="h-px bg-slate-100 my-4" />
+
+                    {/* Stats & Actions */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-4 text-sm font-semibold text-slate-700">
+                        <div className="flex items-center gap-1">
+                          <i className="lnr lnr-star text-orange-400" />
+                          <span>5.0 <span className="text-slate-400 font-normal">({pro.success_rate || 98}%)</span></span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <i className="lnr lnr-tag text-slate-400" />
+                          <span>${pro.rate || "15"}/hr</span>
+                        </div>
+                      </div>
+                      
+                      <a 
+                        href={`https://wa.me/${pro.phone?.replace(/\+/g, '')}?text=Hi ${pro.name}, I found your profile on SkillzLink and would like to discuss a job.`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-10 h-10 rounded-xl bg-green-50 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm"
+                        title="Chat on WhatsApp"
+                      >
+                        <i className="fab fa-whatsapp text-xl" />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-12">
+                <button 
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => p - 1)}
+                  className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                >
+                  <i className="lnr lnr-chevron-left" />
+                </button>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-xl font-bold transition-all ${
+                      currentPage === page 
+                        ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' 
+                        : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button 
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(p => p + 1)}
+                  className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                >
+                  <i className="lnr lnr-chevron-right" />
+                </button>
+              </div>
+            )}
+            
+          </div>
         </div>
-      </main>
-    </>
+      </div>
+    </div>
   )
 }

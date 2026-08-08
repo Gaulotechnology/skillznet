@@ -1,6 +1,6 @@
-body{background:#f2f3fa;}
-.wt-main{padding: 20px 40px 20px 310px;}
-.wt-header{background: #fff;}
+#wt-wrapper body, #wt-wrapper { background: #f2f3fa; }
+#wt-main.wt-main, #wt-wrapper .wt-main { padding: 20px 40px 20px 310px; }
+.wt-header { background: #fff; }
 .wt-dbsectionspace{padding: 20px 0;}
 .wt-dashboardnav{
 	width: 100%;

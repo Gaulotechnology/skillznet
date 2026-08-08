@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import type { FormEvent, ChangeEvent } from "react"
 import { Link } from "react-router-dom"
-import { authApi, publicApi } from "../services/api"
+import { authApi, publicApi, apiBaseUrl } from "../services/api"
 
 const zimbabweCities = [
   "Harare", "Bulawayo", "Mutare", "Gweru", "Kwekwe",
@@ -49,23 +49,29 @@ export function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Load categories and dynamic form fields in parallel
-    Promise.all([
-      publicApi.getCategories().then(res => setCategories(res.categories || [])),
-      fetch(`${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:18080/api"}/registration-fields`)
-        .then(r => r.json())
-        .then(data => {
-          const fields: RegistrationField[] = (data.fields || []).sort(
-            (a: RegistrationField, b: RegistrationField) => a.sort_order - b.sort_order
-          )
-          setDynamicFields(fields)
-          // Init values
-          const init: Record<string, string | boolean> = {}
-          fields.forEach(f => { init[f.name] = f.type === "checkbox" ? false : "" })
-          setDynamicValues(init)
-        })
-    ]).finally(() => setFieldsLoading(false))
+    publicApi.getCategories()
+      .then(res => setCategories(res.categories || []))
+      .catch(err => console.error("Failed to fetch categories", err));
   }, [])
+
+  useEffect(() => {
+    if (role !== "provider") return;
+    
+    setFieldsLoading(true);
+    fetch(`${apiBaseUrl()}/registration-fields?category=${encodeURIComponent(serviceCategory)}`)
+      .then(r => r.ok ? r.json() : { fields: [] })
+      .then(data => {
+        const fields: RegistrationField[] = (data.fields || []).sort(
+          (a: RegistrationField, b: RegistrationField) => a.sort_order - b.sort_order
+        )
+        setDynamicFields(fields)
+        const init: Record<string, string | boolean> = {}
+        fields.forEach(f => { init[f.name] = f.type === "checkbox" ? false : "" })
+        setDynamicValues(init)
+      })
+      .catch(err => console.error("Failed to fetch registration fields", err))
+      .finally(() => setFieldsLoading(false))
+  }, [role, serviceCategory])
 
   const handleDynamicChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -78,6 +84,13 @@ export function RegisterPage() {
     }))
   }
 
+  const formatPhone = (phone: string) => {
+    const clean = phone.replace(/\D/g, '')
+    if (clean.startsWith('263')) return `+${clean}`
+    if (clean.startsWith('0')) return `+263${clean.substring(1)}`
+    return `+263${clean}`
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -85,26 +98,28 @@ export function RegisterPage() {
     setMessage(null)
 
     try {
-      if (role === "provider") {
-        // Build extended description including dynamic field data
-        const extraFields = dynamicFields
-          .filter(f => dynamicValues[f.name] !== "" && dynamicValues[f.name] !== false)
-          .map(f => `${f.label}: ${dynamicValues[f.name]}`)
-          .join(" | ")
+      const formattedPhone = formatPhone(phoneNumber)
 
-        const fullDescription = [description, extraFields].filter(Boolean).join("\n\n")
+      if (role === "provider") {
+        const dynamicDataPayload: Record<string, any> = {}
+        dynamicFields.forEach(f => {
+          if (dynamicValues[f.name] !== "" && dynamicValues[f.name] !== false) {
+            dynamicDataPayload[f.name] = dynamicValues[f.name];
+          }
+        })
 
         await authApi.registerProvider({
           name,
-          phone_number: phoneNumber,
+          phone_number: formattedPhone,
           identity_number: identityNumber,
           address: `${address}, ${city}`,
           service_category: serviceCategory,
           service_radius: parseInt(serviceRadius, 10),
-          description: fullDescription,
+          description: description,
+          dynamic_data: Object.keys(dynamicDataPayload).length > 0 ? dynamicDataPayload : undefined,
         })
       } else {
-        await authApi.registerSeeker({ name, phone_number: phoneNumber })
+        await authApi.registerSeeker({ name, phone_number: formattedPhone, default_latitude: undefined, default_longitude: undefined })
       }
       setMessage("Registration successful! You can now login with your phone number.")
     } catch {
@@ -116,359 +131,387 @@ export function RegisterPage() {
 
   const renderDynamicField = (field: RegistrationField) => {
     const val = dynamicValues[field.name]
-    const commonStyle = { height: '44px', fontSize: '14px' }
+    const inputClasses = "w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-100 transition-all text-sm text-slate-800 bg-slate-50 focus:bg-white"
 
     switch (field.type) {
       case "textarea":
         return (
           <textarea
             name={field.name}
-            className="form-control"
+            className={inputClasses}
             placeholder={field.placeholder || field.label}
             required={field.is_required}
             value={val as string}
             onChange={handleDynamicChange}
             rows={3}
-            style={{ fontSize: '14px' }}
           />
         )
       case "dropdown":
         return (
-          <span className="wt-select">
-            <select
-              name={field.name}
-              required={field.is_required}
-              value={val as string}
-              onChange={handleDynamicChange}
-            >
-              <option value="">{field.placeholder || `Select ${field.label}`}</option>
-              {(field.options || []).map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          </span>
-        )
-      case "checkbox":
-        return (
-          <span className="wt-radio">
-            <input
-              type="checkbox"
-              id={`dyn_${field.name}`}
-              name={field.name}
-              checked={!!val}
-              onChange={handleDynamicChange}
-            />
-            <label htmlFor={`dyn_${field.name}`}>{field.label}</label>
-          </span>
-        )
-      case "file":
-        return (
-          <input
-            type="file"
+          <select
             name={field.name}
-            className="form-control"
-            required={field.is_required}
-            style={{ ...commonStyle, padding: '10px' }}
-          />
-        )
-      case "number":
-        return (
-          <input
-            type="number"
-            name={field.name}
-            className="form-control"
-            placeholder={field.placeholder || field.label}
+            className={inputClasses}
             required={field.is_required}
             value={val as string}
             onChange={handleDynamicChange}
-            style={commonStyle}
-          />
+          >
+            <option value="">{field.placeholder || `Select ${field.label}`}</option>
+            {(field.options || []).map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        )
+      case "checkbox":
+        return (
+          <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors">
+            <input
+              type="checkbox"
+              name={field.name}
+              checked={!!val}
+              onChange={handleDynamicChange}
+              className="w-5 h-5 rounded text-rose-500 focus:ring-rose-500"
+            />
+            <span className="text-sm font-medium text-slate-700">{field.label}</span>
+          </label>
         )
       default:
         return (
           <input
-            type="text"
+            type={field.type}
             name={field.name}
-            className="form-control"
+            className={inputClasses}
             placeholder={field.placeholder || field.label}
             required={field.is_required}
             value={val as string}
             onChange={handleDynamicChange}
-            style={commonStyle}
           />
         )
     }
   }
 
+  if (message) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-xl text-center border border-slate-100">
+          <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i className="lnr lnr-checkmark-circle text-4xl" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-4">You're All Set!</h2>
+          <p className="text-slate-600 mb-8">{message}</p>
+          <Link
+            to="/login"
+            className="block w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+          >
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <>
-      {/* Banner */}
-      <div className="wt-haslayout wt-innerbannerholder">
-        <div className="container">
-          <div className="row justify-content-md-center">
-            <div className="col-xs-12 col-sm-12 col-md-8 col-lg-6">
-              <div className="wt-innerbannercontent">
-                <div className="wt-title"><h2>Join SkillzLink</h2></div>
-                <ol className="wt-breadcrumb">
-                  <li><Link to="/">Home</Link></li>
-                  <li className="wt-active">Register</li>
-                </ol>
+    <div className="min-h-screen flex">
+      {/* Left Panel */}
+      <div className="hidden lg:flex lg:w-5/12 xl:w-1/3 relative overflow-hidden bg-slate-900 flex-col justify-between p-12">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        
+        <div className="relative z-10">
+          <Link to="/" className="inline-flex items-center gap-3 mb-16 hover:opacity-80 transition-opacity">
+            <div className="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center shadow-lg">
+              <span className="text-white font-black text-sm">SL</span>
+            </div>
+            <span className="text-white font-bold text-xl">SkillzLink</span>
+          </Link>
+
+          <h2 className="text-4xl font-bold text-white leading-tight mb-6">
+            Join Zimbabwe's<br/>growing talent<br/>network.
+          </h2>
+          <p className="text-slate-300 text-lg mb-12 max-w-sm">
+            Whether you need something fixed or you're the one fixing it, you're in the right place.
+          </p>
+
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                <i className="lnr lnr-magic-wand text-white" />
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-1">Simple Setup</h4>
+                <p className="text-slate-400 text-sm">Takes less than 2 minutes to create your profile.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center shrink-0 border border-green-500/30">
+                <i className="fab fa-whatsapp text-green-400 text-lg" />
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-1">WhatsApp Integrated</h4>
+                <p className="text-slate-400 text-sm">Get notifications and connect instantly via WhatsApp.</p>
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="relative z-10 text-slate-400 text-sm">
+          Already have an account? <Link to="/login" className="text-white font-semibold hover:text-rose-400 transition-colors">Sign in instead</Link>
         </div>
       </div>
 
-      <main id="wt-main" className="wt-main wt-haslayout wt-innerbgcolor">
-        <div className="wt-haslayout wt-main-section">
-          <div className="container">
-            <div className="row justify-content-md-center">
-              <div className="col-xs-12 col-sm-12 col-md-10 col-lg-7">
+      {/* Right Panel - Form */}
+      <div className="w-full lg:w-7/12 xl:w-2/3 flex items-center justify-center p-6 sm:p-12 bg-slate-50 overflow-y-auto">
+        <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-10">
+          
+          <div className="lg:hidden flex items-center justify-between mb-8">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-rose-500 flex items-center justify-center">
+                <span className="text-white font-black text-xs">SL</span>
+              </div>
+              <span className="font-bold text-slate-800">SkillzLink</span>
+            </Link>
+            <Link to="/login" className="text-sm font-semibold text-rose-500">Sign In</Link>
+          </div>
 
-                <div style={{
-                  background: '#fff',
-                  borderRadius: '16px',
-                  boxShadow: '0 8px 40px rgba(0,0,0,0.10)',
-                  overflow: 'hidden',
-                }}>
+          <div className="mb-10">
+            <h1 className="text-3xl font-bold text-slate-800 mb-3">Create your account</h1>
+            <p className="text-slate-500">Choose how you want to use SkillzLink</p>
+          </div>
 
-                  {/* Header */}
-                  <div style={{
-                    background: 'linear-gradient(135deg, var(--primary-color, #ff5851) 0%, #ff8a4c 100%)',
-                    padding: '32px 32px 24px',
-                    textAlign: 'center',
-                  }}>
-                    <h2 style={{ color: '#fff', margin: '0 0 6px', fontSize: '22px', fontWeight: 700 }}>
-                      Create Your Account
-                    </h2>
-                    <p style={{ color: 'rgba(255,255,255,0.85)', margin: 0, fontSize: '14px' }}>
-                      Join thousands of professionals and seekers on SkillzLink
-                    </p>
+          {error && (
+            <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-3">
+              <i className="lnr lnr-warning text-red-500 text-xl" />
+              <p className="text-red-700 text-sm pt-0.5">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            
+            {/* Role Selection */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label 
+                className={`relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all ${
+                  role === "seeker" 
+                    ? "border-rose-500 bg-rose-50 shadow-md shadow-rose-100" 
+                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <input 
+                  type="radio" 
+                  name="role" 
+                  value="seeker" 
+                  className="sr-only" 
+                  checked={role === "seeker"} 
+                  onChange={() => setRole("seeker")}
+                />
+                <div className="flex justify-between items-start mb-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${role === "seeker" ? "bg-rose-500 text-white" : "bg-slate-100 text-slate-500"}`}>
+                    <i className="lnr lnr-user text-xl" />
                   </div>
+                  {role === "seeker" && <i className="lnr lnr-checkmark-circle text-rose-500 text-xl" />}
+                </div>
+                <h3 className={`font-bold text-lg mb-1 ${role === "seeker" ? "text-rose-700" : "text-slate-700"}`}>I want to hire</h3>
+                <p className="text-sm text-slate-500">Find professionals for your projects</p>
+              </label>
 
-                  {/* Role Toggle */}
-                  <div style={{ padding: '0 32px', borderBottom: '1px solid #f0f0f0' }}>
-                    <div style={{ display: 'flex', gap: 0 }}>
-                      {([
-                        { value: "seeker", icon: "lnr-magnifier", label: "I Need a Professional" },
-                        { value: "provider", icon: "lnr-briefcase", label: "I Am a Professional" },
-                      ] as { value: Role; icon: string; label: string }[]).map(tab => (
-                        <button
-                          key={tab.value}
-                          type="button"
-                          onClick={() => setRole(tab.value)}
-                          style={{
-                            flex: 1, padding: '16px 12px', border: 'none', background: 'none',
-                            cursor: 'pointer', fontSize: '14px', fontWeight: 600,
-                            color: role === tab.value ? 'var(--primary-color, #ff5851)' : '#888',
-                            borderBottom: role === tab.value ? '3px solid var(--primary-color, #ff5851)' : '3px solid transparent',
-                            transition: 'all 0.2s',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                          }}
-                        >
-                          <i className={`lnr ${tab.icon}`} style={{ fontSize: '16px' }}></i>
-                          {tab.label}
-                        </button>
-                      ))}
+              <label 
+                className={`relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all ${
+                  role === "provider" 
+                    ? "border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-100" 
+                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <input 
+                  type="radio" 
+                  name="role" 
+                  value="provider" 
+                  className="sr-only" 
+                  checked={role === "provider"} 
+                  onChange={() => setRole("provider")}
+                />
+                <div className="flex justify-between items-start mb-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${role === "provider" ? "bg-indigo-500 text-white" : "bg-slate-100 text-slate-500"}`}>
+                    <i className="lnr lnr-briefcase text-xl" />
+                  </div>
+                  {role === "provider" && <i className="lnr lnr-checkmark-circle text-indigo-500 text-xl" />}
+                </div>
+                <h3 className={`font-bold text-lg mb-1 ${role === "provider" ? "text-indigo-700" : "text-slate-700"}`}>I am a professional</h3>
+                <p className="text-sm text-slate-500">Offer your services and get clients</p>
+              </label>
+            </div>
+
+            <hr className="border-slate-100" />
+
+            {/* Core Details (Both Roles) */}
+            <div>
+              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 rounded bg-slate-100 text-slate-500 flex items-center justify-center text-xs">1</span>
+                Basic Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Full Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    placeholder="e.g. Tinashe Moyo"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">WhatsApp Number</label>
+                  <div className="flex rounded-xl border border-slate-200 overflow-hidden focus-within:border-rose-400 focus-within:ring-4 focus-within:ring-rose-100 transition-all bg-slate-50 focus-within:bg-white">
+                    <div className="flex items-center gap-2 px-3 border-r border-slate-200 bg-slate-100/50">
+                      <span>🇿🇼</span><span className="text-slate-600 font-semibold text-sm">+263</span>
+                    </div>
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      required
+                      placeholder="71 234 5678"
+                      className="flex-1 px-3 py-3 outline-none bg-transparent text-sm text-slate-800"
+                    />
+                  </div>
+                </div>
+                <div className={role === "provider" ? "col-span-1 md:col-span-2" : "col-span-1"}>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">City</label>
+                  <div className="relative">
+                    <select
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-100 bg-slate-50 focus:bg-white transition-all text-sm appearance-none"
+                    >
+                      {zimbabweCities.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <i className="lnr lnr-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Provider Only Details */}
+            {role === "provider" && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <hr className="border-slate-100 my-8" />
+                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">2</span>
+                  Professional Details
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">National ID Number</label>
+                    <input
+                      type="text"
+                      value={identityNumber}
+                      onChange={(e) => setIdentityNumber(e.target.value)}
+                      required
+                      placeholder="For verification purposes"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Service Category</label>
+                    <div className="relative">
+                      <select
+                        value={serviceCategory}
+                        onChange={(e) => setServiceCategory(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm appearance-none"
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
+                      </select>
+                      <i className="lnr lnr-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
-
-                  {/* Form Body */}
-                  <div style={{ padding: '28px 32px 32px' }}>
-                    {error && (
-                      <div style={{
-                        background: '#fff1f0', border: '1px solid #ffa39e', borderRadius: '8px',
-                        padding: '12px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px'
-                      }}>
-                        <i className="lnr lnr-cross-circle" style={{ color: '#f5222d', fontSize: '18px' }}></i>
-                        <span style={{ color: '#f5222d', fontSize: '14px' }}>{error}</span>
-                      </div>
-                    )}
-                    {message && (
-                      <div style={{
-                        background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: '8px',
-                        padding: '16px', marginBottom: '20px'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                          <i className="lnr lnr-checkmark-circle" style={{ color: '#52c41a', fontSize: '20px' }}></i>
-                          <span style={{ color: '#52c41a', fontSize: '14px', fontWeight: 600 }}>{message}</span>
-                        </div>
-                        <Link to="/login" className="wt-btn" style={{ display: 'inline-block', padding: '10px 24px' }}>
-                          Go to Login →
-                        </Link>
-                      </div>
-                    )}
-
-                    {!message && (
-                      <form className="wt-formtheme" onSubmit={handleSubmit}>
-                        <fieldset>
-                          {/* ── Section: Basic Info ── */}
-                          <div style={{ marginBottom: '16px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 14px', paddingBottom: '8px', borderBottom: '1px solid #f0f0f0' }}>
-                              Basic Information
-                            </h4>
-                          </div>
-
-                          <div className="form-group">
-                            <label style={{ fontWeight: 600, fontSize: '13px', marginBottom: '6px', display: 'block' }}>Full Name *</label>
-                            <input
-                              id="regName" type="text" className="form-control"
-                              placeholder="Your full name"
-                              value={name} onChange={(e) => setName(e.target.value)}
-                              required style={{ height: '44px' }}
-                            />
-                          </div>
-
-                          <div className="form-group">
-                            <label style={{ fontWeight: 600, fontSize: '13px', marginBottom: '6px', display: 'block' }}>Phone Number *</label>
-                            <input
-                              id="regPhone" type="tel" className="form-control"
-                              placeholder="+263 7X XXX XXXX"
-                              value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}
-                              required style={{ height: '44px' }}
-                            />
-                          </div>
-
-                          <div className="form-group">
-                            <label style={{ fontWeight: 600, fontSize: '13px', marginBottom: '6px', display: 'block' }}>City *</label>
-                            <span className="wt-select">
-                              <select id="regCity" value={city} onChange={(e) => setCity(e.target.value)}>
-                                {zimbabweCities.map((c) => (
-                                  <option key={c} value={c}>{c}</option>
-                                ))}
-                              </select>
-                            </span>
-                          </div>
-
-                          {/* ── Section: Provider Fields ── */}
-                          {role === "provider" && (
-                            <>
-                              <div style={{ margin: '24px 0 16px' }}>
-                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 14px', paddingBottom: '8px', borderBottom: '1px solid #f0f0f0' }}>
-                                  Professional Details
-                                </h4>
-                              </div>
-
-                              <div className="form-group">
-                                <label style={{ fontWeight: 600, fontSize: '13px', marginBottom: '6px', display: 'block' }}>National ID *</label>
-                                <input
-                                  id="regIdNumber" type="text" className="form-control"
-                                  placeholder="e.g. 63-123456A78"
-                                  value={identityNumber} onChange={(e) => setIdentityNumber(e.target.value)}
-                                  required style={{ height: '44px' }}
-                                />
-                              </div>
-
-                              <div className="form-group">
-                                <label style={{ fontWeight: 600, fontSize: '13px', marginBottom: '6px', display: 'block' }}>Street Address *</label>
-                                <input
-                                  id="regAddress" type="text" className="form-control"
-                                  placeholder="e.g. 12 Samora Machel Ave"
-                                  value={address} onChange={(e) => setAddress(e.target.value)}
-                                  required style={{ height: '44px' }}
-                                />
-                              </div>
-
-                              <div style={{ display: 'flex', gap: '12px' }}>
-                                <div className="form-group" style={{ flex: 2 }}>
-                                  <label style={{ fontWeight: 600, fontSize: '13px', marginBottom: '6px', display: 'block' }}>Service Category *</label>
-                                  <span className="wt-select">
-                                    <select
-                                      id="regServiceCategory"
-                                      value={serviceCategory}
-                                      onChange={(e) => setServiceCategory(e.target.value)}
-                                      required
-                                    >
-                                      <option value="" disabled>Select a category</option>
-                                      {categories.map((c) => (
-                                        <option key={c.id} value={c.name}>{c.name}</option>
-                                      ))}
-                                    </select>
-                                  </span>
-                                </div>
-                                <div className="form-group" style={{ flex: 1 }}>
-                                  <label style={{ fontWeight: 600, fontSize: '13px', marginBottom: '6px', display: 'block' }}>Radius (km) *</label>
-                                  <input
-                                    id="regRadius" type="number" className="form-control"
-                                    placeholder="10" min={1} max={200}
-                                    value={serviceRadius} onChange={(e) => setServiceRadius(e.target.value)}
-                                    required style={{ height: '44px' }}
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="form-group">
-                                <label style={{ fontWeight: 600, fontSize: '13px', marginBottom: '6px', display: 'block' }}>Brief Description</label>
-                                <textarea
-                                  id="regDescription" className="form-control" rows={3}
-                                  placeholder="Describe your services and experience..."
-                                  value={description} onChange={(e) => setDescription(e.target.value)}
-                                  style={{ fontSize: '14px' }}
-                                />
-                              </div>
-
-                              {/* ── Dynamic Fields from Admin Form Builder ── */}
-                              {!fieldsLoading && dynamicFields.length > 0 && (
-                                <>
-                                  <div style={{ margin: '24px 0 16px' }}>
-                                    <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 14px', paddingBottom: '8px', borderBottom: '1px solid #f0f0f0' }}>
-                                      Additional Information
-                                    </h4>
-                                  </div>
-                                  {dynamicFields.map(field => (
-                                    <div className="form-group" key={field.id}>
-                                      {field.type !== "checkbox" && (
-                                        <label style={{ fontWeight: 600, fontSize: '13px', marginBottom: '6px', display: 'block' }}>
-                                          {field.label} {field.is_required && "*"}
-                                        </label>
-                                      )}
-                                      {renderDynamicField(field)}
-                                    </div>
-                                  ))}
-                                </>
-                              )}
-                              {fieldsLoading && (
-                                <div style={{ textAlign: 'center', padding: '12px', color: '#888', fontSize: '13px' }}>
-                                  <i className="fa fa-spinner fa-spin" style={{ marginRight: '6px' }}></i>
-                                  Loading additional fields...
-                                </div>
-                              )}
-                            </>
-                          )}
-
-                          {/* Submit */}
-                          <button
-                            type="submit"
-                            className="wt-btn"
-                            disabled={loading}
-                            style={{ width: '100%', height: '50px', fontSize: '15px', fontWeight: 700, marginTop: '16px' }}
-                          >
-                            {loading ? (
-                              <><i className="fa fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>Registering...</>
-                            ) : role === "provider" ? (
-                              <><i className="lnr lnr-briefcase" style={{ marginRight: '8px' }}></i>Register as Professional</>
-                            ) : (
-                              <><i className="lnr lnr-user" style={{ marginRight: '8px' }}></i>Register as Service Seeker</>
-                            )}
-                          </button>
-                        </fieldset>
-
-                        <div style={{ textAlign: 'center', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #f0f0f0' }}>
-                          <span style={{ color: '#888', fontSize: '14px' }}>Already have an account?{" "}</span>
-                          <Link to="/login" style={{ color: 'var(--primary-color, #ff5851)', fontWeight: 600, fontSize: '14px' }}>
-                            Sign In →
-                          </Link>
-                        </div>
-                      </form>
-                    )}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Street Address</label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      required
+                      placeholder="e.g. 123 Samora Machel Ave"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Working Radius (km)</label>
+                    <input
+                      type="number"
+                      value={serviceRadius}
+                      onChange={(e) => setServiceRadius(e.target.value)}
+                      required
+                      min="1"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                    />
+                  </div>
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Bio / Description</label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      required
+                      placeholder="Tell potential clients about your experience and skills..."
+                      rows={3}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                    />
                   </div>
                 </div>
 
+                {!fieldsLoading && dynamicFields.length > 0 && (
+                  <>
+                    <h3 className="font-bold text-slate-800 mb-4 mt-8 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">3</span>
+                      Additional Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {dynamicFields.map(field => (
+                        <div key={field.id} className={field.type === 'textarea' ? 'col-span-1 md:col-span-2' : ''}>
+                          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                            {field.label} {field.is_required && <span className="text-rose-500">*</span>}
+                          </label>
+                          {renderDynamicField(field)}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
-          </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-4 rounded-2xl text-white font-bold text-lg shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
+                  role === "seeker"
+                  ? "bg-rose-500 hover:bg-rose-600 shadow-rose-200" 
+                  : "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200"
+                }`}
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Creating account...
+                </span>
+              ) : (
+                `Create ${role === "seeker" ? "Account" : "Professional Profile"}`
+              )}
+            </button>
+            
+            <p className="text-center text-slate-500 text-xs mt-4">
+              By creating an account, you agree to our <a href="#" className="underline hover:text-slate-800">Terms of Service</a> and <a href="#" className="underline hover:text-slate-800">Privacy Policy</a>.
+            </p>
+          </form>
+
         </div>
-      </main>
-    </>
+      </div>
+    </div>
   )
 }

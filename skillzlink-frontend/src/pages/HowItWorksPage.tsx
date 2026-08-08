@@ -1,25 +1,14 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom"
 
 export function HowItWorksPage() {
-  const [activeTab, setActiveTab] = useState<'hiring' | 'freelancing' | 'faq'>('hiring');
-  
-  // Track which accordion item is open
-  const [openAccordion, setOpenAccordion] = useState<string>('hire-1');
-
-  const toggleAccordion = (id: string) => {
-    setOpenAccordion(openAccordion === id ? '' : id);
-  };
-
   return (
     <>
-      {/* Inner Home Banner Start */}
       <div className="wt-haslayout wt-innerbannerholder">
         <div className="container">
           <div className="row justify-content-md-center">
             <div className="col-xs-12 col-sm-12 col-md-8 push-md-2 col-lg-6 push-lg-3">
               <div className="wt-innerbannercontent">
-                <div className="wt-title"><h2>See How It Works?</h2></div>
+                <div className="wt-title"><h2>How It Works</h2></div>
                 <ol className="wt-breadcrumb">
                   <li><Link to="/">Home</Link></li>
                   <li className="wt-active">How It Works</li>
@@ -29,277 +18,214 @@ export function HowItWorksPage() {
           </div>
         </div>
       </div>
-      {/* Inner Home End */}
 
-      {/* Main Start */}
       <main id="wt-main" className="wt-main wt-haslayout wt-innerbgcolor">
         <div className="wt-haslayout wt-main-section">
-          <div className="wt-contentwrappers">
+
+          {/* For Seekers / Customers */}
+          <section className="wt-haslayout" style={{ paddingTop: '60px' }}>
             <div className="container">
-              <div className="row">
-                <div className="col-12 col-sm-12 col-md-12 col-lg-12 float-left">
-                  <div className="wt-howitwork-hold wt-bgwhite wt-haslayout">
-                    
-                    <ul className="wt-navarticletab wt-navarticletabvtwo nav navbar-nav">
-                      <li className="nav-item">
-                        <a 
-                          className={activeTab === 'hiring' ? 'active' : ''} 
-                          onClick={(e) => { e.preventDefault(); setActiveTab('hiring'); }} 
-                          href="#forhiring"
-                        >
-                          For Hiring
-                        </a>
-                      </li>
-                      <li className="nav-item">
-                        <a 
-                          className={activeTab === 'freelancing' ? 'active' : ''} 
-                          onClick={(e) => { e.preventDefault(); setActiveTab('freelancing'); }} 
-                          href="#forfreelancing"
-                        >
-                          For Professionals
-                        </a>
-                      </li>
-                      <li className="nav-item">
-                        <a 
-                          className={activeTab === 'faq' ? 'active' : ''} 
-                          onClick={(e) => { e.preventDefault(); setActiveTab('faq'); }} 
-                          href="#faq"
-                        >
-                          FAQ
-                        </a>
-                      </li>
-                    </ul>
-
-                    <div className="tab-content wt-haslayout">
-                      {/* For Hiring Tab */}
-                      {activeTab === 'hiring' && (
-                        <div className="wt-contentarticle tab-pane active" id="forhiring">
-                          <div className="row">
-                            <div className="wt-starthiringhold wt-innerspace wt-haslayout">
-                              <div className="col-12 col-sm-12 col-md-12 col-lg-7 float-left">
-                                <div className="wt-starthiringcontent">
-                                  <div className="wt-sectionhead">
-                                    <div className="wt-sectiontitle">
-                                      <h2>How To Hire Professionals</h2>
-                                      <span>Find the right skills for your project</span>
-                                    </div>
-                                    <div className="wt-description">
-                                      <p>SkillzLink makes it simple to connect with reliable professionals in your area. Follow these easy steps to get your project done.</p>
-                                    </div>
-                                  </div>
-                                  <ul className="wt-accordionhold accordion">
-                                    <li>
-                                      <div 
-                                        className={`wt-accordiontitle ${openAccordion !== 'hire-1' ? 'collapsed' : ''}`} 
-                                        onClick={() => toggleAccordion('hire-1')}
-                                      >
-                                        <span>1. Search for skills</span>
-                                      </div>
-                                      {openAccordion === 'hire-1' && (
-                                        <div className="wt-accordiondetails">
-                                          <div className="wt-description">
-                                            <p>Use our search bar to find the exact skills you need, from plumbing and electrical work to web design and tutoring. Filter by location and category to narrow down your options.</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                    </li>
-                                    <li>
-                                      <div 
-                                        className={`wt-accordiontitle ${openAccordion !== 'hire-2' ? 'collapsed' : ''}`} 
-                                        onClick={() => toggleAccordion('hire-2')}
-                                      >
-                                        <span>2. Review profiles</span>
-                                      </div>
-                                      {openAccordion === 'hire-2' && (
-                                        <div className="wt-accordiondetails">
-                                          <div className="wt-description">
-                                            <p>Check out professional profiles to see their experience, skills, ratings, and reviews from previous clients. Compare rates and choose the best fit for your budget.</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                    </li>
-                                    <li>
-                                      <div 
-                                        className={`wt-accordiontitle ${openAccordion !== 'hire-3' ? 'collapsed' : ''}`} 
-                                        onClick={() => toggleAccordion('hire-3')}
-                                      >
-                                        <span>3. Connect and hire</span>
-                                      </div>
-                                      {openAccordion === 'hire-3' && (
-                                        <div className="wt-accordiondetails">
-                                          <div className="wt-description">
-                                            <p>Contact the professional directly via WhatsApp or our internal messaging system. Discuss project details, agree on terms, and hire them for your service.</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                              <div className="col-12 col-sm-12 col-md-12 col-lg-5 float-right">
-                                <div className="wt-howtoworkimg">
-                                  <figure>
-                                    <img src="/images/work/img-01.jpg" alt="img description" />
-                                  </figure>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* For Professionals Tab */}
-                      {activeTab === 'freelancing' && (
-                        <div className="wt-contentarticle tab-pane active" id="forfreelancing">
-                          <div className="row">
-                            <div className="wt-starthiringhold wt-innerspace wt-haslayout">
-                              <div className="col-12 col-sm-12 col-md-12 col-lg-7 float-right">
-                                <div className="wt-starthiringcontent">
-                                  <div className="wt-sectionhead">
-                                    <div className="wt-sectiontitle">
-                                      <h2>How to Get Hired</h2>
-                                      <span>Grow your business with SkillzLink</span>
-                                    </div>
-                                    <div className="wt-description">
-                                      <p>Join our platform as a professional to reach more clients and build your reputation. Here is how to get started.</p>
-                                    </div>
-                                  </div>
-                                  <ul className="wt-accordionhold accordion">
-                                    <li>
-                                      <div 
-                                        className={`wt-accordiontitle ${openAccordion !== 'pro-1' ? 'collapsed' : ''}`} 
-                                        onClick={() => toggleAccordion('pro-1')}
-                                      >
-                                        <span>1. Create your profile</span>
-                                      </div>
-                                      {openAccordion === 'pro-1' && (
-                                        <div className="wt-accordiondetails">
-                                          <div className="wt-description">
-                                            <p>Sign up and fill out your profile with your skills, experience, and services offered. Add a professional photo and set your hourly or project rates.</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                    </li>
-                                    <li>
-                                      <div 
-                                        className={`wt-accordiontitle ${openAccordion !== 'pro-2' ? 'collapsed' : ''}`} 
-                                        onClick={() => toggleAccordion('pro-2')}
-                                      >
-                                        <span>2. Get discovered</span>
-                                      </div>
-                                      {openAccordion === 'pro-2' && (
-                                        <div className="wt-accordiondetails">
-                                          <div className="wt-description">
-                                            <p>Clients search our platform for your specific skills. Ensure your profile is complete and accurate to appear higher in search results and attract more leads.</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                    </li>
-                                    <li>
-                                      <div 
-                                        className={`wt-accordiontitle ${openAccordion !== 'pro-3' ? 'collapsed' : ''}`} 
-                                        onClick={() => toggleAccordion('pro-3')}
-                                      >
-                                        <span>3. Deliver and get reviewed</span>
-                                      </div>
-                                      {openAccordion === 'pro-3' && (
-                                        <div className="wt-accordiondetails">
-                                          <div className="wt-description">
-                                            <p>Communicate clearly, complete the service to the client's satisfaction, and earn positive reviews. Good ratings will help you secure more work in the future.</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                              <div className="col-12 col-sm-12 col-md-12 col-lg-5 float-left">
-                                <div className="wt-howtoworkimg">
-                                  <figure>
-                                    <img src="/images/work/img-02.jpg" alt="img description" />
-                                  </figure>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* FAQ Tab */}
-                      {activeTab === 'faq' && (
-                        <div className="wt-contentarticle tab-pane active" id="faq">
-                          <div className="row">
-                            <div className="wt-starthiringhold wt-innerspace wt-haslayout">
-                              <div className="col-12 col-sm-12 col-md-12 col-lg-7 float-left">
-                                <div className="wt-starthiringcontent">
-                                  <div className="wt-sectionhead">
-                                    <div className="wt-sectiontitle">
-                                      <h2>Frequently Asked Questions</h2>
-                                      <span>Find answers to common questions</span>
-                                    </div>
-                                  </div>
-                                  <ul className="wt-accordionhold accordion">
-                                    <li>
-                                      <div 
-                                        className={`wt-accordiontitle ${openAccordion !== 'faq-1' ? 'collapsed' : ''}`} 
-                                        onClick={() => toggleAccordion('faq-1')}
-                                      >
-                                        <span>Is it free to join SkillzLink?</span>
-                                      </div>
-                                      {openAccordion === 'faq-1' && (
-                                        <div className="wt-accordiondetails">
-                                          <div className="wt-description">
-                                            <p>Yes, creating a profile and searching for professionals is completely free. We may introduce premium features in the future, but basic access will always remain free.</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                    </li>
-                                    <li>
-                                      <div 
-                                        className={`wt-accordiontitle ${openAccordion !== 'faq-2' ? 'collapsed' : ''}`} 
-                                        onClick={() => toggleAccordion('faq-2')}
-                                      >
-                                        <span>How do I pay a professional?</span>
-                                      </div>
-                                      {openAccordion === 'faq-2' && (
-                                        <div className="wt-accordiondetails">
-                                          <div className="wt-description">
-                                            <p>Payment terms are agreed upon directly between the client and the professional. SkillzLink currently acts as a discovery platform and does not process payments.</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                    </li>
-                                    <li>
-                                      <div 
-                                        className={`wt-accordiontitle ${openAccordion !== 'faq-3' ? 'collapsed' : ''}`} 
-                                        onClick={() => toggleAccordion('faq-3')}
-                                      >
-                                        <span>How do I report an issue?</span>
-                                      </div>
-                                      {openAccordion === 'faq-3' && (
-                                        <div className="wt-accordiondetails">
-                                          <div className="wt-description">
-                                            <p>If you experience any problems with a professional or the platform, you can use the "Report User" feature on their profile or contact our support team through the Contact Us page.</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+              <div className="row justify-content-md-center">
+                <div className="col-xs-12 col-sm-12 col-md-8 push-md-2 col-lg-6 push-lg-3">
+                  <div className="wt-sectionhead wt-textcenter">
+                    <div className="wt-sectiontitle">
+                      <h2>I Need a Professional</h2>
+                      <span>Hire the best talent in your city in 3 simple steps</span>
                     </div>
                   </div>
                 </div>
               </div>
+              
+              <div className="row" style={{ marginTop: '40px' }}>
+                {/* Step 1 */}
+                <div className="col-12 col-sm-12 col-md-4 col-lg-4" style={{ marginBottom: '30px' }}>
+                  <div style={{
+                    background: '#fff', borderRadius: '10px', padding: '32px 24px',
+                    boxShadow: '0 2px 16px rgba(0,0,0,0.07)', height: '100%', textAlign: 'center',
+                  }}>
+                    <i className="lnr lnr-magnifier" style={{ fontSize: '36px', color: '#ff5851', marginBottom: '16px', display: 'block' }} />
+                    <h3 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '10px', color: '#1a1a2e' }}>1. Search & Filter</h3>
+                    <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7, margin: 0 }}>
+                      Browse our directory of verified professionals. Filter by city, service category, or price range to find the perfect match.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className="col-12 col-sm-12 col-md-4 col-lg-4" style={{ marginBottom: '30px' }}>
+                  <div style={{
+                    background: '#fff', borderRadius: '10px', padding: '32px 24px',
+                    boxShadow: '0 2px 16px rgba(0,0,0,0.07)', height: '100%', textAlign: 'center',
+                  }}>
+                    <i className="lnr lnr-user" style={{ fontSize: '36px', color: '#ff5851', marginBottom: '16px', display: 'block' }} />
+                    <h3 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '10px', color: '#1a1a2e' }}>2. Review Profiles</h3>
+                    <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7, margin: 0 }}>
+                      Check out their past work, read reviews from other Zimbabweans, and verify their ID status before making contact.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="col-12 col-sm-12 col-md-4 col-lg-4" style={{ marginBottom: '30px' }}>
+                  <div style={{
+                    background: '#fff', borderRadius: '10px', padding: '32px 24px',
+                    boxShadow: '0 2px 16px rgba(0,0,0,0.07)', height: '100%', textAlign: 'center',
+                  }}>
+                    <i className="fab fa-whatsapp" style={{ fontSize: '36px', color: '#25D366', marginBottom: '16px', display: 'block' }} />
+                    <h3 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '10px', color: '#1a1a2e' }}>3. Chat on WhatsApp</h3>
+                    <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7, margin: 0 }}>
+                      Click the WhatsApp button to instantly message the professional. Negotiate, share photos, and get the job done.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          </section>
+
+          {/* WhatsApp Banner */}
+          <section className="wt-haslayout" style={{ padding: '60px 0', background: '#f8f9fa' }}>
+            <div className="container">
+              <div className="row items-center">
+                <div className="col-12 col-sm-12 col-md-12 col-lg-6 float-left">
+                  <div className="wt-greetingcontent">
+                    <div className="wt-sectionhead">
+                      <div className="wt-sectiontitle">
+                        <h2>No App Required</h2>
+                        <span style={{ color: '#25D366' }}>Connect seamlessly on WhatsApp</span>
+                      </div>
+                      <div className="wt-description">
+                        <p>
+                          We believe getting things done shouldn't require downloading another app. That's why SkillzLink connects you directly to professionals via WhatsApp — the app you already use every day.
+                        </p>
+                        <ul style={{ listStyle: 'none', padding: 0, marginTop: '20px' }}>
+                          <li style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <i className="lnr lnr-checkmark" style={{ color: '#25D366', fontWeight: 'bold' }} /> Instant notifications and messages
+                          </li>
+                          <li style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <i className="lnr lnr-checkmark" style={{ color: '#25D366', fontWeight: 'bold' }} /> Share location and photos easily
+                          </li>
+                          <li style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <i className="lnr lnr-checkmark" style={{ color: '#25D366', fontWeight: 'bold' }} /> Save data by using WhatsApp bundles
+                          </li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <i className="lnr lnr-checkmark" style={{ color: '#25D366', fontWeight: 'bold' }} /> Keep all your conversations in one place
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12 col-sm-12 col-md-12 col-lg-6 float-left" style={{ textAlign: 'center' }}>
+                  <img
+                    src="/images/whatsapp-mobile.png"
+                    alt="WhatsApp Integration"
+                    style={{ maxWidth: '300px', display: 'inline-block' }}
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* For Professionals */}
+          <section className="wt-haslayout" style={{ padding: '60px 0' }}>
+            <div className="container">
+              <div className="row justify-content-md-center">
+                <div className="col-xs-12 col-sm-12 col-md-8 push-md-2 col-lg-6 push-lg-3">
+                  <div className="wt-sectionhead wt-textcenter">
+                    <div className="wt-sectiontitle">
+                      <h2>I am a Professional</h2>
+                      <span>Grow your business and get more clients on SkillzLink</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="row" style={{ marginTop: '40px' }}>
+                {/* Step A */}
+                <div className="col-12 col-sm-6 col-md-6 col-lg-3" style={{ marginBottom: '30px' }}>
+                  <div style={{
+                    background: '#fff', borderRadius: '10px', padding: '32px 24px',
+                    boxShadow: '0 2px 16px rgba(0,0,0,0.07)', height: '100%', textAlign: 'center',
+                  }}>
+                    <i className="lnr lnr-laptop-phone" style={{ fontSize: '36px', color: '#ff5851', marginBottom: '16px', display: 'block' }} />
+                    <h3 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '10px', color: '#1a1a2e' }}>1. Create Profile</h3>
+                    <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7, margin: 0 }}>
+                      Sign up with your phone number, add your service category, set your radius, and write a bio.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step B */}
+                <div className="col-12 col-sm-6 col-md-6 col-lg-3" style={{ marginBottom: '30px' }}>
+                  <div style={{
+                    background: '#fff', borderRadius: '10px', padding: '32px 24px',
+                    boxShadow: '0 2px 16px rgba(0,0,0,0.07)', height: '100%', textAlign: 'center',
+                  }}>
+                    <i className="lnr lnr-license" style={{ fontSize: '36px', color: '#ff5851', marginBottom: '16px', display: 'block' }} />
+                    <h3 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '10px', color: '#1a1a2e' }}>2. Get Verified</h3>
+                    <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7, margin: 0 }}>
+                      Provide your National ID. Once verified, you'll receive a badge that boosts trust.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step C */}
+                <div className="col-12 col-sm-6 col-md-6 col-lg-3" style={{ marginBottom: '30px' }}>
+                  <div style={{
+                    background: '#fff', borderRadius: '10px', padding: '32px 24px',
+                    boxShadow: '0 2px 16px rgba(0,0,0,0.07)', height: '100%', textAlign: 'center',
+                  }}>
+                    <i className="lnr lnr-bubble" style={{ fontSize: '36px', color: '#ff5851', marginBottom: '16px', display: 'block' }} />
+                    <h3 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '10px', color: '#1a1a2e' }}>3. Receive Leads</h3>
+                    <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7, margin: 0 }}>
+                      Clients find you in the directory and message you directly on WhatsApp to negotiate.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step D */}
+                <div className="col-12 col-sm-6 col-md-6 col-lg-3" style={{ marginBottom: '30px' }}>
+                  <div style={{
+                    background: '#fff', borderRadius: '10px', padding: '32px 24px',
+                    boxShadow: '0 2px 16px rgba(0,0,0,0.07)', height: '100%', textAlign: 'center',
+                  }}>
+                    <i className="lnr lnr-star" style={{ fontSize: '36px', color: '#ff5851', marginBottom: '16px', display: 'block' }} />
+                    <h3 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '10px', color: '#1a1a2e' }}>4. Build Reputation</h3>
+                    <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7, margin: 0 }}>
+                      Complete jobs successfully, collect 5-star reviews, and rank higher in search results.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* CTA Section */}
+          <section className="wt-haslayout" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #764ba2 100%)', padding: '60px 0' }}>
+            <div className="container">
+              <div className="row justify-content-md-center">
+                <div className="col-xs-12 col-sm-12 col-md-10 col-lg-8" style={{ textAlign: 'center' }}>
+                  <h2 style={{ color: '#fff', fontSize: '28px', fontWeight: 700, marginBottom: '12px' }}>
+                    Ready to get started?
+                  </h2>
+                  <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: '30px', fontSize: '16px' }}>
+                    Join thousands of Zimbabweans already using SkillzLink to get things done.
+                  </p>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                    <Link to="/register" className="wt-btn" style={{ background: '#ff5851', border: 'none' }}>
+                      Create Free Account
+                    </Link>
+                    <Link to="/nearby-professionals" className="wt-btn" style={{ background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.5)' }}>
+                      Find a Professional
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
         </div>
       </main>
-      {/* Main End */}
     </>
-  );
+  )
 }

@@ -1,17 +1,18 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { adminApi } from "../../../services/api";
+import { DataTable, type Column } from "../../../components/shared/DataTable";
 
 const STATUS_COLORS: Record<string, string> = {
-  "2": "#52c41a", // 2xx green
-  "3": "#1890ff", // 3xx blue
-  "4": "#fa8c16", // 4xx orange
-  "5": "#f5222d", // 5xx red
+  "2": "bg-emerald-50 text-emerald-700",
+  "3": "bg-blue-50 text-blue-700",
+  "4": "bg-amber-50 text-amber-700",
+  "5": "bg-rose-50 text-rose-700",
 };
 
 function getStatusColor(code: number) {
   const first = String(code)[0];
-  return STATUS_COLORS[first] || "#999";
+  return STATUS_COLORS[first] || "bg-gray-100 text-gray-700";
 }
 
 export function DashboardApiLogsPage() {
@@ -36,131 +37,158 @@ export function DashboardApiLogsPage() {
     : 0;
   const errorCount = logs.filter(l => l.status_code >= 400).length;
 
+  const columns: Column<any>[] = [
+    {
+      key: "created_at",
+      label: "Timestamp",
+      render: (log) => (
+        <span className="text-xs font-mono text-gray-500 whitespace-nowrap">
+          {new Date(log.created_at).toLocaleString()}
+        </span>
+      ),
+      exportValue: (log) => new Date(log.created_at).toLocaleString(),
+    },
+    {
+      key: "url",
+      label: "Request",
+      render: (log) => (
+        <div className="flex items-center gap-3">
+          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
+            log.method === 'GET' ? 'bg-blue-50 text-blue-700' :
+            log.method === 'POST' ? 'bg-emerald-50 text-emerald-700' :
+            log.method === 'DELETE' ? 'bg-rose-50 text-rose-700' :
+            'bg-amber-50 text-amber-700'
+          }`}>
+            {log.method}
+          </span>
+          <span className="text-sm text-gray-900 font-mono max-w-[280px] truncate" title={log.url}>
+            {log.url.replace(/^https?:\/\/[^/]+/, '')}
+          </span>
+          {log.request_body && (
+            <i className={`lnr lnr-chevron-down text-gray-400 text-xs ml-auto transition-transform ${expanded === log.id ? 'rotate-180' : ''}`}></i>
+          )}
+        </div>
+      ),
+      exportValue: (log) => `${log.method} ${log.url}`,
+    },
+    {
+      key: "status_code",
+      label: "Status",
+      render: (log) => (
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getStatusColor(log.status_code)}`}>
+          {log.status_code}
+        </span>
+      ),
+      exportValue: (log) => log.status_code,
+    },
+    {
+      key: "response_time_ms",
+      label: "Time",
+      render: (log) => (
+        <span className={`text-sm font-mono ${log.response_time_ms > 500 ? 'text-red-600' : 'text-gray-900'}`}>
+          {log.response_time_ms ?? '-'}ms
+        </span>
+      ),
+      exportValue: (log) => log.response_time_ms ?? 0,
+    },
+    {
+      key: "ip_address",
+      label: "IP / User",
+      render: (log) => (
+        <div className="text-xs font-mono text-gray-500">
+          <div>{log.ip_address}</div>
+          <div className="text-gray-400">UID: {log.user_id ?? 'N/A'}</div>
+        </div>
+      ),
+      exportValue: (log) => `${log.ip_address} (UID: ${log.user_id ?? 'N/A'})`,
+    },
+  ];
+
   return (
     <DashboardLayout>
-      <section className="wt-haslayout wt-dbsectionspace">
+      <div className="p-8 space-y-8">
+
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">API Health & Logs</h2>
+          <p className="text-sm text-gray-500 mt-1">Monitor all incoming and outgoing API requests across the platform.</p>
+        </div>
+
         {/* Summary Cards */}
-        <div className="row" style={{ marginBottom: '20px' }}>
-          <div className="col-12 col-sm-4">
-            <div className="wt-insightsitem wt-dashboardbox" style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: '28px', margin: '0', color: '#1890ff' }}>{logs.length}</h3>
-              <span>Total Requests</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-6 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center text-xl">
+              <i className="lnr lnr-cloud-sync"></i>
+            </div>
+            <div>
+              <h4 className="text-2xl font-semibold text-gray-900">{logs.length}</h4>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Requests</p>
             </div>
           </div>
-          <div className="col-12 col-sm-4">
-            <div className="wt-insightsitem wt-dashboardbox" style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: '28px', margin: '0', color: '#f5222d' }}>{errorCount}</h3>
-              <span>Errors (4xx / 5xx)</span>
+          <div className="bg-white border border-gray-200 rounded-lg p-6 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-red-50 text-red-600 flex items-center justify-center text-xl">
+              <i className="lnr lnr-warning"></i>
+            </div>
+            <div>
+              <h4 className="text-2xl font-semibold text-gray-900">{errorCount}</h4>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Errors (4xx/5xx)</p>
             </div>
           </div>
-          <div className="col-12 col-sm-4">
-            <div className="wt-insightsitem wt-dashboardbox" style={{ textAlign: 'center' }}>
-              <h3 style={{ fontSize: '28px', margin: '0', color: '#52c41a' }}>{avgResponse}ms</h3>
-              <span>Avg Response Time</span>
+          <div className="bg-white border border-gray-200 rounded-lg p-6 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+              <i className="lnr lnr-hourglass"></i>
+            </div>
+            <div>
+              <h4 className="text-2xl font-semibold text-gray-900">{avgResponse}ms</h4>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Response Time</p>
             </div>
           </div>
         </div>
 
-        <div className="wt-dashboardbox">
-          <div className="wt-dashboardboxtitle wt-titlewithsearch">
-            <h2>API Request Logs</h2>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <span className="wt-select" style={{ minWidth: '130px' }}>
-                <select value={methodFilter} onChange={e => setMethodFilter(e.target.value)}>
-                  <option value="">All Methods</option>
-                  {["GET", "POST", "PUT", "DELETE"].map(m => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
-                </select>
-              </span>
-              <span className="wt-radio">
-                <input type="checkbox" id="err-only" checked={errorsOnly}
-                  onChange={e => setErrorsOnly(e.target.checked)} />
-                <label htmlFor="err-only"> Errors Only</label>
-              </span>
-              <button className="wt-btn" onClick={fetchLogs} style={{ padding: '8px 16px' }}>
-                <i className="lnr lnr-sync"></i> Refresh
+        {/* DataTable */}
+        <DataTable
+          columns={columns}
+          data={logs}
+          loading={loading}
+          title="Request Logs"
+          exportFileName="api-logs"
+          emptyIcon="lnr lnr-text-align-left"
+          emptyMessage="No API logs found matching filters."
+          onRowClick={(log) => log.request_body && setExpanded(expanded === log.id ? null : log.id)}
+          headerActions={
+            <div className="flex items-center gap-3 flex-wrap">
+              <select
+                value={methodFilter}
+                onChange={e => setMethodFilter(e.target.value)}
+                className="bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors"
+              >
+                <option value="">All Methods</option>
+                {["GET", "POST", "PUT", "DELETE"].map(m => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                <input type="checkbox" checked={errorsOnly} onChange={e => setErrorsOnly(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-gray-900" />
+                Errors Only
+              </label>
+              <button onClick={fetchLogs} className="px-4 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors flex items-center gap-2">
+                <i className={`lnr lnr-sync ${loading ? 'animate-spin' : ''}`}></i> Refresh
               </button>
             </div>
+          }
+        />
+
+        {/* Expanded request body rows - rendered outside DataTable for expandable detail */}
+        {expanded && logs.find(l => l.id === expanded)?.request_body && (
+          <div className="border border-gray-200 rounded-lg overflow-hidden -mt-4">
+            <div className="px-6 py-4 border-l-4 border-gray-900 bg-gray-50">
+              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Request Body</h5>
+              <pre className="bg-gray-900 text-emerald-400 p-4 rounded-lg text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all">
+                {logs.find(l => l.id === expanded)?.request_body}
+              </pre>
+            </div>
           </div>
-          <div className="wt-dashboardboxcontent">
-            {loading ? <p style={{ padding: '20px' }}>Loading logs...</p> : (
-              <div style={{ overflowX: 'auto' }}>
-                <table className="wt-tablecategories" style={{ minWidth: '700px' }}>
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Method</th>
-                      <th>URL</th>
-                      <th>Status</th>
-                      <th>Time (ms)</th>
-                      <th>IP</th>
-                      <th>User ID</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {logs.map(log => (
-                      <>
-                        <tr key={log.id} style={{ cursor: log.request_body ? 'pointer' : 'default' }}
-                          onClick={() => setExpanded(expanded === log.id ? null : log.id)}>
-                          <td style={{ fontSize: '12px', whiteSpace: 'nowrap' }}>
-                            {new Date(log.created_at).toLocaleString()}
-                          </td>
-                          <td>
-                            <span style={{
-                              background: log.method === 'GET' ? '#e6f7ff' : log.method === 'DELETE' ? '#fff1f0' : '#fffbe6',
-                              color: log.method === 'GET' ? '#1890ff' : log.method === 'DELETE' ? '#f5222d' : '#faad14',
-                              padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 600
-                            }}>
-                              {log.method}
-                            </span>
-                          </td>
-                          <td style={{ fontSize: '12px', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {log.url.replace(/^https?:\/\/[^/]+/, '')}
-                          </td>
-                          <td>
-                            <span style={{
-                              color: '#fff', background: getStatusColor(log.status_code),
-                              padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 600
-                            }}>
-                              {log.status_code}
-                            </span>
-                          </td>
-                          <td style={{ fontSize: '12px' }}>
-                            <span style={{ color: log.response_time_ms > 500 ? '#f5222d' : '#52c41a', fontWeight: 600 }}>
-                              {log.response_time_ms ?? '-'}
-                            </span>
-                          </td>
-                          <td style={{ fontSize: '12px' }}>{log.ip_address}</td>
-                          <td style={{ fontSize: '12px' }}>{log.user_id ?? '—'}</td>
-                          <td>{log.request_body && <i className="lnr lnr-chevron-down" style={{ fontSize: '10px' }}></i>}</td>
-                        </tr>
-                        {expanded === log.id && log.request_body && (
-                          <tr key={`${log.id}-body`}>
-                            <td colSpan={8} style={{ background: '#f8f9fa', fontSize: '12px' }}>
-                              <pre style={{ margin: 0, padding: '8px', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-                                {log.request_body}
-                              </pre>
-                            </td>
-                          </tr>
-                        )}
-                      </>
-                    ))}
-                    {logs.length === 0 && (
-                      <tr>
-                        <td colSpan={8} style={{ textAlign: 'center', color: '#999', padding: '30px' }}>
-                          No API logs found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+        )}
+      </div>
     </DashboardLayout>
   );
 }

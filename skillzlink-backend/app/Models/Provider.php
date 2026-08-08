@@ -31,6 +31,7 @@ class Provider extends Model
         'success_rate',
         'response_time',
         'skills',
+        'dynamic_data',
     ];
 
     protected function casts(): array
@@ -42,6 +43,7 @@ class Provider extends Model
             'subscription_expiry' => 'datetime',
             'rating' => 'decimal:2',
             'skills' => 'array',
+            'dynamic_data' => 'array',
         ];
     }
 

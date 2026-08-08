@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"; // useEffect needed for API refresh
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { seekerApi, publicApi } from "../../../services/api";
@@ -9,9 +9,7 @@ export function DashboardSaveItemsPage() {
   const [revealing, setRevealing] = useState<number | null>(null);
 
   useEffect(() => {
-    // Load from localStorage (saved by the ProfessionalProfilePage)
     const raw = JSON.parse(localStorage.getItem("saved_professionals") || "[]");
-    // Refresh each one from the API to get fresh data
     if (raw.length === 0) {
       setLoading(false);
       return;
@@ -48,101 +46,129 @@ export function DashboardSaveItemsPage() {
 
   return (
     <DashboardLayout>
-      <section className="wt-haslayout wt-dbsectionspace">
-        <div className="wt-dashboardbox">
-          <div className="wt-dashboardboxtitle wt-titlewithsearch">
-            <h2>Saved Professionals</h2>
-            <Link to="/nearby-professionals" className="wt-btn" style={{ padding: '8px 16px', fontSize: '13px' }}>
-              + Find More
-            </Link>
+      <div className="p-6 md:p-8 max-w-6xl mx-auto">
+        
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+          <div>
+            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Saved Professionals</h2>
+            <p className="text-slate-500 mt-1 font-medium">Keep track of your favorite service providers.</p>
           </div>
-          <div className="wt-dashboardboxcontent">
-            {loading ? (
-              <div style={{ padding: '40px', textAlign: 'center' }}>
-                <i className="fa fa-spinner fa-spin" style={{ fontSize: '28px', color: '#ff5851' }}></i>
+          <Link 
+            to="/nearby-professionals"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-colors"
+          >
+            <i className="lnr lnr-plus-circle"></i> Find More
+          </Link>
+        </div>
+
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mb-4" />
+              <p className="text-slate-500 font-medium">Loading saved professionals...</p>
+            </div>
+          ) : saved.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+              <div className="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 text-5xl mb-6">
+                <i className="lnr lnr-heart"></i>
               </div>
-            ) : saved.length === 0 ? (
-              <div style={{ padding: '40px', textAlign: 'center', color: '#888' }}>
-                <i className="lnr lnr-heart" style={{ fontSize: '48px', display: 'block', marginBottom: '12px' }}></i>
-                <h3 style={{ color: '#ccc' }}>No saved professionals yet</h3>
-                <p>Browse professionals and click the heart icon to save them here.</p>
-                <Link to="/nearby-professionals" className="wt-btn">Browse Professionals</Link>
-              </div>
-            ) : (
-              <div className="row">
+              <h3 className="text-xl font-bold text-slate-800 mb-2">No saved professionals yet</h3>
+              <p className="text-slate-500 font-medium mb-8 max-w-md">
+                Browse professionals and click the heart icon to save them here for quick access later.
+              </p>
+              <Link 
+                to="/nearby-professionals" 
+                className="px-8 py-3.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
+              >
+                Browse Professionals
+              </Link>
+            </div>
+          ) : (
+            <div className="p-6 md:p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {saved.map((pro) => (
-                  <div className="col-12 col-md-6" key={pro.id} style={{ marginBottom: '20px' }}>
-                    <div style={{
-                      border: '1px solid #f0f0f0', borderRadius: '10px', padding: '20px',
-                      display: 'flex', gap: '16px', alignItems: 'flex-start',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                    }}>
-                      <div style={{
-                        width: '60px', height: '60px', borderRadius: '50%',
-                        background: '#f5f5f5', overflow: 'hidden', flexShrink: 0
-                      }}>
-                        {pro.image
-                          ? <img src={pro.image} alt={pro.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <i className="lnr lnr-user" style={{ fontSize: '28px', color: '#ccc' }}></i>
-                            </div>
-                        }
+                  <div key={pro.id} className="group rounded-2xl border border-slate-200 bg-white hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-100/50 transition-all p-6 relative overflow-hidden flex flex-col h-full">
+                    
+                    <div className="flex gap-5 mb-5">
+                      <div className="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                        {pro.image ? (
+                          <img src={pro.image} alt={pro.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400 text-2xl bg-slate-50">
+                            <i className="lnr lnr-user"></i>
+                          </div>
+                        )}
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start gap-4">
                           <div>
-                            <h4 style={{ margin: '0 0 2px', fontSize: '15px' }}>{pro.name}</h4>
-                            <p style={{ margin: '0 0 4px', color: '#888', fontSize: '13px' }}>{pro.service_category}</p>
+                            <h4 className="text-lg font-bold text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1">{pro.name}</h4>
+                            <p className="text-sm font-medium text-slate-500 mb-1">{pro.service_category}</p>
                             {pro.rating > 0 && (
-                              <span style={{ fontSize: '12px', color: '#faad14' }}>
-                                {'★'.repeat(Math.round(pro.rating))} ({pro.rating.toFixed(1)})
-                              </span>
+                              <div className="flex items-center gap-1.5 text-amber-500 font-bold text-sm">
+                                <i className="fa fa-star"></i>
+                                <span>{pro.rating.toFixed(1)}</span>
+                              </div>
                             )}
                           </div>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            {pro.premium_badge && (
-                              <span style={{ background: '#faad14', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
-                                Premium
-                              </span>
-                            )}
-                            {pro.id_verified && (
-                              <span style={{ background: '#52c41a', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
-                                ✓ Verified
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <p style={{ margin: '8px 0', fontSize: '13px', color: '#555', lineHeight: 1.5 }}>
-                          {pro.description?.substring(0, 100)}{pro.description?.length > 100 ? '...' : ''}
-                        </p>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
-                          <Link to={`/professional-profile/${pro.id}`} className="wt-btn" style={{ padding: '6px 14px', fontSize: '12px' }}>
-                            View Profile
-                          </Link>
-                          <button
-                            className="wt-btn"
-                            style={{ padding: '6px 14px', fontSize: '12px', background: '#52c41a' }}
-                            onClick={() => handleRevealContact(pro.id)}
-                            disabled={revealing === pro.id}
-                          >
-                            {revealing === pro.id ? '...' : '📞 Contact'}
-                          </button>
+                          
                           <button
                             onClick={() => removeSaved(pro.id)}
-                            style={{ padding: '6px 14px', fontSize: '12px', background: 'none', border: '1px solid #f5222d', color: '#f5222d', borderRadius: '4px', cursor: 'pointer' }}
+                            className="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors flex items-center justify-center shrink-0"
+                            title="Remove from saved"
                           >
-                            Remove
+                            <i className="lnr lnr-trash font-bold"></i>
                           </button>
                         </div>
                       </div>
                     </div>
+                    
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {pro.premium_badge && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider">
+                          <i className="fa fa-crown"></i> Premium
+                        </span>
+                      )}
+                      {pro.id_verified && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black uppercase tracking-wider">
+                          <i className="fa fa-check-circle"></i> Verified
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-2 flex-1">
+                      {pro.description || "No description provided."}
+                    </p>
+                    
+                    <div className="flex gap-3 mt-auto pt-5 border-t border-slate-100">
+                      <Link 
+                        to={`/professional-profile/${pro.id}`} 
+                        className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm text-center hover:bg-slate-50 hover:text-slate-800 transition-colors"
+                      >
+                        View Profile
+                      </Link>
+                      <button
+                        className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200 active:scale-95 disabled:opacity-70 flex justify-center items-center gap-2"
+                        onClick={() => handleRevealContact(pro.id)}
+                        disabled={revealing === pro.id}
+                      >
+                        {revealing === pro.id ? (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <i className="lnr lnr-phone-handset"></i> Contact
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      </section>
+      </div>
     </DashboardLayout>
   );
 }

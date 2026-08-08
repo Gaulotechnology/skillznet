@@ -19,97 +19,147 @@ export function DashboardProviderOverviewPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const tierColor = (tier: string) => {
-    if (tier?.includes('quarterly')) return '#faad14';
-    if (tier?.includes('monthly')) return '#1890ff';
-    return '#888';
+  const tierStyle = (tier: string) => {
+    if (tier?.includes('quarterly')) return { color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-100' };
+    if (tier?.includes('monthly')) return { color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-100' };
+    return { color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-100' };
   };
+
+  const currentTier = tierStyle(analytics?.subscription_tier);
 
   return (
     <DashboardLayout>
-      <section className="wt-haslayout wt-dbsectionspace">
+      <div className="p-6 md:p-8 max-w-7xl mx-auto">
         {loading ? (
-          <div style={{ padding: '40px', textAlign: 'center' }}>
-            <i className="fa fa-spinner fa-spin" style={{ fontSize: '30px', color: '#ff5851' }}></i>
+          <div className="flex flex-col items-center justify-center h-64">
+            <div className="w-12 h-12 border-4 border-slate-200 border-t-rose-500 rounded-full animate-spin mb-4" />
+            <p className="text-slate-500 font-medium">Loading your dashboard...</p>
           </div>
         ) : (
-          <div className="row">
+          <>
             {/* Welcome Header */}
-            <div className="col-12" style={{ marginBottom: '24px' }}>
-              <div className="wt-dashboardbox" style={{ background: 'linear-gradient(135deg, #ff5851 0%, #ff8a4c 100%)', color: '#fff', padding: '24px' }}>
-                <h2 style={{ color: '#fff', margin: '0 0 4px' }}>Welcome back, {profile?.name || 'Professional'}! 👋</h2>
-                <p style={{ color: 'rgba(255,255,255,0.85)', margin: 0 }}>
-                  Here's an overview of your account performance.
-                </p>
+            <div className="mb-8">
+              <div className="rounded-3xl bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500 p-8 md:p-10 relative overflow-hidden shadow-xl shadow-rose-200/50">
+                <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white opacity-10 mix-blend-overlay blur-2xl translate-x-1/3 -translate-y-1/3"></div>
+                <div className="absolute bottom-0 right-32 w-40 h-40 rounded-full bg-white opacity-20 mix-blend-overlay blur-xl translate-y-1/3"></div>
+                
+                <div className="relative z-10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/20 text-white text-xs font-bold uppercase tracking-wider mb-4">
+                    <i className="lnr lnr-briefcase"></i> Provider Dashboard
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-black text-white mb-2">Welcome back, {profile?.name || 'Professional'}! 👋</h2>
+                  <p className="text-rose-50 text-lg max-w-xl mb-8 font-medium">
+                    Here's an overview of your account performance and quick actions to manage your profile.
+                  </p>
+                  
+                  <div className="flex gap-4">
+                    <Link 
+                      to="/dashboard/profile" 
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-rose-600 font-bold hover:bg-rose-50 transition-all shadow-lg hover:shadow-xl active:scale-95"
+                    >
+                      <i className="lnr lnr-pencil"></i> Edit Profile
+                    </Link>
+                    {!profile?.identity_verified && (
+                      <Link 
+                        to="/dashboard/profile" 
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900/40 text-white font-bold hover:bg-slate-900/60 backdrop-blur-md transition-all active:scale-95 border border-white/10"
+                      >
+                        <i className="lnr lnr-shield"></i> Verify ID
+                      </Link>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Key Stats */}
-            <div className="col-6 col-md-3">
-              <div className="wt-insightsitem wt-dashboardbox" style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: '36px', margin: '0', color: '#1890ff' }}>{analytics?.profile_views ?? 0}</h3>
-                <span>Profile Views</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group hover:border-slate-200 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                  <i className="lnr lnr-eye"></i>
+                </div>
+                <h3 className="text-3xl font-black text-slate-800 mb-1">{analytics?.profile_views ?? 0}</h3>
+                <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">Profile Views</span>
               </div>
-            </div>
-            <div className="col-6 col-md-3">
-              <div className="wt-insightsitem wt-dashboardbox" style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: '36px', margin: '0', color: '#52c41a' }}>{analytics?.contact_reveals ?? 0}</h3>
-                <span>Contact Reveals</span>
+              
+              <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group hover:border-slate-200 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                  <i className="lnr lnr-phone-handset"></i>
+                </div>
+                <h3 className="text-3xl font-black text-slate-800 mb-1">{analytics?.contact_reveals ?? 0}</h3>
+                <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">Contact Reveals</span>
               </div>
-            </div>
-            <div className="col-6 col-md-3">
-              <div className="wt-insightsitem wt-dashboardbox" style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: '20px', margin: '0', color: tierColor(analytics?.subscription_tier) }}>
-                  {analytics?.subscription_tier?.replace(/_/g, ' ') || 'Free'}
-                </h3>
-                <span>Current Plan</span>
+              
+              <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group hover:border-slate-200 transition-colors flex flex-col justify-between">
+                <div>
+                  <div className={`w-12 h-12 rounded-xl ${currentTier.bg} ${currentTier.color} flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform`}>
+                    <i className="lnr lnr-star"></i>
+                  </div>
+                  <h3 className={`text-xl font-black mb-1 capitalize ${currentTier.color}`}>
+                    {analytics?.subscription_tier?.replace(/_/g, ' ') || 'Free'}
+                  </h3>
+                </div>
+                <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">Current Plan</span>
               </div>
-            </div>
-            <div className="col-6 col-md-3">
-              <div className="wt-insightsitem wt-dashboardbox" style={{ textAlign: 'center' }}>
-                <h3 style={{ fontSize: '20px', margin: '0', color: profile?.identity_verified ? '#52c41a' : '#fa8c16' }}>
-                  {profile?.identity_verified ? '✓ Verified' : 'Pending'}
-                </h3>
-                <span>ID Verification</span>
+              
+              <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group hover:border-slate-200 transition-colors flex flex-col justify-between">
+                <div>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform ${profile?.identity_verified ? 'bg-emerald-50 text-emerald-500' : 'bg-amber-50 text-amber-500'}`}>
+                    <i className={`lnr ${profile?.identity_verified ? 'lnr-checkmark-circle' : 'lnr-warning'}`}></i>
+                  </div>
+                  <h3 className={`text-xl font-black mb-1 ${profile?.identity_verified ? 'text-emerald-500' : 'text-amber-500'}`}>
+                    {profile?.identity_verified ? 'Verified' : 'Pending'}
+                  </h3>
+                </div>
+                <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">ID Verification</span>
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="col-12 col-md-6 mt-4">
-              <div className="wt-dashboardbox">
-                <div className="wt-dashboardboxtitle">
-                  <h2>Quick Actions</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Quick Actions */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-slate-800">Quick Actions</h3>
+                  <p className="text-slate-500 text-sm mt-1">Manage your professional presence</p>
                 </div>
-                <div className="wt-dashboardboxcontent" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
-                    { to: '/dashboard/profile', icon: 'ti-user', label: 'Edit My Profile', desc: 'Update your bio, skills, and photos' },
-                    { to: '/dashboard/subscription', icon: 'ti-star', label: 'Manage Subscription', desc: 'Upgrade for more visibility' },
-                    { to: '/dashboard/insights', icon: 'ti-bar-chart', label: 'View Insights', desc: 'Detailed performance analytics' },
-                    { to: '/dashboard/settings', icon: 'ti-settings', label: 'Account Settings', desc: 'Privacy and notification preferences' },
+                    { to: '/dashboard/profile', icon: 'lnr-user', label: 'Edit Profile', desc: 'Update bio & skills', color: 'text-indigo-500', bg: 'bg-indigo-50' },
+                    { to: '/dashboard/subscription', icon: 'lnr-star', label: 'Subscription', desc: 'Upgrade visibility', color: 'text-amber-500', bg: 'bg-amber-50' },
+                    { to: '/dashboard/insights', icon: 'lnr-chart-bars', label: 'Insights', desc: 'View analytics', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                    { to: '/dashboard/settings', icon: 'lnr-cog', label: 'Settings', desc: 'Account preferences', color: 'text-slate-600', bg: 'bg-slate-100' },
                   ].map((a, i) => (
-                    <Link to={a.to} key={i} style={{
-                      display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 16px',
-                      background: '#f8f9fa', borderRadius: '8px', textDecoration: 'none', color: '#333',
-                      transition: 'background 0.2s'
-                    }}>
-                      <i className={a.icon} style={{ fontSize: '22px', color: '#ff5851', minWidth: '28px' }}></i>
+                    <Link to={a.to} key={i} className="p-5 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-all group flex flex-col gap-4">
+                      <div className={`w-12 h-12 rounded-xl ${a.bg} ${a.color} flex items-center justify-center text-xl shadow-sm group-hover:scale-110 transition-transform`}>
+                        <i className={`lnr ${a.icon}`}></i>
+                      </div>
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: '14px' }}>{a.label}</div>
-                        <div style={{ color: '#888', fontSize: '12px' }}>{a.desc}</div>
+                        <div className="font-bold text-slate-800 text-sm mb-1">{a.label}</div>
+                        <div className="text-xs text-slate-500 font-medium">{a.desc}</div>
                       </div>
                     </Link>
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Profile Completeness */}
-            <div className="col-12 col-md-6 mt-4">
-              <div className="wt-dashboardbox">
-                <div className="wt-dashboardboxtitle">
-                  <h2>Profile Strength</h2>
+              {/* Profile Completeness */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col">
+                <div className="mb-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-800">Profile Strength</h3>
+                    <p className="text-slate-500 text-sm mt-1">Complete profiles get more views</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full border-4 border-slate-100 border-t-emerald-500 flex items-center justify-center font-bold text-emerald-500 text-sm">
+                    {Math.round(
+                      ([
+                        !!profile?.description, !!profile?.service_category, !!profile?.location,
+                        !!profile?.image, !!profile?.identity_verified, !!profile?.contact_opt_in
+                      ].filter(Boolean).length / 6) * 100
+                    )}%
+                  </div>
                 </div>
-                <div className="wt-dashboardboxcontent" style={{ padding: '20px' }}>
+                
+                <div className="space-y-3 mb-6 flex-1">
                   {[
                     { label: 'Description', done: !!profile?.description },
                     { label: 'Service Category', done: !!profile?.service_category },
@@ -118,30 +168,29 @@ export function DashboardProviderOverviewPage() {
                     { label: 'ID Verified', done: !!profile?.identity_verified },
                     { label: 'Contact Opt-in', done: !!profile?.contact_opt_in },
                   ].map((item, i) => (
-                    <div key={i} style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      padding: '10px 0', borderBottom: i < 5 ? '1px solid #f0f0f0' : 'none'
-                    }}>
-                      <span style={{ fontSize: '14px' }}>{item.label}</span>
-                      <span style={{
-                        color: item.done ? '#52c41a' : '#fa8c16',
-                        fontWeight: 600, fontSize: '13px'
-                      }}>
-                        {item.done ? '✓ Complete' : '○ Incomplete'}
-                      </span>
+                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-sm font-bold text-slate-700">{item.label}</span>
+                      {item.done ? (
+                        <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-emerald-500">
+                          <i className="lnr lnr-checkmark-circle"></i> Complete
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-500">
+                          <i className="lnr lnr-warning"></i> Pending
+                        </span>
+                      )}
                     </div>
                   ))}
-                  <div style={{ marginTop: '16px' }}>
-                    <Link to="/dashboard/profile" className="wt-btn" style={{ width: '100%', textAlign: 'center' }}>
-                      Complete Profile
-                    </Link>
-                  </div>
                 </div>
+                
+                <Link to="/dashboard/profile" className="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-sm text-center hover:bg-slate-800 transition-colors active:scale-95">
+                  Complete My Profile
+                </Link>
               </div>
             </div>
-          </div>
+          </>
         )}
-      </section>
+      </div>
     </DashboardLayout>
   );
 }

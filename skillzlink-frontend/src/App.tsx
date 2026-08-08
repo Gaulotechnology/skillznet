@@ -6,6 +6,7 @@ import { PopularServices } from "./components/landing/PopularServices"
 import { JoinInfo } from "./components/landing/JoinInfo"
 import { LimitlessExperience } from "./components/landing/LimitlessExperience"
 import { SkillsFooter } from "./components/landing/SkillsFooter"
+import { ApplyBannerSection } from "./pages/ApplyBannerSection"
 import { publicApi } from "./services/api"
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
       <PopularServices />
       <JoinInfo />
       <LimitlessExperience />
+      <ApplyBannerSection />
       <SkillsFooter />
     </>
   )

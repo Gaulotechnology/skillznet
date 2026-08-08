@@ -8,6 +8,7 @@ use App\Models\ProviderReport;
 use App\Models\ProviderView;
 use App\Models\SearchQuery;
 use App\Models\Seeker;
+use App\Models\Booking;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -173,5 +174,46 @@ class SeekerController extends Controller
         }
         $visible = substr($phoneNumber, -4);
         return str_repeat('*', max(strlen($phoneNumber) - 4, 0)).$visible;
+    }
+
+    public function createBooking(Request $request): JsonResponse
+    {
+        $seeker = Seeker::where('user_id', $request->user()->id)->firstOrFail();
+        
+        $validated = $request->validate([
+            'provider_id' => ['required', 'exists:providers,id'],
+            'booking_date' => ['required', 'date', 'after_or_equal:today'],
+            'start_time' => ['required', 'date_format:H:i'],
+            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $booking = Booking::create([
+            'seeker_id' => $seeker->id,
+            'provider_id' => $validated['provider_id'],
+            'booking_date' => $validated['booking_date'],
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'notes' => $validated['notes'] ?? null,
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'message' => 'Booking created successfully',
+            'booking' => $booking,
+        ], 201);
+    }
+
+    public function getBookings(Request $request): JsonResponse
+    {
+        $seeker = Seeker::where('user_id', $request->user()->id)->firstOrFail();
+        
+        $bookings = Booking::with('provider.user')
+            ->where('seeker_id', $seeker->id)
+            ->orderByDesc('booking_date')
+            ->orderByDesc('start_time')
+            ->get();
+
+        return response()->json(['bookings' => $bookings]);
     }
 }

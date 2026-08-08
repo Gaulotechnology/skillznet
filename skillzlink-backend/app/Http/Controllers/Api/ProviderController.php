@@ -8,6 +8,8 @@ use App\Models\Provider;
 use App\Models\ProviderDocument;
 use App\Models\ProviderView;
 use App\Models\SubscriptionHistory;
+use App\Models\ProviderAvailability;
+use App\Models\Booking;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -36,6 +38,7 @@ class ProviderController extends Controller
             'longitude' => ['sometimes', 'nullable', 'numeric'],
             'description' => ['sometimes', 'nullable', 'string'],
             'contact_opt_in' => ['sometimes', 'boolean'],
+            'dynamic_data' => ['sometimes', 'nullable', 'array'],
         ]);
 
         $provider->update($validated);
@@ -139,6 +142,79 @@ class ProviderController extends Controller
                 ->count(),
             'subscription_tier' => $provider->subscription_tier,
             'expiry_date' => $provider->subscription_expiry,
+        ]);
+    }
+
+    public function getAvailability(Request $request): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+        
+        $availabilities = ProviderAvailability::where('provider_id', $provider->id)
+            ->orderBy('day_of_week')
+            ->get();
+
+        return response()->json(['availabilities' => $availabilities]);
+    }
+
+    public function setAvailability(Request $request): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+        
+        $validated = $request->validate([
+            'availabilities' => ['required', 'array'],
+            'availabilities.*.day_of_week' => ['required', 'integer', 'min:0', 'max:6'],
+            'availabilities.*.start_time' => ['nullable', 'date_format:H:i'],
+            'availabilities.*.end_time' => ['nullable', 'date_format:H:i'],
+            'availabilities.*.is_available' => ['required', 'boolean'],
+        ]);
+
+        foreach ($validated['availabilities'] as $avail) {
+            ProviderAvailability::updateOrCreate(
+                [
+                    'provider_id' => $provider->id,
+                    'day_of_week' => $avail['day_of_week'],
+                ],
+                [
+                    'start_time' => $avail['start_time'],
+                    'end_time' => $avail['end_time'],
+                    'is_available' => $avail['is_available'],
+                ]
+            );
+        }
+
+        return response()->json(['message' => 'Availability updated successfully']);
+    }
+
+    public function getBookings(Request $request): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+        
+        $bookings = Booking::with('seeker.user')
+            ->where('provider_id', $provider->id)
+            ->orderByDesc('booking_date')
+            ->orderByDesc('start_time')
+            ->get();
+
+        return response()->json(['bookings' => $bookings]);
+    }
+
+    public function updateBookingStatus(Request $request, int $id): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+        
+        $validated = $request->validate([
+            'status' => ['required', 'in:accepted,rejected,completed,cancelled'],
+        ]);
+
+        $booking = Booking::where('id', $id)
+            ->where('provider_id', $provider->id)
+            ->firstOrFail();
+            
+        $booking->update(['status' => $validated['status']]);
+
+        return response()->json([
+            'message' => 'Booking status updated',
+            'booking' => $booking
         ]);
     }
 }

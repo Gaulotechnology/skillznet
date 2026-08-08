@@ -4,6 +4,17 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:18080/api"
 
+export interface RegistrationField {
+  id: number;
+  label: string;
+  name: string;
+  type: string;
+  required: boolean;
+  options?: any;
+  category_name: string | null;
+  sort_order: number;
+}
+
 export function apiBaseUrl(): string {
   return API_BASE_URL
 }
@@ -87,6 +98,7 @@ export interface PublicProvider {
   phone?: string
   completed_services?: number
   success_rate?: number
+  dynamic_data?: Record<string, any>
   response_time?: string
   experience?: {
     title: string
@@ -150,7 +162,8 @@ export const authApi = {
   registerProvider: (payload: {
     name: string; phone_number: string; identity_number: string;
     address: string; service_category: string; service_radius: number;
-    latitude?: number; longitude?: number; description?: string
+    latitude?: number; longitude?: number; description?: string;
+    dynamic_data?: Record<string, any>;
   }) =>
     fetchJson<{ message: string; user_id: number; provider_id: number }>(
       `${API_BASE_URL}/auth/register-provider`,
@@ -174,6 +187,27 @@ export const publicApi = {
 
   getProvider: (id: string | number) =>
     fetchJson<{ provider: PublicProvider }>(`${API_BASE_URL}/providers/${id}`),
+
+  getCareers: () => fetchJson<{ jobs: JobPosting[] }>(`${API_BASE_URL}/careers`),
+
+  getProviderSlots: (id: string | number, date: string) => 
+    fetchJson<{ slots: string[] }>(`${API_BASE_URL}/providers/${id}/slots?date=${date}`),
+    
+  getProviderRegistrationFields: (category_slug: string) => 
+    fetchJson<{ fields: RegistrationField[] }>(`${API_BASE_URL}/fields/provider/${category_slug}`),
+}
+
+
+export interface JobPosting {
+  id: number
+  title: string
+  department: string
+  location: string
+  type: string
+  description: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
 }
 
 // ─── Seeker endpoints (auth required) ────────────────────────────────────────
@@ -197,6 +231,43 @@ export const seekerApi = {
     fetchJson<{ message: string }>(`${API_BASE_URL}/seeker/provider/${id}/report`, {
       method: "POST", body: JSON.stringify({ issue }),
     }),
+
+  getBookings: () => fetchJson<{ bookings: any[] }>(`${API_BASE_URL}/seeker/bookings`),
+  
+  createBooking: (payload: { provider_id: number; booking_date: string; start_time: string; end_time: string; notes?: string }) =>
+    fetchJson<{ message: string; booking: any }>(`${API_BASE_URL}/seeker/bookings`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+
+  getOverview: () => fetchJson<{ stats: { saved_count: number; reports_count: number; bookings_count: number }; recent_saved: any[] }>(`${API_BASE_URL}/seeker/overview`),
+
+  getReviews: () => fetchJson<{ reviews: any[] }>(`${API_BASE_URL}/seeker/reviews`),
+  createReview: (payload: { provider_id: number; rating: number; comment: string }) =>
+    fetchJson<{ message: string; review: any }>(`${API_BASE_URL}/seeker/reviews`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+  updateReview: (id: number, payload: { rating: number; comment: string }) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/seeker/reviews/${id}`, {
+      method: "PUT", body: JSON.stringify(payload),
+    }),
+  deleteReview: (id: number) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/seeker/reviews/${id}`, { method: "DELETE" }),
+
+  getBilling: () => fetchJson<{ payment_methods: any[]; transactions: any[] }>(`${API_BASE_URL}/seeker/billing`),
+  addPaymentMethod: (payload: { type: string; details: Record<string, string> }) =>
+    fetchJson<{ message: string; payment_method: any }>(`${API_BASE_URL}/seeker/billing/payment-methods`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+  deletePaymentMethod: (id: number) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/seeker/billing/payment-methods/${id}`, { method: "DELETE" }),
+
+  getSettings: () => fetchJson<{ settings: { email_updates: boolean; sms_updates: boolean } }>(`${API_BASE_URL}/seeker/settings`),
+  updateSettings: (payload: { email_updates: boolean; sms_updates: boolean }) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/seeker/settings`, {
+      method: "PUT", body: JSON.stringify(payload),
+    }),
+  deleteAccount: () => fetchJson<{ message: string }>(`${API_BASE_URL}/seeker/account`, { method: "DELETE" }),
+  requestPasswordReset: () => fetchJson<{ message: string }>(`${API_BASE_URL}/auth/password-reset`, { method: "POST" }),
 }
 
 // ─── Provider endpoints (auth required) ──────────────────────────────────────
@@ -205,7 +276,8 @@ export const providerApi = {
 
   updateProfile: (payload: Partial<{
     address: string; service_category: string; service_radius: number;
-    latitude: number; longitude: number; description: string; contact_opt_in: boolean
+    latitude: number; longitude: number; description: string; contact_opt_in: boolean;
+    dynamic_data: Record<string, any>;
   }>) =>
     fetchJson<{ message: string; provider: PublicProvider }>(`${API_BASE_URL}/provider/profile`, {
       method: "PUT", body: JSON.stringify(payload),
@@ -237,6 +309,48 @@ export const providerApi = {
       profile_views: number; contact_reveals: number;
       subscription_tier: string; expiry_date: string
     }>(`${API_BASE_URL}/provider/analytics`),
+
+  getAvailability: () => fetchJson<{ availabilities: any[] }>(`${API_BASE_URL}/provider/availability`),
+  
+  setAvailability: (payload: { availabilities: any[] }) => 
+    fetchJson<{ message: string }>(`${API_BASE_URL}/provider/availability`, {
+      method: "POST", body: JSON.stringify(payload)
+    }),
+
+  getBookings: () => fetchJson<{ bookings: any[] }>(`${API_BASE_URL}/provider/bookings`),
+  
+  updateBookingStatus: (id: number, status: string) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/provider/bookings/${id}/status`, {
+      method: "PUT", body: JSON.stringify({ status })
+    }),
+
+  getServices: (status?: string) => {
+    const qs = status ? `?status=${status}` : '';
+    return fetchJson<{ services: any[]; stats: { ongoing: number; completed: number; cancelled: number } }>(`${API_BASE_URL}/provider/services${qs}`);
+  },
+  getService: (id: number) =>
+    fetchJson<{ service: any; history: any[] }>(`${API_BASE_URL}/provider/services/${id}`),
+  sendServiceMessage: (id: number, payload: { message: string }) =>
+    fetchJson<{ message: string; entry: any }>(`${API_BASE_URL}/provider/services/${id}/messages`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+  cancelService: (id: number, reason?: string) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/provider/services/${id}/cancel`, {
+      method: "POST", body: JSON.stringify({ reason }),
+    }),
+  completeService: (id: number) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/provider/services/${id}/complete`, { method: "POST" }),
+  repostService: (id: number) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/provider/services/${id}/repost`, { method: "POST" }),
+  deleteService: (id: number) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/provider/services/${id}`, { method: "DELETE" }),
+
+  getQuotes: () =>
+    fetchJson<{ quotes: any[]; stats: { ongoing: number; completed: number; cancelled: number } }>(`${API_BASE_URL}/provider/quotes`),
+  respondToQuote: (id: number, action: 'accept' | 'reject') =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/provider/quotes/${id}/respond`, {
+      method: "POST", body: JSON.stringify({ action }),
+    }),
 }
 
 // ─── Admin endpoints (auth required) ─────────────────────────────────────────
@@ -253,6 +367,10 @@ export const adminApi = {
   deleteUser: (id: number) =>
     fetchJson<{ message: string }>(`${API_BASE_URL}/admin/users/${id}`, {
       method: "DELETE"
+    }),
+  impersonateUser: (id: number) =>
+    fetchJson<{ token: string; user: { name: string; role: string } }>(`${API_BASE_URL}/admin/users/${id}/impersonate`, {
+      method: "POST"
     }),
 
   getCategories: () => fetchJson<{ categories: any[] }>(`${API_BASE_URL}/admin/categories`),
@@ -283,6 +401,12 @@ export const adminApi = {
   getStats: () => fetchJson<any>(`${API_BASE_URL}/admin/stats`),
 
   getRegistrationFields: () => fetchJson<{ fields: any[] }>(`${API_BASE_URL}/admin/registration-fields`),
+  getProviderRegistrationFields: (category?: string) => {
+    const url = category 
+      ? `${API_BASE_URL}/registration-fields?category=${encodeURIComponent(category)}`
+      : `${API_BASE_URL}/registration-fields`;
+    return fetchJson<{ fields: any[] }>(url);
+  },
   createRegistrationField: (payload: any) =>
     fetchJson<{ message: string; field: any }>(`${API_BASE_URL}/admin/registration-fields`, {
       method: "POST", body: JSON.stringify(payload)
@@ -302,4 +426,84 @@ export const adminApi = {
     if (params?.error) qs.set("error", "1");
     return fetchJson<{ logs: any[] }>(`${API_BASE_URL}/admin/api-logs?${qs.toString()}`);
   },
+
+  getConversations: () =>
+    fetchJson<{ conversations: any[] }>(`${API_BASE_URL}/admin/conversations`),
+  getConversation: (id: number) =>
+    fetchJson<{ conversation: any; messages: any[] }>(`${API_BASE_URL}/admin/conversations/${id}`),
+  sendMessage: (conversationId: number, payload: { content: string }) =>
+    fetchJson<{ message: string; entry: any }>(`${API_BASE_URL}/admin/conversations/${conversationId}/messages`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+  startConversation: (payload: { recipient_id: number; content: string }) =>
+    fetchJson<{ message: string; conversation: any }>(`${API_BASE_URL}/admin/conversations`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+
+  getInsights: (period?: string) => {
+    const qs = period ? `?period=${period}` : '';
+    return fetchJson<{ stats: { ongoing: number; completed: number; cancelled: number; reposted: number }; hired_providers: any[]; chart_data: any[] }>(`${API_BASE_URL}/admin/insights${qs}`);
+  },
+
+  getPackages: () => fetchJson<{ packages: any[] }>(`${API_BASE_URL}/admin/packages`),
+  createPackage: (payload: any) =>
+    fetchJson<{ message: string; package: any }>(`${API_BASE_URL}/admin/packages`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+  updatePackage: (id: number, payload: any) =>
+    fetchJson<{ message: string; package: any }>(`${API_BASE_URL}/admin/packages/${id}`, {
+      method: "PUT", body: JSON.stringify(payload),
+    }),
+  deletePackage: (id: number) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/admin/packages/${id}`, { method: "DELETE" }),
+
+  getRoles: () => fetchJson<{ roles: any[] }>(`${API_BASE_URL}/admin/roles`),
+  createRole: (payload: { name: string; description?: string }) =>
+    fetchJson<{ message: string; role: any }>(`${API_BASE_URL}/admin/roles`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+  updateRole: (id: number, payload: { name: string; description?: string }) =>
+    fetchJson<{ message: string; role: any }>(`${API_BASE_URL}/admin/roles/${id}`, {
+      method: "PUT", body: JSON.stringify(payload),
+    }),
+  deleteRole: (id: number) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/admin/roles/${id}`, { method: "DELETE" }),
+}
+
+// ─── Affiliate endpoints (auth required) ─────────────────────────────────────
+export const affiliateApi = {
+  getOverview: () =>
+    fetchJson<{ stats: { total_clicks: number; total_signups: number; total_earnings: number; pending_payout: number }; referral_code: string; referral_link: string; recent_referrals: any[] }>(`${API_BASE_URL}/affiliate/overview`),
+  requestPayout: () =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/affiliate/payout`, { method: "POST" }),
+}
+
+// ─── Agent endpoints (auth required) ─────────────────────────────────────────
+export const agentApi = {
+  getOverview: () =>
+    fetchJson<{ stats: { total_onboarded: number; commission_earned: number; active_providers: number }; onboarded_providers: any[]; onboarding_link: string }>(`${API_BASE_URL}/agent/overview`),
+  getOnboardedProviders: () =>
+    fetchJson<{ providers: any[] }>(`${API_BASE_URL}/agent/providers`),
+}
+
+// ─── Shared account endpoints (auth required) ────────────────────────────────
+export const accountApi = {
+  getSettings: () =>
+    fetchJson<{ settings: { email_updates: boolean; sms_updates: boolean } }>(`${API_BASE_URL}/account/settings`),
+  updateSettings: (payload: { email_updates: boolean; sms_updates: boolean }) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/account/settings`, {
+      method: "PUT", body: JSON.stringify(payload),
+    }),
+  deleteAccount: () =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/account`, { method: "DELETE" }),
+  requestPasswordReset: () =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/auth/password-reset`, { method: "POST" }),
+  submitSupportTicket: (payload: { category: string; description: string }) =>
+    fetchJson<{ message: string; ticket_id: number }>(`${API_BASE_URL}/support/tickets`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+  saveExperience: (payload: { title: string; description: string }) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/account/experience`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
 }

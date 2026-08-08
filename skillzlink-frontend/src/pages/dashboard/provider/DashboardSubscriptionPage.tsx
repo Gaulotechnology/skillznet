@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { providerApi } from "../../../services/api";
+import { DataTable, type Column } from "../../../components/shared/DataTable";
 
 const PLANS = [
   {
@@ -8,7 +9,6 @@ const PLANS = [
     title: "Premium Monthly",
     price: "$10",
     period: "/month",
-    color: "#1890ff",
     features: [
       "Priority listing in search results",
       "ID Verified badge on profile",
@@ -18,10 +18,9 @@ const PLANS = [
   },
   {
     id: "quarterly",
-    title: "Premium Quarterly ⭐",
+    title: "Premium Quarterly",
     price: "$25",
     period: "/3 months",
-    color: "#faad14",
     badge: "Best Value",
     features: [
       "Everything in Monthly",
@@ -49,9 +48,7 @@ export function DashboardSubscriptionPage() {
   }, []);
 
   const handleSubscribe = async (planId: string) => {
-    setSubscribing(true);
-    setError(null);
-    setSuccess(null);
+    setSubscribing(true); setError(null); setSuccess(null);
     try {
       await providerApi.subscribe(planId as "monthly" | "quarterly", paymentMethod);
       setSuccess(`Successfully upgraded to ${planId === 'monthly' ? 'Premium Monthly' : 'Premium Quarterly'}!`);
@@ -60,8 +57,7 @@ export function DashboardSubscriptionPage() {
     } catch (err: any) {
       setError(err.message || "Subscription failed. Please try again.");
     } finally {
-      setSubscribing(false);
-      setSelectedPlan(null);
+      setSubscribing(false); setSelectedPlan(null);
     }
   };
 
@@ -74,171 +70,161 @@ export function DashboardSubscriptionPage() {
     ? new Date(subscription.subscription_expiry).toLocaleDateString()
     : null;
 
+  const historyColumns: Column<any>[] = [
+    {
+      key: "tier",
+      label: "Plan Details",
+      render: (h) => <span className="text-sm font-medium text-gray-900 capitalize">{h.tier?.replace(/_/g, ' ')}</span>,
+      exportValue: (h) => h.tier?.replace(/_/g, ' ') || '',
+    },
+    {
+      key: "start_date",
+      label: "Start Date",
+      render: (h) => <span className="text-sm text-gray-500">{h.start_date ? new Date(h.start_date).toLocaleDateString() : '—'}</span>,
+      exportValue: (h) => h.start_date ? new Date(h.start_date).toLocaleDateString() : '',
+    },
+    {
+      key: "end_date",
+      label: "End Date",
+      render: (h) => <span className="text-sm text-gray-500">{h.end_date ? new Date(h.end_date).toLocaleDateString() : '—'}</span>,
+      exportValue: (h) => h.end_date ? new Date(h.end_date).toLocaleDateString() : '',
+    },
+    {
+      key: "status",
+      label: "Status",
+      align: "right" as const,
+      render: (h, index) => {
+        const isLatest = index === 0;
+        return isLatest && isActive(h.tier) ? (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400">Expired</span>
+        );
+      },
+      exportValue: (h) => isActive(h.tier) ? 'Active' : 'Expired',
+    },
+  ];
+
   return (
     <DashboardLayout>
-      <section className="wt-haslayout wt-dbsectionspace">
-        <div className="wt-dashboardboxtitle" style={{ marginBottom: '24px' }}>
-          <h2>Subscription & Plans</h2>
-          {subscription && (
-            <p style={{ color: '#888', fontSize: '14px', margin: 0 }}>
-              Current Plan: <strong style={{ color: '#333' }}>{subscription.tier?.replace(/_/g, ' ') || 'Free'}</strong>
-              {expiryDate && <span> · Expires: <strong>{expiryDate}</strong></span>}
-            </p>
-          )}
+      <div className="p-8">
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Subscription & Plans</h2>
+          <p className="text-sm text-gray-500 mt-1">Manage your subscription to unlock premium features and visibility.</p>
         </div>
 
+        {/* Notifications */}
         {success && (
-          <div className="wt-updatall" style={{ background: '#f6ffed', borderColor: '#b7eb8f', marginBottom: '20px' }}>
-            <i className="ti-check" style={{ color: '#52c41a' }}></i>
-            <span style={{ color: '#52c41a' }}>{success}</span>
+          <div className="mb-6 p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-3">
+            <i className="lnr lnr-checkmark-circle text-emerald-600"></i>
+            <p className="text-sm text-emerald-700 font-medium">{success}</p>
           </div>
         )}
         {error && (
-          <div className="wt-updatall" style={{ background: '#fff1f0', borderColor: '#ffa39e', marginBottom: '20px' }}>
-            <i className="ti-close" style={{ color: '#f5222d' }}></i>
-            <span style={{ color: '#f5222d' }}>{error}</span>
+          <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3">
+            <i className="lnr lnr-warning text-red-600"></i>
+            <p className="text-sm text-red-700 font-medium">{error}</p>
           </div>
         )}
 
-        {/* Free Plan */}
-        <div className="row" style={{ marginBottom: '20px' }}>
-          <div className="col-12">
-            <div className="wt-dashboardbox" style={{
-              border: subscription?.tier === 'free' || !subscription?.tier ? '2px solid #ff5851' : '1px solid #eee',
-              borderRadius: '8px'
-            }}>
-              <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                <div>
-                  <h3 style={{ margin: '0 0 4px' }}>Free Plan</h3>
-                  <span style={{ color: '#888' }}>Basic visibility on the platform</span>
+        {/* Current Plan Summary */}
+        {subscription && (
+          <div className="mb-8 bg-gray-900 rounded-lg p-6 text-white">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center text-2xl">
+                  {subscription.tier === 'free' || !subscription.tier ? '🌟' : '👑'}
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '28px', fontWeight: 700, color: '#333' }}>$0</span>
-                  <span style={{ color: '#888' }}>/forever</span>
-                  {(subscription?.tier === 'free' || !subscription?.tier) && (
-                    <p style={{ margin: '4px 0 0', color: '#ff5851', fontWeight: 600, fontSize: '13px' }}>✓ Current Plan</p>
-                  )}
+                <div>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">Current Plan</p>
+                  <h3 className="text-xl font-semibold capitalize text-white">
+                    {subscription.tier?.replace(/_/g, ' ') || 'Free Plan'}
+                  </h3>
+                  {expiryDate && <p className="text-sm text-gray-400 mt-0.5">Expires on {expiryDate}</p>}
                 </div>
               </div>
+              {(!subscription.tier || subscription.tier === 'free') && (
+                <span className="px-3 py-1.5 rounded-md bg-white/10 text-sm text-gray-300">Basic visibility</span>
+              )}
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Paid Plans */}
-        <div className="row">
-          {PLANS.map(plan => (
-            <div className="col-12 col-md-6" key={plan.id}>
-              <div className="wt-dashboardbox" style={{
-                border: isActive(plan.id) ? `2px solid ${plan.color}` : '1px solid #eee',
-                borderRadius: '8px', overflow: 'hidden', position: 'relative'
-              }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {PLANS.map(plan => {
+            const isPlanActive = isActive(plan.id);
+            const isSelected = selectedPlan === plan.id;
+            return (
+              <div key={plan.id} className={`bg-white rounded-lg overflow-hidden transition-all relative ${isPlanActive ? 'ring-2 ring-gray-900' : 'border border-gray-200 hover:border-gray-300'} flex flex-col`}>
                 {plan.badge && (
-                  <div style={{
-                    position: 'absolute', top: '12px', right: '12px',
-                    background: plan.color, color: '#fff',
-                    padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600
-                  }}>
-                    {plan.badge}
+                  <div className="absolute top-4 right-4">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700">{plan.badge}</span>
                   </div>
                 )}
-                <div style={{ padding: '24px' }}>
-                  <h3 style={{ margin: '0 0 4px', color: plan.color }}>{plan.title}</h3>
-                  <div style={{ margin: '12px 0' }}>
-                    <span style={{ fontSize: '36px', fontWeight: 700, color: '#333' }}>{plan.price}</span>
-                    <span style={{ color: '#888' }}>{plan.period}</span>
+                <div className="p-6 border-b border-gray-100">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">{plan.title}</h3>
+                  <div className="flex items-end gap-1">
+                    <span className="text-4xl font-semibold text-gray-900 tracking-tight">{plan.price}</span>
+                    <span className="text-sm text-gray-500 mb-1">{plan.period}</span>
                   </div>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: '16px 0' }}>
-                    {plan.features.map((f, i) => (
-                      <li key={i} style={{ padding: '6px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                        <span style={{ color: plan.color, fontWeight: 700 }}>✓</span> {f}
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <ul className="space-y-3 mb-6 flex-1">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-900 mt-1.5 shrink-0"></span>
+                        <span className="text-sm text-gray-600">{feature}</span>
                       </li>
                     ))}
                   </ul>
-
-                  {isActive(plan.id) ? (
-                    <div style={{ background: plan.color, color: '#fff', padding: '10px 16px', borderRadius: '6px', textAlign: 'center', fontWeight: 600 }}>
-                      ✓ Active Plan
+                  {isPlanActive ? (
+                    <div className="w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm text-center flex items-center justify-center gap-2">
+                      <i className="lnr lnr-checkmark-circle"></i> Active Plan
                     </div>
-                  ) : selectedPlan === plan.id ? (
-                    <div>
-                      <div className="form-group" style={{ marginBottom: '12px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Payment Method</label>
-                        <span className="wt-select">
-                          <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
-                            <option value="ecocash">EcoCash</option>
-                            <option value="onemoney">OneMoney</option>
-                            <option value="innbucks">InnBucks</option>
-                            <option value="card">Credit/Debit Card</option>
-                          </select>
-                        </span>
+                  ) : isSelected ? (
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="mb-3">
+                        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Payment Method</label>
+                        <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors">
+                          <option value="ecocash">EcoCash</option>
+                          <option value="onemoney">OneMoney</option>
+                          <option value="innbucks">InnBucks</option>
+                          <option value="card">Credit/Debit Card</option>
+                        </select>
                       </div>
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <button
-                          className="wt-btn"
-                          style={{ flex: 1, background: plan.color }}
-                          onClick={() => handleSubscribe(plan.id)}
-                          disabled={subscribing}
-                        >
-                          {subscribing ? 'Processing...' : 'Confirm & Pay'}
+                      <div className="flex gap-2">
+                        <button onClick={() => handleSubscribe(plan.id)} disabled={subscribing || loading} className="flex-1 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors flex items-center justify-center">
+                          {subscribing ? <i className="lnr lnr-sync animate-spin"></i> : 'Pay Now'}
                         </button>
-                        <button
-                          className="wt-btn"
-                          style={{ background: '#ccc', color: '#333' }}
-                          onClick={() => setSelectedPlan(null)}
-                        >
-                          Cancel
+                        <button onClick={() => setSelectedPlan(null)} disabled={subscribing} className="py-2.5 px-3 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors">
+                          <i className="lnr lnr-cross"></i>
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <button
-                      className="wt-btn"
-                      style={{ width: '100%', background: plan.color }}
-                      onClick={() => setSelectedPlan(plan.id)}
-                      disabled={loading}
-                    >
+                    <button onClick={() => setSelectedPlan(plan.id)} disabled={loading} className="w-full py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors">
                       Upgrade Now
                     </button>
                   )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* History */}
         {!loading && subscription?.history?.length > 0 && (
-          <div className="row mt-4">
-            <div className="col-12">
-              <div className="wt-dashboardbox">
-                <div className="wt-dashboardboxtitle">
-                  <h2>Payment History</h2>
-                </div>
-                <div className="wt-dashboardboxcontent">
-                  <table className="wt-tablecategories">
-                    <thead>
-                      <tr>
-                        <th>Plan</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {subscription.history.map((h: any) => (
-                        <tr key={h.id}>
-                          <td style={{ textTransform: 'capitalize' }}>{h.tier?.replace(/_/g, ' ')}</td>
-                          <td>{h.start_date ? new Date(h.start_date).toLocaleDateString() : '—'}</td>
-                          <td>{h.end_date ? new Date(h.end_date).toLocaleDateString() : '—'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
+          <DataTable
+            columns={historyColumns}
+            data={subscription.history}
+            title="Billing History"
+            subtitle="Record of your past subscription payments"
+            exportFileName="billing-history"
+          />
         )}
-      </section>
+      </div>
     </DashboardLayout>
   );
 }

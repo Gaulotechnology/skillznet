@@ -26,6 +26,7 @@ class AuthController extends Controller
             'latitude' => ['nullable', 'numeric'],
             'longitude' => ['nullable', 'numeric'],
             'description' => ['nullable', 'string'],
+            'dynamic_data' => ['nullable', 'array'],
         ]);
 
         $user = User::create([
@@ -46,6 +47,7 @@ class AuthController extends Controller
             'latitude' => $validated['latitude'] ?? null,
             'longitude' => $validated['longitude'] ?? null,
             'description' => $validated['description'] ?? null,
+            'dynamic_data' => $validated['dynamic_data'] ?? null,
         ]);
 
         return response()->json([
@@ -105,6 +107,18 @@ class AuthController extends Controller
             'verified' => false,
         ]);
 
+        // Log SMS
+        \App\Models\SmsLog::create([
+            'recipient' => $validated['phone_number'],
+            'type' => 'otp',
+            'message' => "Your SkillzLink verification code is: {$otp}. Valid for 10 minutes.",
+            'provider' => 'fake',
+            'status' => 'delivered',
+            'cost' => 0.0350,
+            'user_id' => $user->id,
+            'sent_at' => now(),
+        ]);
+
         return response()->json([
             'message' => 'OTP generated',
             'otp' => $otp,
@@ -133,6 +147,8 @@ class AuthController extends Controller
         $otpRecord->update(['verified' => true]);
         $user = User::where('phone_number', $validated['phone_number'])->firstOrFail();
         $token = $user->createToken('api-token')->plainTextToken;
+
+        $user->append('permissions');
 
         return response()->json([
             'message' => 'Authenticated',

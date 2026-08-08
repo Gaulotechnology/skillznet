@@ -2,152 +2,94 @@ import { Link } from "react-router-dom"
 
 export function Footer() {
   return (
-    <footer id="wt-footer" className="wt-footer wt-haslayout">
-      <div className="wt-footerholder wt-haslayout">
-        <div className="container">
-          <div className="row">
-            <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-              <div className="wt-footerlogohold">
-                <strong className="wt-logo">
-                  <Link to="/">
-                    <img src="/images/flogo.png" alt="SkillzLink footer logo" />
-                  </Link>
-                </strong>
-                <div className="wt-description">
-                  <p>
-                    SkillzLink connects you with trusted, verified local professionals across
-                    Zimbabwe. From plumbers to tutors, find the right expert near you — fast,
-                    secure, and integrated with WhatsApp.{" "}
-                    <Link to="/about">more...</Link>
-                  </p>
-                </div>
-                <ul className="wt-socialiconssimple wt-socialiconfooter">
-                  <li className="wt-facebook">
-                    <a href="#/">
-                      <i className="fa fa-facebook-f" />
-                    </a>
-                  </li>
-                  <li className="wt-twitter">
-                    <a href="#/">
-                      <i className="fab fa-twitter" />
-                    </a>
-                  </li>
-                  <li className="wt-youtube">
-                    <a href="#/">
-                      <i className="fab fa-youtube" />
-                    </a>
-                  </li>
-                  <li className="wt-instagram">
-                    <a href="#/">
-                      <i className="fab fa-instagram" />
-                    </a>
-                  </li>
-                  <li className="wt-googleplus">
-                    <a href="#/">
-                      <i className="fab fa-google-plus-g" />
-                    </a>
-                  </li>
-                </ul>
+    <footer className="bg-slate-900 pt-20 pb-10">
+      <div className="container mx-auto px-6">
+        
+        {/* Top Footer Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          
+          {/* Brand & Description */}
+          <div className="lg:col-span-2 pr-0 lg:pr-12">
+            <Link to="/" className="flex items-center gap-2 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center">
+                <span className="text-slate-900 font-black text-sm">SL</span>
               </div>
-            </div>
-            <div className="col-12 col-sm-6 col-md-3 col-lg-3">
-              <div className="wt-footercol wt-widgetcompany">
-                <div className="wt-fwidgettitle">
-                  <h3>Company</h3>
-                </div>
-                <ul className="wt-fwidgetcontent">
-                  <li>
-                    <Link to="/about">About Us</Link>
-                  </li>
-                  <li>
-                    <Link to="/how-it-works">How It Works</Link>
-                  </li>
-                  <li>
-                    <Link to="/careers">Careers</Link>
-                  </li>
-                  <li>
-                    <Link to="/terms-and-conditions">Terms &amp; Conditions</Link>
-                  </li>
-                  <li>
-                    <Link to="/trust-and-safety">Trust &amp; Safety</Link>
-                  </li>
-                  <li className="wt-viewmore">
-                    <Link to="/about">+ View All</Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="col-12 col-sm-6 col-md-3 col-lg-3">
-              <div className="wt-footercol wt-widgetexplore">
-                <div className="wt-fwidgettitle">
-                  <h3>Explore More</h3>
-                </div>
-                <ul className="wt-fwidgetcontent">
-                  <li>
-                    <Link to="/?service=plumbing#find-providers">Plumbers Near You</Link>
-                  </li>
-                  <li>
-                    <Link to="/?service=electrical#find-providers">Electricians Near You</Link>
-                  </li>
-                  <li>
-                    <Link to="/?service=cleaning#find-providers">Cleaners Near You</Link>
-                  </li>
-                  <li>
-                    <Link to="/?service=tutoring#find-providers">Tutors Near You</Link>
-                  </li>
-                  <li>
-                    <Link to="/?service=plumbing#find-providers">Find Professionals</Link>
-                  </li>
-                  <li className="wt-viewmore">
-                    <Link to="/service-categories">+ View All</Link>
-                  </li>
-                </ul>
-              </div>
+              <span className="font-extrabold text-3xl text-white tracking-tight">SkillzLink</span>
+            </Link>
+            <p className="text-slate-400 text-lg leading-relaxed mb-8 max-w-md">
+              SkillzLink connects you with trusted, verified local professionals across
+              Zimbabwe. From plumbers to tutors, find the right expert near you — fast,
+              secure, and integrated with WhatsApp.
+            </p>
+            
+            {/* Social Icons */}
+            <div className="flex items-center gap-3">
+              {[
+                { icon: 'fa-facebook-f', label: 'Facebook' },
+                { icon: 'fa-twitter', label: 'Twitter' },
+                { icon: 'fa-instagram', label: 'Instagram' },
+                { icon: 'fa-youtube', label: 'YouTube' }
+              ].map((social, idx) => (
+                <a 
+                  key={idx} 
+                  href="#/" 
+                  aria-label={social.label}
+                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-rose-500 transition-colors"
+                >
+                  <i className={`fab ${social.icon}`} />
+                </a>
+              ))}
             </div>
           </div>
-        </div>
-      </div>
-      <div className="wt-haslayout wt-joininfo">
-        <div className="container">
-          <div className="row justify-content-md-center">
-            <div className="col-xs-12 col-sm-12 col-md-12 col-lg-10 push-lg-1">
-              <div className="wt-companyinfo">
-                <span>
-                  <Link to="/register">New to SkillzLink?</Link> Find trusted professionals or grow
-                  your service business today.
-                </span>
-              </div>
-              <div className="wt-fbtnarea">
-                <Link to="/register" className="wt-btn">Join Now</Link>
-              </div>
-            </div>
+
+          {/* Company Links */}
+          <div>
+            <h3 className="text-white font-bold text-xl mb-6">Company</h3>
+            <ul className="space-y-4">
+              <li><Link to="/about" className="text-slate-400 hover:text-white transition-colors">About Us</Link></li>
+              <li><Link to="/how-it-works" className="text-slate-400 hover:text-white transition-colors">How It Works</Link></li>
+              <li><Link to="/careers" className="text-slate-400 hover:text-white transition-colors">Careers</Link></li>
+              <li><Link to="/terms-and-conditions" className="text-slate-400 hover:text-white transition-colors">Terms &amp; Conditions</Link></li>
+              <li><Link to="/trust-and-safety" className="text-slate-400 hover:text-white transition-colors">Trust &amp; Safety</Link></li>
+            </ul>
+          </div>
+
+          {/* Explore Links */}
+          <div>
+            <h3 className="text-white font-bold text-xl mb-6">Explore More</h3>
+            <ul className="space-y-4">
+              <li><Link to="/nearby-professionals?service=plumbing" className="text-slate-400 hover:text-white transition-colors">Plumbers Near You</Link></li>
+              <li><Link to="/nearby-professionals?service=electrical" className="text-slate-400 hover:text-white transition-colors">Electricians Near You</Link></li>
+              <li><Link to="/nearby-professionals?service=cleaning" className="text-slate-400 hover:text-white transition-colors">Cleaners Near You</Link></li>
+              <li><Link to="/nearby-professionals?service=tutoring" className="text-slate-400 hover:text-white transition-colors">Tutors Near You</Link></li>
+              <li><Link to="/nearby-professionals" className="text-rose-400 font-semibold hover:text-rose-300 transition-colors">View All Pros <i className="lnr lnr-arrow-right ml-1" /></Link></li>
+            </ul>
           </div>
         </div>
-      </div>
-      <div className="wt-haslayout wt-footerbottom">
-        <div className="container">
-          <div className="row">
-            <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-              <p className="wt-copyrights">SkillzLink &copy; {new Date().getFullYear()}</p>
-              <nav className="wt-addnav">
-                <ul>
-                  <li>
-                    <Link to="/news">News</Link>
-                  </li>
-                  <li>
-                    <Link to="/terms-and-conditions">Terms &amp; Conditions</Link>
-                  </li>
-                  <li>
-                    <Link to="/privacy-policy">Privacy Policy</Link>
-                  </li>
-                  <li>
-                    <Link to="/careers">Career</Link>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+
+        {/* Join CTA Strip */}
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
+          <div>
+            <h3 className="text-white font-bold text-2xl mb-2">New to SkillzLink?</h3>
+            <p className="text-slate-400 text-lg">Find trusted professionals or grow your service business today.</p>
           </div>
+          <Link to="/register" className="px-8 py-4 bg-rose-500 text-white font-bold rounded-2xl hover:bg-rose-600 transition-colors shrink-0">
+            Create Free Account
+          </Link>
         </div>
+
+        <hr className="border-white/10 mb-8" />
+
+        {/* Bottom Footer */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-slate-500 text-sm font-medium">
+          <p>SkillzLink &copy; {new Date().getFullYear()}. All rights reserved.</p>
+          <nav className="flex items-center gap-6">
+            <Link to="/news" className="hover:text-slate-300 transition-colors">News</Link>
+            <Link to="/terms-and-conditions" className="hover:text-slate-300 transition-colors">Terms</Link>
+            <Link to="/privacy-policy" className="hover:text-slate-300 transition-colors">Privacy</Link>
+          </nav>
+        </div>
+        
       </div>
     </footer>
   )
