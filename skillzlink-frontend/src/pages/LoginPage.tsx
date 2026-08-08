@@ -22,14 +22,13 @@ export function LoginPage() {
     return `+263${clean}`
   }
 
-  const handleLogin = async (e: FormEvent) => {
-    e.preventDefault()
+  const executeLogin = async (phone: string, pinCode: string) => {
     setLoading(true)
     setError(null)
     setMessage(null)
     try {
-      const formattedPhone = formatPhone(phoneNumber)
-      const data = await authApi.loginWithPin(formattedPhone, pin)
+      const formattedPhone = formatPhone(phone)
+      const data = await authApi.loginWithPin(formattedPhone, pinCode)
       setToken(data.token)
       setCurrentUser(data.user)
       const role = data.user.role
@@ -41,6 +40,17 @@ export function LoginPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleLogin = async (e: FormEvent) => {
+    e.preventDefault()
+    await executeLogin(phoneNumber, pin)
+  }
+
+  const handleDemoLogin = (phone: string) => {
+    setPhoneNumber(phone)
+    setPin("1234")
+    executeLogin(phone, "1234")
   }
 
   const handleRequestPinReset = async (e: FormEvent) => {
@@ -249,9 +259,9 @@ export function LoginPage() {
               <div className="pt-5 mt-2 border-t border-[var(--border-color)] flex flex-col items-center gap-3">
                 <p className="text-xs text-[var(--text-secondary)] font-medium uppercase tracking-wider">Demo Logins <span className="lowercase normal-case font-normal ml-1 opacity-75">(PIN: 1234)</span></p>
                 <div className="flex flex-wrap justify-center gap-2 w-full">
-                  <button type="button" onClick={() => {setPhoneNumber("771111111"); setPin("1234");}} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Admin</button>
-                  <button type="button" onClick={() => {setPhoneNumber("772222222"); setPin("1234");}} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Provider</button>
-                  <button type="button" onClick={() => {setPhoneNumber("773333333"); setPin("1234");}} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Seeker</button>
+                  <button type="button" onClick={() => handleDemoLogin("771111111")} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Admin</button>
+                  <button type="button" onClick={() => handleDemoLogin("772222222")} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Provider</button>
+                  <button type="button" onClick={() => handleDemoLogin("773333333")} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Seeker</button>
                 </div>
               </div>
             </form>
