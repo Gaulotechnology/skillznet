@@ -41,6 +41,12 @@ export function RegisterPage() {
   const [dynamicFields, setDynamicFields] = useState<RegistrationField[]>([])
   const [dynamicValues, setDynamicValues] = useState<Record<string, string | boolean>>({})
 
+  // Auth Steps
+  const [step, setStep] = useState<"details" | "otp" | "pin">("details")
+  const [otp, setOtp] = useState("")
+  const [pin, setPin] = useState("")
+  const [confirmPin, setConfirmPin] = useState("")
+
   // Options
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -100,30 +106,53 @@ export function RegisterPage() {
     try {
       const formattedPhone = formatPhone(phoneNumber)
 
-      if (role === "provider") {
-        const dynamicDataPayload: Record<string, any> = {}
-        dynamicFields.forEach(f => {
-          if (dynamicValues[f.name] !== "" && dynamicValues[f.name] !== false) {
-            dynamicDataPayload[f.name] = dynamicValues[f.name];
-          }
-        })
+      if (step === "details") {
+        const res = await authApi.requestOtp(formattedPhone)
+        setMessage(res.otp ? `Dev OTP: ${res.otp}` : "OTP sent via WhatsApp/SMS")
+        setStep("otp")
+      } else if (step === "otp") {
+        await authApi.verifyOtp(formattedPhone, otp)
+        setStep("pin")
+        setMessage(null)
+      } else if (step === "pin") {
+        if (pin.length !== 4) {
+          setError("PIN must be exactly 4 digits.")
+          setLoading(false)
+          return
+        }
+        if (pin !== confirmPin) {
+          setError("PINs do not match.")
+          setLoading(false)
+          return
+        }
 
-        await authApi.registerProvider({
-          name,
-          phone_number: formattedPhone,
-          identity_number: identityNumber,
-          address: `${address}, ${city}`,
-          service_category: serviceCategory,
-          service_radius: parseInt(serviceRadius, 10),
-          description: description,
-          dynamic_data: Object.keys(dynamicDataPayload).length > 0 ? dynamicDataPayload : undefined,
-        })
-      } else {
-        await authApi.registerSeeker({ name, phone_number: formattedPhone, default_latitude: undefined, default_longitude: undefined })
+        if (role === "provider") {
+          const dynamicDataPayload: Record<string, any> = {}
+          dynamicFields.forEach(f => {
+            if (dynamicValues[f.name] !== "" && dynamicValues[f.name] !== false) {
+              dynamicDataPayload[f.name] = dynamicValues[f.name];
+            }
+          })
+
+          await authApi.registerProvider({
+            name,
+            phone_number: formattedPhone,
+            otp,
+            pin,
+            identity_number: identityNumber,
+            address: `${address}, ${city}`,
+            service_category: serviceCategory,
+            service_radius: parseInt(serviceRadius, 10),
+            description: description,
+            dynamic_data: Object.keys(dynamicDataPayload).length > 0 ? dynamicDataPayload : undefined,
+          })
+        } else {
+          await authApi.registerSeeker({ name, phone_number: formattedPhone, otp, pin, default_latitude: undefined, default_longitude: undefined })
+        }
+        setMessage("Registration successful! You can now login with your phone number and PIN.")
       }
-      setMessage("Registration successful! You can now login with your phone number.")
-    } catch {
-      setError("Registration failed. The phone number may already be in use.")
+    } catch (err: any) {
+      setError(err.message || "Registration failed.")
     } finally {
       setLoading(false)
     }
@@ -131,7 +160,7 @@ export function RegisterPage() {
 
   const renderDynamicField = (field: RegistrationField) => {
     const val = dynamicValues[field.name]
-    const inputClasses = "w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-100 transition-all text-sm text-slate-800 bg-slate-50 focus:bg-white"
+    const inputClasses = "w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] transition-all text-sm text-[var(--text-primary)] bg-[var(--bg-secondary)] focus:bg-white"
 
     switch (field.type) {
       case "textarea":
@@ -163,15 +192,15 @@ export function RegisterPage() {
         )
       case "checkbox":
         return (
-          <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors">
+          <label className="flex items-center gap-3 p-3 border border-[var(--border-color)] rounded-xl bg-[var(--bg-secondary)] cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors">
             <input
               type="checkbox"
               name={field.name}
               checked={!!val}
               onChange={handleDynamicChange}
-              className="w-5 h-5 rounded text-rose-500 focus:ring-rose-500"
+              className="w-5 h-5 rounded text-[var(--accent-color)] focus:ring-rose-500"
             />
-            <span className="text-sm font-medium text-slate-700">{field.label}</span>
+            <span className="text-sm font-medium text-[var(--text-primary)]">{field.label}</span>
           </label>
         )
       default:
@@ -191,16 +220,16 @@ export function RegisterPage() {
 
   if (message) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-        <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-xl text-center border border-slate-100">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-[var(--bg-secondary)]">
+        <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-xl text-center border border-[var(--border-color)]">
           <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <i className="lnr lnr-checkmark-circle text-4xl" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-4">You're All Set!</h2>
-          <p className="text-slate-600 mb-8">{message}</p>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-4">You're All Set!</h2>
+          <p className="text-[var(--text-secondary)] mb-8">{message}</p>
           <Link
             to="/login"
-            className="block w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+            className="block w-full py-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-[var(--text-primary)] font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
           >
             Go to Login
           </Link>
@@ -212,87 +241,95 @@ export function RegisterPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-5/12 xl:w-1/3 relative overflow-hidden bg-slate-900 flex-col justify-between p-12">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+      <div className="hidden lg:flex lg:w-5/12 xl:w-1/3 relative overflow-hidden bg-[var(--bg-secondary)] flex-col justify-between p-12">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--accent-color)]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--accent-color)]/5 rounded-full blur-3xl" />
         
         <div className="relative z-10">
           <Link to="/" className="inline-flex items-center gap-3 mb-16 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center shadow-lg">
-              <span className="text-white font-black text-sm">SL</span>
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-color)] flex items-center justify-center">
+              <span className="text-[var(--text-primary)] font-black text-sm">SL</span>
             </div>
-            <span className="text-white font-bold text-xl">SkillzLink</span>
+            <span className="text-[var(--text-primary)] font-bold text-xl">SkillzLink</span>
           </Link>
 
-          <h2 className="text-4xl font-bold text-white leading-tight mb-6">
+          <h2 className="text-4xl font-bold text-[var(--text-primary)] leading-tight mb-6">
             Join Zimbabwe's<br/>growing talent<br/>network.
           </h2>
-          <p className="text-slate-300 text-lg mb-12 max-w-sm">
+          <p className="text-[var(--text-secondary)] text-lg mb-12 max-w-sm">
             Whether you need something fixed or you're the one fixing it, you're in the right place.
           </p>
 
           <div className="space-y-6">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                <i className="lnr lnr-magic-wand text-white" />
+              <div className="w-10 h-10 rounded-full bg-[var(--bg-primary)]/50 flex items-center justify-center shrink-0">
+                <i className="lnr lnr-magic-wand text-[var(--text-primary)]" />
               </div>
               <div>
-                <h4 className="text-white font-semibold mb-1">Simple Setup</h4>
-                <p className="text-slate-400 text-sm">Takes less than 2 minutes to create your profile.</p>
+                <h4 className="text-[var(--text-primary)] font-semibold mb-1">Simple Setup</h4>
+                <p className="text-[var(--text-secondary)] text-sm">Takes less than 2 minutes to create your profile.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center shrink-0 border border-green-500/30">
-                <i className="fab fa-whatsapp text-green-400 text-lg" />
+              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-100">
+                <i className="fab fa-whatsapp text-green-600 text-lg" />
               </div>
               <div>
-                <h4 className="text-white font-semibold mb-1">WhatsApp Integrated</h4>
-                <p className="text-slate-400 text-sm">Get notifications and connect instantly via WhatsApp.</p>
+                <h4 className="text-[var(--text-primary)] font-semibold mb-1">WhatsApp Integrated</h4>
+                <p className="text-[var(--text-secondary)] text-sm">Get notifications and connect instantly via WhatsApp.</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="relative z-10 text-slate-400 text-sm">
-          Already have an account? <Link to="/login" className="text-white font-semibold hover:text-rose-400 transition-colors">Sign in instead</Link>
+        <div className="relative z-10 text-[var(--text-secondary)] text-sm">
+          Already have an account? <Link to="/login" className="text-[var(--text-primary)] font-semibold hover:text-[var(--accent-color)] transition-colors">Sign in instead</Link>
         </div>
       </div>
 
       {/* Right Panel - Form */}
-      <div className="w-full lg:w-7/12 xl:w-2/3 flex items-center justify-center p-6 sm:p-12 bg-slate-50 overflow-y-auto">
-        <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-10">
+      <div className="w-full lg:w-7/12 xl:w-2/3 flex items-center justify-center p-6 sm:p-12 bg-[var(--bg-secondary)] overflow-y-auto">
+        <div className="w-full max-w-2xl bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] shadow-sm p-6 sm:p-10">
           
           <div className="lg:hidden flex items-center justify-between mb-8">
             <Link to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-rose-500 flex items-center justify-center">
-                <span className="text-white font-black text-xs">SL</span>
+                <span className="text-[var(--text-primary)] font-black text-xs">SL</span>
               </div>
-              <span className="font-bold text-slate-800">SkillzLink</span>
+              <span className="font-bold text-[var(--text-primary)]">SkillzLink</span>
             </Link>
-            <Link to="/login" className="text-sm font-semibold text-rose-500">Sign In</Link>
+            <Link to="/login" className="text-sm font-semibold text-[var(--accent-color)]">Sign In</Link>
           </div>
 
           <div className="mb-10">
-            <h1 className="text-3xl font-bold text-slate-800 mb-3">Create your account</h1>
-            <p className="text-slate-500">Choose how you want to use SkillzLink</p>
+            <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-3">Create your account</h1>
+            <p className="text-[var(--text-secondary)]">Choose how you want to use SkillzLink</p>
           </div>
 
-          {error && (
-            <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-100 flex items-start gap-3">
-              <i className="lnr lnr-warning text-red-500 text-xl" />
-              <p className="text-red-700 text-sm pt-0.5">{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-8">
+            {error && (
+              <div className="mb-6 p-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3">
+                <i className="lnr lnr-cross-circle text-red-500 mt-0.5" />
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
             
-            {/* Role Selection */}
+            {message && step !== 'pin' && step !== 'details' && (
+              <div className="mb-6 p-3 rounded-xl bg-green-50 border border-green-100 flex items-start gap-3">
+                <i className="lnr lnr-checkmark-circle text-green-500 mt-0.5" />
+                <p className="text-green-700 text-sm font-mono">{message}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {step === "details" && (
+                <>
+                  {/* Account Type Selection */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <label 
                 className={`relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all ${
                   role === "seeker" 
-                    ? "border-rose-500 bg-rose-50 shadow-md shadow-rose-100" 
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                    ? "border-[var(--accent-color)] bg-[var(--bg-secondary)] shadow-sm" 
+                    : "border-[var(--border-color)] bg-white hover:border-slate-300 hover:bg-[var(--bg-secondary)]"
                 }`}
               >
                 <input 
@@ -304,20 +341,20 @@ export function RegisterPage() {
                   onChange={() => setRole("seeker")}
                 />
                 <div className="flex justify-between items-start mb-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${role === "seeker" ? "bg-rose-500 text-white" : "bg-slate-100 text-slate-500"}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${role === "seeker" ? "bg-rose-500 text-[var(--text-primary)]" : "bg-[var(--bg-secondary)] text-[var(--text-secondary)]"}`}>
                     <i className="lnr lnr-user text-xl" />
                   </div>
-                  {role === "seeker" && <i className="lnr lnr-checkmark-circle text-rose-500 text-xl" />}
+                  {role === "seeker" && <i className="lnr lnr-checkmark-circle text-[var(--accent-color)] text-xl" />}
                 </div>
-                <h3 className={`font-bold text-lg mb-1 ${role === "seeker" ? "text-rose-700" : "text-slate-700"}`}>I want to hire</h3>
-                <p className="text-sm text-slate-500">Find professionals for your projects</p>
+                <h3 className={`font-bold text-lg mb-1 ${role === "seeker" ? "text-[var(--accent-color)]" : "text-[var(--text-primary)]"}`}>I want to hire</h3>
+                <p className="text-sm text-[var(--text-secondary)]">Find professionals for your projects</p>
               </label>
 
               <label 
                 className={`relative flex flex-col p-6 rounded-2xl border-2 cursor-pointer transition-all ${
                   role === "provider" 
-                    ? "border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-100" 
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                    ? "border-[var(--accent-color)] bg-[var(--bg-secondary)] shadow-sm" 
+                    : "border-[var(--border-color)] bg-white hover:border-slate-300 hover:bg-[var(--bg-secondary)]"
                 }`}
               >
                 <input 
@@ -329,41 +366,41 @@ export function RegisterPage() {
                   onChange={() => setRole("provider")}
                 />
                 <div className="flex justify-between items-start mb-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${role === "provider" ? "bg-indigo-500 text-white" : "bg-slate-100 text-slate-500"}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${role === "provider" ? "bg-indigo-500 text-[var(--text-primary)]" : "bg-[var(--bg-secondary)] text-[var(--text-secondary)]"}`}>
                     <i className="lnr lnr-briefcase text-xl" />
                   </div>
-                  {role === "provider" && <i className="lnr lnr-checkmark-circle text-indigo-500 text-xl" />}
+                  {role === "provider" && <i className="lnr lnr-checkmark-circle text-[var(--accent-color)] text-xl" />}
                 </div>
-                <h3 className={`font-bold text-lg mb-1 ${role === "provider" ? "text-indigo-700" : "text-slate-700"}`}>I am a professional</h3>
-                <p className="text-sm text-slate-500">Offer your services and get clients</p>
+                <h3 className={`font-bold text-lg mb-1 ${role === "provider" ? "text-[var(--accent-color)]" : "text-[var(--text-primary)]"}`}>I am a professional</h3>
+                <p className="text-sm text-[var(--text-secondary)]">Offer your services and get clients</p>
               </label>
             </div>
 
-            <hr className="border-slate-100" />
+            <hr className="border-[var(--border-color)]" />
 
             {/* Core Details (Both Roles) */}
             <div>
-              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 rounded bg-slate-100 text-slate-500 flex items-center justify-center text-xs">1</span>
+              <h3 className="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 rounded bg-[var(--bg-secondary)] text-[var(--text-secondary)] flex items-center justify-center text-xs">1</span>
                 Basic Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Full Name</label>
+                  <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Full Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
                     placeholder="e.g. Tinashe Moyo"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                    className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">WhatsApp Number</label>
-                  <div className="flex rounded-xl border border-slate-200 overflow-hidden focus-within:border-rose-400 focus-within:ring-4 focus-within:ring-rose-100 transition-all bg-slate-50 focus-within:bg-white">
-                    <div className="flex items-center gap-2 px-3 border-r border-slate-200 bg-slate-100/50">
-                      <span>🇿🇼</span><span className="text-slate-600 font-semibold text-sm">+263</span>
+                  <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">WhatsApp Number</label>
+                  <div className="flex rounded-xl border border-[var(--border-color)] overflow-hidden focus-within:border-rose-400 focus-within:ring-4 focus-within:ring-rose-100 transition-all bg-[var(--bg-secondary)] focus-within:bg-white">
+                    <div className="flex items-center gap-2 px-3 border-r border-[var(--border-color)] bg-[var(--bg-secondary)]/50">
+                      <span>🇿🇼</span><span className="text-[var(--text-secondary)] font-semibold text-sm">+263</span>
                     </div>
                     <input
                       type="tel"
@@ -371,21 +408,21 @@ export function RegisterPage() {
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       required
                       placeholder="71 234 5678"
-                      className="flex-1 px-3 py-3 outline-none bg-transparent text-sm text-slate-800"
+                      className="flex-1 px-3 py-3 outline-none bg-transparent text-sm text-[var(--text-primary)]"
                     />
                   </div>
                 </div>
                 <div className={role === "provider" ? "col-span-1 md:col-span-2" : "col-span-1"}>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">City</label>
+                  <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">City</label>
                   <div className="relative">
                     <select
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-rose-400 focus:ring-4 focus:ring-rose-100 bg-slate-50 focus:bg-white transition-all text-sm appearance-none"
+                      className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm appearance-none"
                     >
                       {zimbabweCities.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
-                    <i className="lnr lnr-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <i className="lnr lnr-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none" />
                   </div>
                 </div>
               </div>
@@ -394,85 +431,85 @@ export function RegisterPage() {
             {/* Provider Only Details */}
             {role === "provider" && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <hr className="border-slate-100 my-8" />
-                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">2</span>
+                <hr className="border-[var(--border-color)] my-8" />
+                <h3 className="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded bg-[var(--bg-secondary)] text-[var(--accent-color)] flex items-center justify-center text-xs">2</span>
                   Professional Details
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">National ID Number</label>
+                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">National ID Number</label>
                     <input
                       type="text"
                       value={identityNumber}
                       onChange={(e) => setIdentityNumber(e.target.value)}
                       required
                       placeholder="For verification purposes"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                      className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Service Category</label>
+                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Service Category</label>
                     <div className="relative">
                       <select
                         value={serviceCategory}
                         onChange={(e) => setServiceCategory(e.target.value)}
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm appearance-none"
+                        className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm appearance-none"
                       >
                         <option value="">Select a category</option>
                         {categories.map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
                       </select>
-                      <i className="lnr lnr-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <i className="lnr lnr-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Street Address</label>
+                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Street Address</label>
                     <input
                       type="text"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       required
                       placeholder="e.g. 123 Samora Machel Ave"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                      className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Working Radius (km)</label>
+                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Working Radius (km)</label>
                     <input
                       type="number"
                       value={serviceRadius}
                       onChange={(e) => setServiceRadius(e.target.value)}
                       required
                       min="1"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                      className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm"
                     />
                   </div>
                   <div className="col-span-1 md:col-span-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Bio / Description</label>
+                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Bio / Description</label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       required
                       placeholder="Tell potential clients about your experience and skills..."
                       rows={3}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 bg-slate-50 focus:bg-white transition-all text-sm"
+                      className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm"
                     />
                   </div>
                 </div>
 
                 {!fieldsLoading && dynamicFields.length > 0 && (
                   <>
-                    <h3 className="font-bold text-slate-800 mb-4 mt-8 flex items-center gap-2">
-                      <span className="w-6 h-6 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">3</span>
+                    <h3 className="font-bold text-[var(--text-primary)] mb-4 mt-8 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded bg-[var(--bg-secondary)] text-[var(--accent-color)] flex items-center justify-center text-xs">3</span>
                       Additional Information
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {dynamicFields.map(field => (
                         <div key={field.id} className={field.type === 'textarea' ? 'col-span-1 md:col-span-2' : ''}>
-                          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                            {field.label} {field.is_required && <span className="text-rose-500">*</span>}
+                          <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+                            {field.label} {field.is_required && <span className="text-[var(--accent-color)]">*</span>}
                           </label>
                           {renderDynamicField(field)}
                         </div>
@@ -482,33 +519,98 @@ export function RegisterPage() {
                 )}
               </div>
             )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-4 rounded-2xl text-white font-bold text-lg shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
-                  role === "seeker"
-                  ? "bg-rose-500 hover:bg-rose-600 shadow-rose-200" 
-                  : "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200"
-                }`}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                  Creating account...
-                </span>
-              ) : (
-                `Create ${role === "seeker" ? "Account" : "Professional Profile"}`
-              )}
-            </button>
             
-            <p className="text-center text-slate-500 text-xs mt-4">
-              By creating an account, you agree to our <a href="#" className="underline hover:text-slate-800">Terms of Service</a> and <a href="#" className="underline hover:text-slate-800">Privacy Policy</a>.
+            {/* Submit */}
+              {step === "details" && (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed mt-8"
+                >
+                  {loading ? "Please wait..." : "Continue"}
+                </button>
+              )}
+                </>
+              )}
+
+              {step === "otp" && (
+                <div className="space-y-5">
+                  <div className="text-center mb-6">
+                    <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">Verify Your Number</h3>
+                    <p className="text-[var(--text-secondary)] text-sm">We sent a code to {phoneNumber}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">Enter OTP Code</label>
+                    <input
+                      type="text"
+                      value={otp}
+                      onChange={e => setOtp(e.target.value)}
+                      placeholder="Enter your 6-digit code"
+                      required
+                      maxLength={8}
+                      className="w-full px-4 py-3.5 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] transition-all text-[var(--text-primary)] text-lg font-mono tracking-widest text-center placeholder:text-sm placeholder:tracking-normal placeholder:font-sans bg-[var(--bg-secondary)] focus:bg-white"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3.5 rounded-xl bg-[#25D366] text-white font-semibold text-sm hover:bg-[#1fb855] transition-colors disabled:opacity-60"
+                  >
+                    {loading ? "Verifying..." : "Verify OTP"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep("details")}
+                    className="w-full py-3 rounded-xl border border-[var(--border-color)] text-[var(--text-secondary)] font-medium text-sm hover:bg-[var(--bg-secondary)] transition-colors"
+                  >
+                    ← Change phone number
+                  </button>
+                </div>
+              )}
+
+              {step === "pin" && (
+                <div className="space-y-5">
+                  <div className="text-center mb-6">
+                    <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">Create a PIN</h3>
+                    <p className="text-[var(--text-secondary)] text-sm">Protect your account with a 4-digit PIN.</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">PIN</label>
+                    <input
+                      type="password"
+                      value={pin}
+                      onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0,4))}
+                      placeholder="Enter 4-digit PIN"
+                      required
+                      className="w-full px-4 py-3.5 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] transition-all text-[var(--text-primary)] text-center text-xl tracking-[0.5em] font-mono bg-[var(--bg-secondary)] focus:bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">Confirm PIN</label>
+                    <input
+                      type="password"
+                      value={confirmPin}
+                      onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0,4))}
+                      placeholder="Confirm 4-digit PIN"
+                      required
+                      className="w-full px-4 py-3.5 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] transition-all text-[var(--text-primary)] text-center text-xl tracking-[0.5em] font-mono bg-[var(--bg-secondary)] focus:bg-white"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60"
+                  >
+                    {loading ? "Registering..." : "Complete Registration"}
+                  </button>
+                </div>
+              )}
+            </form>
+            
+            <p className="text-center text-[var(--text-secondary)] text-xs mt-4">
+              By creating an account, you agree to our <a href="#" className="underline hover:text-[var(--text-primary)]">Terms of Service</a> and <a href="#" className="underline hover:text-[var(--text-primary)]">Privacy Policy</a>.
             </p>
-          </form>
+
 
         </div>
       </div>

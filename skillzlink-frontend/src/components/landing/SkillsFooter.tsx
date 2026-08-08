@@ -57,34 +57,20 @@ export function SkillsFooter() {
   ]
 
   return (
-    <section className="py-20 bg-slate-50 border-t border-slate-200">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+    <section className="bg-white border-t border-gray-200 py-12">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {sections.map((section, index) => (
             <div key={index}>
-              <h3 className="text-xl font-bold text-slate-800 mb-6 relative inline-block">
-                {section.title}
-                <div className="absolute -bottom-2 left-0 w-1/2 h-1 bg-rose-500 rounded-full" />
-              </h3>
-              <ul className="space-y-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">{section.title}</h3>
+              <ul className="space-y-2.5">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
-                    <Link 
-                      to={link.to} 
-                      className="text-slate-600 hover:text-rose-500 hover:translate-x-1 inline-block transition-all"
-                    >
+                    <Link to={link.to} className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                       {link.name}
                     </Link>
                   </li>
                 ))}
-                <li>
-                  <Link 
-                    to="/nearby-professionals" 
-                    className="text-rose-500 font-bold hover:text-rose-600 inline-flex items-center gap-1 mt-2"
-                  >
-                    + View All
-                  </Link>
-                </li>
               </ul>
             </div>
           ))}

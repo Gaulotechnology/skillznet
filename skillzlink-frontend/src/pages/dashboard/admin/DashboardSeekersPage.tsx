@@ -59,20 +59,20 @@ export function DashboardSeekersPage() {
           {user.avatar ? (
             <img src={user.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
+            <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm font-medium text-[var(--text-secondary)]">
               {(user.name || 'S').charAt(0).toUpperCase()}
             </div>
           )}
           <div>
-            <span className="text-sm font-medium text-gray-900">{user.name || '—'}</span>
-            <span className="text-xs text-gray-400 font-normal ml-1.5">#{String(user.id).padStart(6, '0')}</span>
+            <span className="text-sm font-medium text-[var(--text-primary)]">{user.name || '—'}</span>
+            <span className="text-xs text-[var(--text-secondary)] font-normal ml-1.5">#{String(user.id).padStart(6, '0')}</span>
           </div>
         </div>
       ),
       exportValue: (user) => user.name || '',
     },
-    { key: "email", label: "Email", render: (user) => <span className="text-gray-500">{user.email || '—'}</span> },
-    { key: "phone_number", label: "Phone", render: (user) => <span className="text-gray-500">{user.phone_number || '—'}</span> },
+    { key: "email", label: "Email", render: (user) => <span className="text-[var(--text-secondary)]">{user.email || '—'}</span> },
+    { key: "phone_number", label: "Phone", render: (user) => <span className="text-[var(--text-secondary)]">{user.phone_number || '—'}</span> },
     {
       key: "status",
       label: "Status",
@@ -91,7 +91,7 @@ export function DashboardSeekersPage() {
       key: "created_at",
       label: "Created",
       render: (user) => (
-        <span className="text-sm text-gray-500 whitespace-nowrap">
+        <span className="text-sm text-[var(--text-secondary)] whitespace-nowrap">
           {user.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
         </span>
       ),
@@ -104,7 +104,7 @@ export function DashboardSeekersPage() {
       <div className="p-8 relative">
 
         {/* Toast */}
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'} ${toastType === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}>
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'} ${toastType === 'success' ? 'bg-[var(--accent-color)] text-white' : 'bg-red-600 text-white'}`}>
           <i className={`lnr ${toastType === 'success' ? 'lnr-checkmark-circle' : 'lnr-warning'} text-sm`}></i>
           {toastMessage}
         </div>
@@ -114,15 +114,15 @@ export function DashboardSeekersPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteModalOpen(false)} />
             <div className="bg-white rounded-2xl p-8 max-w-sm w-full relative z-10 shadow-xl">
-              <div className="w-14 h-14 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-2xl mx-auto mb-4">
+              <div className="w-14 h-14 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center text-2xl mx-auto mb-4">
                 <i className="lnr lnr-trash"></i>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Delete Seeker?</h3>
-              <p className="text-sm text-gray-500 text-center mb-6">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] text-center mb-2">Delete Seeker?</h3>
+              <p className="text-sm text-[var(--text-secondary)] text-center mb-6">
                 Permanently delete <strong>{userToDelete?.name}</strong>? This cannot be undone.
               </p>
               <div className="flex gap-3">
-                <button onClick={() => setDeleteModalOpen(false)} className="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors">Cancel</button>
+                <button onClick={() => setDeleteModalOpen(false)} className="flex-1 py-2.5 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium text-sm hover:bg-[var(--bg-secondary)] transition-colors">Cancel</button>
                 <button onClick={handleDelete} className="flex-1 py-2.5 rounded-lg bg-red-600 text-white font-medium text-sm hover:bg-red-700 transition-colors">Delete</button>
               </div>
             </div>
@@ -142,10 +142,10 @@ export function DashboardSeekersPage() {
           emptyMessage="No seekers found"
           actions={(user) => (
             <div className="flex items-center justify-end gap-1">
-              <button onClick={() => handleSuspend(user)} title="Suspend Seeker" className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+              <button onClick={() => handleSuspend(user)} title="Suspend Seeker" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors">
                 <i className="lnr lnr-ban text-sm"></i>
               </button>
-              <button onClick={() => openDeleteModal(user)} title="Delete Seeker" className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+              <button onClick={() => openDeleteModal(user)} title="Delete Seeker" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors">
                 <i className="lnr lnr-trash text-sm"></i>
               </button>
             </div>

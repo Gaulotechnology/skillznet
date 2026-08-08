@@ -49,62 +49,68 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
-      <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-[var(--bg-primary)]/95 backdrop-blur-md border-b border-[var(--border-color)]" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-            <span className="text-white font-black text-sm">SL</span>
+        <Link to="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 rounded-lg bg-[var(--accent-color)] flex items-center justify-center group-hover:scale-105 transition-transform">
+            <span className="text-white font-black text-xs">SL</span>
           </div>
-          <span className="font-extrabold text-2xl text-slate-900 tracking-tight">SkillzLink</span>
+          <span className="font-extrabold text-xl text-[var(--text-primary)] tracking-tight">SkillzLink</span>
         </Link>
 
         {/* Desktop Navigation */}
         {!location.pathname.startsWith('/dashboard') && (
-          <nav className="hidden lg:flex items-center gap-8">
-            <Link to="/" className="text-slate-600 font-semibold hover:text-rose-500 transition-colors">
-              Home
-            </Link>
-            <Link to="/nearby-professionals" className="text-slate-600 font-semibold hover:text-rose-500 transition-colors">
-              Find Professionals
-            </Link>
-            <Link to="/how-it-works" className="text-slate-600 font-semibold hover:text-rose-500 transition-colors">
-              How It Works
-            </Link>
-            <Link to="/about" className="text-slate-600 font-semibold hover:text-rose-500 transition-colors">
-              About
-            </Link>
+          <nav className="hidden lg:flex items-center gap-1">
+            {[
+              { to: "/", label: "Home" },
+              { to: "/nearby-professionals", label: "Find Professionals" },
+              { to: "/how-it-works", label: "How It Works" },
+              { to: "/about", label: "About" },
+            ].map(link => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  location.pathname === link.to
+                    ? "bg-[var(--accent-light)] text-[var(--accent-color)]"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
         )}
 
         {/* Auth / User Area */}
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="hidden lg:flex items-center gap-3">
           {loggedIn && user ? (
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
-                  <i className="lnr lnr-user text-slate-400 text-xl" />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-[var(--accent-light)] border border-[var(--border-color)] overflow-hidden flex items-center justify-center shrink-0">
+                  <span className="text-[var(--accent-color)] font-bold text-xs">{user.name?.charAt(0)?.toUpperCase()}</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800 leading-tight">{user.name}</h3>
-                  <span className="text-xs font-semibold text-rose-500 uppercase tracking-wide">{user.role}</span>
+                  <p className="font-semibold text-sm text-[var(--text-primary)] leading-tight">{user.name}</p>
+                  <span className="text-[11px] font-medium text-[var(--accent-color)] uppercase tracking-wide">{user.role}</span>
                 </div>
               </div>
-              <div className="h-8 w-px bg-slate-200" />
-              <Link to={getDashboardLink()} className="text-slate-600 hover:text-slate-900 font-semibold flex items-center gap-2">
-                <i className="lnr lnr-laptop-phone" /> Dashboard
+              <div className="h-7 w-px bg-[var(--border-color)]" />
+              <Link to={getDashboardLink()} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm font-medium flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors">
+                <i className="lnr lnr-laptop-phone text-xs" /> Dashboard
               </Link>
-              <button onClick={handleLogout} className="text-slate-500 hover:text-rose-500 flex items-center gap-2 font-semibold">
-                <i className="lnr lnr-exit" /> Logout
+              <button onClick={handleLogout} className="text-[var(--text-secondary)] hover:text-[var(--accent-color)] text-sm font-medium flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-[var(--accent-light)] transition-colors">
+                <i className="lnr lnr-exit text-xs" /> Logout
               </button>
             </div>
           ) : (
             <>
-              <Link to="/login" className="text-slate-600 font-bold hover:text-slate-900 px-4 py-2 transition-colors">
-                Login
+              <Link to="/login" className="text-[var(--text-secondary)] font-medium text-sm hover:text-[var(--text-primary)] px-4 py-2 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors">
+                Log in
               </Link>
-              <Link to="/register" className="bg-rose-500 text-white font-bold px-6 py-2.5 rounded-xl hover:bg-rose-600 shadow-md shadow-rose-200 hover:-translate-y-0.5 transition-all">
-                Join Now
+              <Link to="/register" className="bg-[var(--accent-color)] text-white font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-[var(--accent-hover)] transition-colors">
+                Sign up
               </Link>
             </>
           )}
@@ -112,60 +118,63 @@ export function Header() {
 
         {/* Mobile Menu Toggle */}
         <button 
-          className="lg:hidden w-12 h-12 flex items-center justify-center rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100 transition-colors"
+          className="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
-          <i className={`lnr ${isMenuOpen ? 'lnr-cross' : 'lnr-menu'} text-2xl`} />
+          <i className={`lnr ${isMenuOpen ? 'lnr-cross' : 'lnr-menu'} text-xl`} />
         </button>
       </div>
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 shadow-2xl py-4 px-6 flex flex-col gap-4">
+        <div className="lg:hidden absolute top-[72px] left-0 w-full bg-[var(--bg-primary)] border-b border-[var(--border-color)] shadow-lg py-4 px-6 flex flex-col gap-3">
           {!location.pathname.startsWith('/dashboard') && (
-            <nav className="flex flex-col gap-4 mb-4 border-b border-slate-100 pb-4">
-              <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-700 hover:text-rose-500">
-                Home
-              </Link>
-              <Link to="/nearby-professionals" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-700 hover:text-rose-500">
-                Find Professionals
-              </Link>
-              <Link to="/how-it-works" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-700 hover:text-rose-500">
-                How It Works
-              </Link>
-              <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-lg font-bold text-slate-700 hover:text-rose-500">
-                About
-              </Link>
+            <nav className="flex flex-col gap-1 mb-3 border-b border-[var(--border-color)] pb-3">
+              {[
+                { to: "/", label: "Home" },
+                { to: "/nearby-professionals", label: "Find Professionals" },
+                { to: "/how-it-works", label: "How It Works" },
+                { to: "/about", label: "About" },
+              ].map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-[var(--text-primary)] font-medium py-2.5 px-3 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
           )}
 
           {loggedIn && user ? (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
-                  <i className="lnr lnr-user text-slate-400 text-xl" />
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3 px-3 py-2">
+                <div className="w-10 h-10 rounded-full bg-[var(--accent-light)] border border-[var(--border-color)] flex items-center justify-center">
+                  <span className="text-[var(--accent-color)] font-bold text-sm">{user.name?.charAt(0)?.toUpperCase()}</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800">{user.name}</h3>
-                  <span className="text-sm font-semibold text-rose-500">{user.role}</span>
+                  <p className="font-semibold text-[var(--text-primary)]">{user.name}</p>
+                  <span className="text-xs font-medium text-[var(--accent-color)]">{user.role}</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                <Link to={getDashboardLink()} onClick={() => setIsMenuOpen(false)} className="bg-slate-50 text-center py-3 rounded-xl font-bold text-slate-700 hover:bg-slate-100 border border-slate-200">
+              <div className="grid grid-cols-2 gap-2">
+                <Link to={getDashboardLink()} onClick={() => setIsMenuOpen(false)} className="bg-[var(--bg-secondary)] text-center py-2.5 rounded-lg font-medium text-[var(--text-primary)] hover:bg-[var(--border-color)] border border-[var(--border-color)] text-sm">
                   Dashboard
                 </Link>
-                <button onClick={(e) => { handleLogout(e); setIsMenuOpen(false); }} className="bg-rose-50 text-center py-3 rounded-xl font-bold text-rose-600 hover:bg-rose-100 border border-rose-100">
+                <button onClick={(e) => { handleLogout(e); setIsMenuOpen(false); }} className="bg-[var(--accent-light)] text-center py-2.5 rounded-lg font-medium text-[var(--accent-color)] hover:bg-[var(--accent-color)] hover:text-white border border-[var(--accent-color)]/20 text-sm transition-colors">
                   Logout
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
-              <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full text-center py-3 rounded-xl border border-slate-200 text-slate-700 font-bold hover:bg-slate-50">
-                Login
+            <div className="flex flex-col gap-2">
+              <Link to="/login" onClick={() => setIsMenuOpen(false)} className="w-full text-center py-2.5 rounded-lg border border-[var(--border-color)] text-[var(--text-primary)] font-medium hover:bg-[var(--bg-secondary)] text-sm">
+                Log in
               </Link>
-              <Link to="/register" onClick={() => setIsMenuOpen(false)} className="w-full text-center py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 shadow-lg shadow-rose-200">
-                Join Now
+              <Link to="/register" onClick={() => setIsMenuOpen(false)} className="w-full text-center py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-semibold hover:bg-[var(--accent-hover)] text-sm transition-colors">
+                Sign up
               </Link>
             </div>
           )}

@@ -46,39 +46,39 @@ export function DashboardSaveItemsPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 md:p-8 max-w-6xl mx-auto">
+      <div className="p-6 md:p-8 max-w-6xl mx-auto font-['Inter',sans-serif]">
         
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Saved Professionals</h2>
-            <p className="text-slate-500 mt-1 font-medium">Keep track of your favorite service providers.</p>
+            <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tight">Saved Professionals</h2>
+            <p className="text-[var(--text-secondary)] mt-1 font-medium">Keep track of your favorite service providers.</p>
           </div>
           <Link 
             to="/nearby-professionals"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent-light)] text-[var(--accent-color)] font-bold hover:bg-[var(--accent-color)] hover:text-white transition-colors"
           >
             <i className="lnr lnr-plus-circle"></i> Find More
           </Link>
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[var(--border-color)] overflow-hidden">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mb-4" />
-              <p className="text-slate-500 font-medium">Loading saved professionals...</p>
+              <div className="w-12 h-12 border-4 border-[var(--border-color)] border-t-[var(--accent-color)] rounded-full animate-spin mb-4" />
+              <p className="text-[var(--text-secondary)] font-medium">Loading saved professionals...</p>
             </div>
           ) : saved.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
-              <div className="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 text-5xl mb-6">
+              <div className="w-24 h-24 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] text-5xl mb-6">
                 <i className="lnr lnr-heart"></i>
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">No saved professionals yet</h3>
-              <p className="text-slate-500 font-medium mb-8 max-w-md">
+              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">No saved professionals yet</h3>
+              <p className="text-[var(--text-secondary)] font-medium mb-8 max-w-md">
                 Browse professionals and click the heart icon to save them here for quick access later.
               </p>
               <Link 
                 to="/nearby-professionals" 
-                className="px-8 py-3.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
+                className="px-5 py-2.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold hover:bg-[var(--accent-hover)] transition-all active:scale-95"
               >
                 Browse Professionals
               </Link>
@@ -87,14 +87,14 @@ export function DashboardSaveItemsPage() {
             <div className="p-6 md:p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {saved.map((pro) => (
-                  <div key={pro.id} className="group rounded-2xl border border-slate-200 bg-white hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-100/50 transition-all p-6 relative overflow-hidden flex flex-col h-full">
+                  <div key={pro.id} className="group rounded-2xl border border-[var(--border-color)] bg-white hover:border-[var(--accent-color)]/30 hover:shadow-lg transition-all p-6 relative overflow-hidden flex flex-col h-full">
                     
                     <div className="flex gap-5 mb-5">
-                      <div className="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                      <div className="w-16 h-16 rounded-2xl bg-[var(--bg-secondary)] overflow-hidden shrink-0 border border-[var(--border-color)]">
                         {pro.image ? (
                           <img src={pro.image} alt={pro.name} className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-400 text-2xl bg-slate-50">
+                          <div className="w-full h-full flex items-center justify-center text-[var(--text-secondary)] text-2xl bg-[var(--bg-secondary)]">
                             <i className="lnr lnr-user"></i>
                           </div>
                         )}
@@ -103,8 +103,8 @@ export function DashboardSaveItemsPage() {
                       <div className="flex-1">
                         <div className="flex justify-between items-start gap-4">
                           <div>
-                            <h4 className="text-lg font-bold text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1">{pro.name}</h4>
-                            <p className="text-sm font-medium text-slate-500 mb-1">{pro.service_category}</p>
+                            <h4 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors line-clamp-1">{pro.name}</h4>
+                            <p className="text-sm font-medium text-[var(--text-secondary)] mb-1">{pro.service_category}</p>
                             {pro.rating > 0 && (
                               <div className="flex items-center gap-1.5 text-amber-500 font-bold text-sm">
                                 <i className="fa fa-star"></i>
@@ -115,7 +115,7 @@ export function DashboardSaveItemsPage() {
                           
                           <button
                             onClick={() => removeSaved(pro.id)}
-                            className="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors flex items-center justify-center shrink-0"
+                            className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-red-50 hover:text-red-500 transition-colors flex items-center justify-center shrink-0"
                             title="Remove from saved"
                           >
                             <i className="lnr lnr-trash font-bold"></i>
@@ -126,7 +126,7 @@ export function DashboardSaveItemsPage() {
                     
                     <div className="flex flex-wrap gap-2 mb-4">
                       {pro.premium_badge && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black uppercase tracking-wider">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 border border-amber-100 text-[10px] font-black uppercase tracking-wider">
                           <i className="fa fa-crown"></i> Premium
                         </span>
                       )}
@@ -137,19 +137,19 @@ export function DashboardSaveItemsPage() {
                       )}
                     </div>
 
-                    <p className="text-slate-600 text-sm leading-relaxed mb-6 line-clamp-2 flex-1">
+                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-6 line-clamp-2 flex-1">
                       {pro.description || "No description provided."}
                     </p>
                     
-                    <div className="flex gap-3 mt-auto pt-5 border-t border-slate-100">
+                    <div className="flex gap-3 mt-auto pt-5 border-t border-[var(--border-color)]">
                       <Link 
                         to={`/professional-profile/${pro.id}`} 
-                        className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm text-center hover:bg-slate-50 hover:text-slate-800 transition-colors"
+                        className="flex-1 py-2.5 rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] font-bold text-sm text-center hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] transition-colors"
                       >
                         View Profile
                       </Link>
                       <button
-                        className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200 active:scale-95 disabled:opacity-70 flex justify-center items-center gap-2"
+                        className="flex-1 py-2.5 rounded-xl bg-[var(--accent-color)] text-white font-bold text-sm hover:bg-[var(--accent-hover)] transition-colors active:scale-95 disabled:opacity-70 flex justify-center items-center gap-2"
                         onClick={() => handleRevealContact(pro.id)}
                         disabled={revealing === pro.id}
                       >

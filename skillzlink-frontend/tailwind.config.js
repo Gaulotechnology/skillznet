@@ -4,6 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
+        accent: "var(--accent-color)",
+        "accent-hover": "var(--accent-hover)",
+        "accent-light": "var(--accent-light)",
         primary: {
           50: "#eff6ff",
           100: "#dbeafe",

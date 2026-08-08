@@ -51,28 +51,28 @@ export function DashboardAgentsPage() {
       key: "name", label: "Agent", render: (row) => (
         <div className="flex items-center gap-3">
           {row.avatar ? <img src={row.avatar} alt="" className="w-8 h-8 rounded-full object-cover" /> : (
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">{(row.name || "A").charAt(0)}</div>
+            <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm font-medium text-[var(--text-secondary)]">{(row.name || "A").charAt(0)}</div>
           )}
-          <span className="text-sm font-medium text-gray-900">{row.name}</span>
+          <span className="text-sm font-medium text-[var(--text-primary)]">{row.name}</span>
         </div>
       ),
     },
-    { key: "email", label: "Email", render: (row) => <span className="text-gray-500">{row.email}</span> },
-    { key: "phone", label: "Phone", render: (row) => <span className="text-gray-500">{row.phone}</span> },
+    { key: "email", label: "Email", render: (row) => <span className="text-[var(--text-secondary)]">{row.email}</span> },
+    { key: "phone", label: "Phone", render: (row) => <span className="text-[var(--text-secondary)]">{row.phone}</span> },
     {
       key: "status", label: "Status", render: (row) => (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.status === "active" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.status === "active" ? "bg-green-50 text-green-700" : "bg-[var(--bg-secondary)] text-[var(--text-secondary)]"}`}>
           {row.status}
         </span>
       ),
     },
-    { key: "assignedSeekers", label: "Assigned Seekers", render: (row) => <span className="text-gray-700">{row.assignedSeekers}</span> },
-    { key: "createdAt", label: "Created", render: (row) => <span className="text-gray-500">{row.createdAt}</span> },
+    { key: "assignedSeekers", label: "Assigned Seekers", render: (row) => <span className="text-[var(--text-primary)]">{row.assignedSeekers}</span> },
+    { key: "createdAt", label: "Created", render: (row) => <span className="text-[var(--text-secondary)]">{row.createdAt}</span> },
   ];
 
   return (
     <DashboardLayout>
-      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-gray-900 text-white" : "bg-red-600 text-white"}`}>
+      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-[var(--accent-color)] text-white" : "bg-red-600 text-white"}`}>
         <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
         {toastMessage}
       </div>
@@ -84,15 +84,15 @@ export function DashboardAgentsPage() {
         subtitle="Manage agents assigned to seekers"
         exportFileName="agents"
         headerActions={
-          <button className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors" onClick={() => toast("Add Agent modal coming soon.")}>
+          <button className="px-4 py-2 bg-[var(--accent-color)] text-white text-sm font-medium rounded-xl hover:bg-[var(--accent-hover)] transition-colors" onClick={() => toast("Add Agent modal coming soon.")}>
             Add Agent
           </button>
         }
         actions={(row) => (
           <div className="flex items-center gap-1">
-            <button onClick={() => toast("Edit modal coming soon.")} className="p-1.5 text-gray-400 hover:text-gray-700 rounded"><i className="lnr lnr-pencil text-sm"></i></button>
-            <button onClick={() => handleSuspend(row)} className="p-1.5 text-gray-400 hover:text-orange-600 rounded"><i className="lnr lnr-power-switch text-sm"></i></button>
-            <button onClick={() => handleDelete(row)} className="p-1.5 text-gray-400 hover:text-red-600 rounded"><i className="lnr lnr-trash2 text-sm"></i></button>
+            <button onClick={() => toast("Edit modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded"><i className="lnr lnr-pencil text-sm"></i></button>
+            <button onClick={() => handleSuspend(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-orange-600 rounded"><i className="lnr lnr-power-switch text-sm"></i></button>
+            <button onClick={() => handleDelete(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-red-600 rounded"><i className="lnr lnr-trash2 text-sm"></i></button>
           </div>
         )}
       />

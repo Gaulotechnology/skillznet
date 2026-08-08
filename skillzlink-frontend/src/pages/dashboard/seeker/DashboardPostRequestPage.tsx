@@ -36,7 +36,6 @@ export function DashboardPostRequestPage() {
   const [loading, setLoading] = useState(false);
   const [revealingId, setRevealingId] = useState<number | null>(null);
 
-  // Toast State
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error" | "info">("success");
@@ -56,7 +55,6 @@ export function DashboardPostRequestPage() {
     const coords = zimbabweCities[city] || { lat: -17.8292, lng: 31.0522 };
 
     try {
-      // Try authenticated seeker search first
       try {
         const data = await seekerApi.search(service, coords.lat, coords.lng, parseInt(radius));
         const mappedResults: LocalSearchResult[] = (data.results || []).map(r => ({
@@ -65,7 +63,6 @@ export function DashboardPostRequestPage() {
         }));
         setResults(mappedResults);
       } catch {
-        // Fall back to public listing if not logged in as seeker
         const data = await publicApi.listProviders({ category: service });
         const mappedResults: LocalSearchResult[] = data.data.slice(0, 10).map(r => ({
           ...r,
@@ -99,7 +96,6 @@ export function DashboardPostRequestPage() {
     try {
       const res = await seekerApi.revealContact(id);
       if (res.contact_available && res.contact_number) {
-        // Save to contacted history
         const history = JSON.parse(localStorage.getItem("contacted_professionals") || "[]");
         const pro = results.find(r => r.id === id);
         if (pro && !history.find((h: any) => h.id === id)) {
@@ -124,13 +120,13 @@ export function DashboardPostRequestPage() {
 
   return (
     <SeekerLayout>
-      <div className="p-6 md:p-8 max-w-7xl mx-auto relative">
+      <div className="p-6 md:p-8 max-w-7xl mx-auto relative font-['Inter',sans-serif]">
         
         {/* Toast Notification */}
-        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-2xl transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100 visible' : '-translate-y-10 opacity-0 invisible'}`}>
+        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-[var(--text-primary)] text-white px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-2xl transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100 visible' : '-translate-y-10 opacity-0 invisible'}`}>
           <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
             toastType === 'success' ? 'bg-emerald-500' : 
-            toastType === 'error' ? 'bg-rose-500' : 'bg-blue-500'
+            toastType === 'error' ? 'bg-red-500' : 'bg-blue-500'
           }`}>
             <i className={`lnr ${
               toastType === 'success' ? 'lnr-checkmark-circle' : 
@@ -141,17 +137,17 @@ export function DashboardPostRequestPage() {
         </div>
 
         <div className="mb-8">
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Find a Professional</h2>
-          <p className="text-slate-500 mt-1 font-medium">Search by service type and location to find the right professional near you.</p>
+          <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tight">Find a Professional</h2>
+          <p className="text-[var(--text-secondary)] mt-1 font-medium">Search by service type and location to find the right professional near you.</p>
         </div>
 
         {/* Search Form */}
-        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-8">
+        <div className="bg-white rounded-2xl p-6 md:p-8 border border-[var(--border-color)] mb-8">
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Service Type *</label>
+              <label className="block text-sm font-bold text-[var(--text-primary)] mb-1.5">Service Type *</label>
               <div className="relative">
-                <i className="lnr lnr-briefcase absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <i className="lnr lnr-briefcase absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
                 <input
                   type="text"
                   placeholder="e.g. Plumber, Electrician, Cleaner..."
@@ -159,19 +155,19 @@ export function DashboardPostRequestPage() {
                   onChange={(e) => setService(e.target.value)}
                   required
                   disabled={loading}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl pl-11 pr-4 py-3 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
+                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-xl pl-11 pr-4 py-3 outline-none focus:bg-white focus:border-[var(--accent-color)] focus:ring-4 focus:ring-[var(--accent-light)] transition-all font-medium placeholder:text-[var(--text-secondary)]"
                 />
               </div>
             </div>
             <div className="w-full md:w-48">
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">City</label>
+              <label className="block text-sm font-bold text-[var(--text-primary)] mb-1.5">City</label>
               <div className="relative">
-                <i className="lnr lnr-map-marker absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <i className="lnr lnr-map-marker absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
                 <select 
                   value={city} 
                   onChange={(e) => setCity(e.target.value)}
                   disabled={loading}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl pl-11 pr-4 py-3 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all font-medium appearance-none"
+                  className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-xl pl-11 pr-4 py-3 outline-none focus:bg-white focus:border-[var(--accent-color)] focus:ring-4 focus:ring-[var(--accent-light)] transition-all font-medium appearance-none"
                   style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1rem' }}
                 >
                   {Object.keys(zimbabweCities).map((c) => (
@@ -181,12 +177,12 @@ export function DashboardPostRequestPage() {
               </div>
             </div>
             <div className="w-full md:w-32">
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Radius (km)</label>
+              <label className="block text-sm font-bold text-[var(--text-primary)] mb-1.5">Radius (km)</label>
               <select 
                 value={radius} 
                 onChange={(e) => setRadius(e.target.value)}
                 disabled={loading}
-                className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all font-medium appearance-none"
+                className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-[var(--accent-color)] focus:ring-4 focus:ring-[var(--accent-light)] transition-all font-medium appearance-none"
                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1rem' }}
               >
                 {["5", "10", "25", "50", "100"].map((r) => (
@@ -198,7 +194,7 @@ export function DashboardPostRequestPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full md:w-auto px-8 py-3 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 shadow-lg shadow-slate-200 transition-all active:scale-95 disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center gap-2"
+                className="w-full md:w-auto px-8 py-3 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm hover:bg-[var(--accent-hover)] transition-all active:scale-95 disabled:opacity-70 disabled:active:scale-100 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <><i className="lnr lnr-sync animate-spin"></i> Searching...</>
@@ -214,37 +210,37 @@ export function DashboardPostRequestPage() {
         {searched && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-800">
+              <h3 className="text-xl font-bold text-[var(--text-primary)]">
                 {results.length > 0
                   ? `${results.length} Professional${results.length !== 1 ? "s" : ""} Found`
                   : "No Professionals Found"}
               </h3>
               {results.length > 0 && (
-                <Link to="/nearby-professionals" className="text-sm font-bold text-indigo-600 hover:text-indigo-700">
+                <Link to="/nearby-professionals" className="text-sm font-bold text-[var(--accent-color)] hover:text-[var(--accent-hover)]">
                   Browse All Directory
                 </Link>
               )}
             </div>
             
             {results.length === 0 ? (
-              <div className="py-20 text-center bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                <div className="w-20 h-20 rounded-full bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center mx-auto mb-6 text-slate-300">
+              <div className="py-20 text-center bg-white rounded-2xl border border-[var(--border-color)]">
+                <div className="w-20 h-20 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-color)] flex items-center justify-center mx-auto mb-6 text-[var(--text-secondary)]">
                   <i className="lnr lnr-magnifier text-3xl"></i>
                 </div>
-                <h4 className="text-xl font-bold text-slate-700 mb-2">No professionals found</h4>
-                <p className="text-slate-500 max-w-md mx-auto">We couldn't find any professionals for <strong>{service}</strong> in <strong>{city}</strong> within {radius}km. Try expanding your search radius or using different keywords.</p>
+                <h4 className="text-xl font-bold text-[var(--text-primary)] mb-2">No professionals found</h4>
+                <p className="text-[var(--text-secondary)] max-w-md mx-auto">We couldn't find any professionals for <strong>{service}</strong> in <strong>{city}</strong> within {radius}km. Try expanding your search radius or using different keywords.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {results.map((pro) => (
-                  <div key={pro.id} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-slate-200 hover:shadow-md transition-all flex flex-col">
+                  <div key={pro.id} className="bg-white rounded-2xl p-6 border border-[var(--border-color)] hover:border-[var(--accent-color)]/30 hover:shadow-md transition-all flex flex-col">
                     <div className="flex items-start gap-4 mb-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shrink-0 shadow-sm text-white font-black text-xl">
+                      <div className="w-14 h-14 rounded-2xl bg-[var(--accent-light)] flex items-center justify-center shrink-0 text-[var(--accent-color)] font-black text-xl">
                         {((pro.name || pro.provider_name) || "?")[0].toUpperCase()}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-slate-900 text-lg mb-0.5">{pro.name || pro.provider_name}</h4>
-                        <div className="text-sm font-bold text-indigo-600 mb-2 flex items-center gap-1.5">
+                        <h4 className="font-bold text-[var(--text-primary)] text-lg mb-0.5">{pro.name || pro.provider_name}</h4>
+                        <div className="text-sm font-bold text-[var(--accent-color)] mb-2 flex items-center gap-1.5">
                           <i className="lnr lnr-briefcase"></i> {pro.service_category}
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -266,12 +262,12 @@ export function DashboardPostRequestPage() {
                       <div className="flex items-center gap-3 mb-4 text-sm font-medium">
                         <div className="flex items-center gap-1 text-amber-400">
                           <i className="lnr lnr-star font-bold"></i>
-                          <span className="text-slate-700">{pro.rating.toFixed(1)} Rating</span>
+                          <span className="text-[var(--text-primary)]">{pro.rating.toFixed(1)} Rating</span>
                         </div>
                         {pro.distance !== undefined && (
                           <>
-                            <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                            <div className="text-blue-500 flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-[var(--border-color)]"></span>
+                            <div className="text-[var(--accent-color)] flex items-center gap-1">
                               <i className="lnr lnr-map-marker"></i> {pro.distance} km away
                             </div>
                           </>
@@ -280,28 +276,28 @@ export function DashboardPostRequestPage() {
                     )}
                     
                     {pro.description && (
-                      <p className="text-sm text-slate-500 line-clamp-2 mb-4 leading-relaxed">
+                      <p className="text-sm text-[var(--text-secondary)] line-clamp-2 mb-4 leading-relaxed">
                         {pro.description}
                       </p>
                     )}
                     
                     {pro.contact_number_masked && (
-                      <div className="px-4 py-3 bg-slate-50 rounded-xl mb-4 text-sm font-mono text-slate-700 flex items-center gap-2 border border-slate-100">
-                        <i className="lnr lnr-phone text-slate-400"></i> {pro.contact_number_masked}
+                      <div className="px-4 py-3 bg-[var(--bg-secondary)] rounded-xl mb-4 text-sm font-mono text-[var(--text-primary)] flex items-center gap-2 border border-[var(--border-color)]">
+                        <i className="lnr lnr-phone text-[var(--text-secondary)]"></i> {pro.contact_number_masked}
                       </div>
                     )}
                     
-                    <div className="mt-auto pt-4 border-t border-slate-50 flex gap-2 flex-wrap sm:flex-nowrap">
+                    <div className="mt-auto pt-4 border-t border-[var(--border-color)] flex gap-2 flex-wrap sm:flex-nowrap">
                       <Link 
                         to={`/professional-profile/${pro.id}`} 
-                        className="flex-1 min-w-[120px] py-2.5 px-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs text-center hover:bg-slate-200 transition-colors"
+                        className="flex-1 min-w-[120px] py-2.5 px-4 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold text-xs text-center hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] transition-colors"
                       >
                         View Profile
                       </Link>
                       <button
                         onClick={() => handleRevealContact(pro.id)}
                         disabled={revealingId === pro.id}
-                        className="flex-1 min-w-[120px] py-2.5 px-4 rounded-xl bg-emerald-500 text-white font-bold text-xs text-center hover:bg-emerald-600 shadow-sm hover:shadow-emerald-200 transition-all disabled:opacity-70 disabled:hover:shadow-sm"
+                        className="flex-1 min-w-[120px] py-2.5 px-4 rounded-xl bg-emerald-500 text-white font-bold text-xs text-center hover:bg-emerald-600 transition-all disabled:opacity-70"
                       >
                         {revealingId === pro.id ? (
                           <><i className="lnr lnr-sync animate-spin"></i> Loading</>
@@ -311,7 +307,7 @@ export function DashboardPostRequestPage() {
                       </button>
                       <button
                         onClick={() => handleSave(pro)}
-                        className="w-10 shrink-0 py-2.5 rounded-xl border border-slate-200 text-rose-500 flex items-center justify-center hover:bg-rose-50 hover:border-rose-200 transition-colors"
+                        className="w-10 shrink-0 py-2.5 rounded-xl border border-[var(--border-color)] text-[var(--accent-color)] flex items-center justify-center hover:bg-[var(--accent-light)] transition-colors"
                         title="Save Professional"
                       >
                         <i className="lnr lnr-heart font-bold"></i>
@@ -326,12 +322,12 @@ export function DashboardPostRequestPage() {
 
         {!searched && !loading && (
           <div className="py-24 text-center">
-            <div className="w-24 h-24 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-6 shadow-sm border border-indigo-100">
+            <div className="w-24 h-24 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center mx-auto mb-6 border border-[var(--border-color)]">
               <i className="lnr lnr-magnifier text-4xl"></i>
             </div>
-            <h3 className="text-2xl font-bold text-slate-800 mb-2">Ready to find a pro?</h3>
-            <p className="text-slate-500 mb-6">Enter a service type and city above to find highly rated professionals near you.</p>
-            <Link to="/nearby-professionals" className="inline-flex items-center gap-2 text-indigo-600 font-bold hover:text-indigo-700 bg-white px-5 py-2.5 rounded-xl border border-indigo-100 shadow-sm hover:shadow-md transition-all">
+            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Ready to find a pro?</h3>
+            <p className="text-[var(--text-secondary)] mb-6">Enter a service type and city above to find highly rated professionals near you.</p>
+            <Link to="/nearby-professionals" className="inline-flex items-center gap-2 text-[var(--accent-color)] font-bold hover:text-[var(--accent-hover)] bg-white px-5 py-2.5 rounded-xl border border-[var(--border-color)] hover:shadow-md transition-all">
               Browse Directory <i className="lnr lnr-arrow-right"></i>
             </Link>
           </div>

@@ -26,14 +26,11 @@ const MOCK_SMS = [
 export function DashboardSmsLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState<"success" | "error">("success");
+  const [showToast] = useState(false);
+  const [toastMessage] = useState("");
+  const [toastType] = useState<"success" | "error">("success");
 
-  const toast = (msg: string, type: "success" | "error" = "success") => {
-    setToastMessage(msg); setToastType(type); setShowToast(true);
-    setTimeout(() => setShowToast(false), 3500);
-  };
+
 
   useEffect(() => { setTimeout(() => { setLogs(MOCK_SMS); setLoading(false); }, 500); }, []);
 
@@ -41,48 +38,48 @@ export function DashboardSmsLogsPage() {
   const failed = logs.filter(l => l.status === "Failed").length;
   const monthlyCost = logs.reduce((s, l) => s + l.cost, 0);
 
-  const typeColor: Record<string, string> = { OTP: "bg-purple-50 text-purple-700", Notification: "bg-blue-50 text-blue-700", Marketing: "bg-pink-50 text-pink-700" };
+  const typeColor: Record<string, string> = { OTP: "bg-[var(--accent-light)] text-[var(--accent-color)]", Notification: "bg-[var(--accent-light)] text-blue-700", Marketing: "bg-[var(--accent-light)] text-[var(--accent-color)]" };
   const statusColor: Record<string, string> = { Delivered: "bg-green-50 text-green-700", Failed: "bg-red-50 text-red-600", Pending: "bg-yellow-50 text-yellow-700" };
 
   const columns: Column<any>[] = [
-    { key: "id", label: "ID", render: (row) => <span className="text-xs text-gray-500">#{row.id}</span> },
-    { key: "recipient", label: "Recipient", render: (row) => <span className="text-sm font-mono text-gray-700">{row.recipient}</span> },
+    { key: "id", label: "ID", render: (row) => <span className="text-xs text-[var(--text-secondary)]">#{row.id}</span> },
+    { key: "recipient", label: "Recipient", render: (row) => <span className="text-sm font-mono text-[var(--text-primary)]">{row.recipient}</span> },
     { key: "type", label: "Type", render: (row) => <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${typeColor[row.type] || ""}`}>{row.type}</span> },
-    { key: "message", label: "Message", render: (row) => <span className="text-gray-500 text-xs truncate max-w-[200px] block">{row.message.length > 50 ? row.message.slice(0, 50) + "…" : row.message}</span> },
-    { key: "provider", label: "Provider", render: (row) => <span className="text-gray-500 text-xs">{row.provider}</span> },
+    { key: "message", label: "Message", render: (row) => <span className="text-[var(--text-secondary)] text-xs truncate max-w-[200px] block">{row.message.length > 50 ? row.message.slice(0, 50) + "…" : row.message}</span> },
+    { key: "provider", label: "Provider", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.provider}</span> },
     { key: "status", label: "Status", render: (row) => <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${statusColor[row.status] || ""}`}>{row.status}</span> },
-    { key: "cost", label: "Cost", render: (row) => <span className="text-gray-700">${row.cost.toFixed(2)}</span> },
-    { key: "sentAt", label: "Sent At", render: (row) => <span className="text-gray-500 text-xs">{row.sentAt}</span> },
+    { key: "cost", label: "Cost", render: (row) => <span className="text-[var(--text-primary)]">${row.cost.toFixed(2)}</span> },
+    { key: "sentAt", label: "Sent At", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.sentAt}</span> },
   ];
 
   return (
     <DashboardLayout>
-      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-gray-900 text-white" : "bg-red-600 text-white"}`}>
+      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-[var(--accent-color)] text-white" : "bg-red-600 text-white"}`}>
         <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
         {toastMessage}
       </div>
 
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">SMS Logs</h1>
-        <p className="text-sm text-gray-500 mt-1">All SMS messages sent from the platform</p>
+        <h1 className="text-xl font-semibold text-[var(--text-primary)]">SMS Logs</h1>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">All SMS messages sent from the platform</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sent</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">{logs.length}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Total Sent</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{logs.length}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Delivered Rate</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">{logs.length ? Math.round((delivered / logs.length) * 100) : 0}%</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Delivered Rate</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{logs.length ? Math.round((delivered / logs.length) * 100) : 0}%</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Failed</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">{failed}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Failed</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{failed}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Cost</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">${monthlyCost.toFixed(2)}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Monthly Cost</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">${monthlyCost.toFixed(2)}</p>
         </div>
       </div>
 

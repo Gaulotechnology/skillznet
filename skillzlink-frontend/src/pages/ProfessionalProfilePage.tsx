@@ -309,7 +309,7 @@ export function ProfessionalProfilePage() {
             {/* Reviews Section */}
             <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
               <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                <i className="lnr lnr-bubble text-rose-500" /> Client Reviews
+                <i className="lnr lnr-bubble text-rose-500" /> Seeker Reviews
               </h2>
               {reviewsList.length > 0 ? (
                 <div className="space-y-6">

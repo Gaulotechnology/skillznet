@@ -33,13 +33,11 @@ export function DashboardRolesPage() {
 
   const fetchData = async () => {
     try {
-      const [permRes, rolesRes] = await Promise.all([
-        fetchJson<any>(apiBaseUrl() + '/admin/permissions'),
-        adminApi.getRoles(),
-      ]);
-      setPermissions(permRes.permissions);
+      const permRes = await fetchJson<any>(apiBaseUrl() + '/admin/permissions');
+      setPermissions(permRes.permissions || []);
       setRolePermissions(permRes.role_permissions || {});
-      setRoles(rolesRes.roles || []);
+      // Dynamic roles are not implemented in the backend, fallback to default roles
+      setRoles([]);
     } catch (err) {
       showToast("Failed to load data", "error");
     } finally {
@@ -127,33 +125,33 @@ export function DashboardRolesPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-12 bg-[var(--bg-primary)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-[var(--border-color)]">
           <div>
-            <h2 className="text-3xl font-bold text-slate-800">Roles & Permissions</h2>
-            <p className="text-slate-500 mt-1">Control access rights across the platform.</p>
+            <h2 className="text-3xl font-semibold text-[var(--text-primary)] tracking-tight">Roles & Permissions</h2>
+            <p className="text-[var(--text-secondary)] mt-2 text-sm font-medium">Control access rights across the platform</p>
           </div>
-          <button onClick={openCreateRole} className="px-6 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-xl transition-colors text-sm shadow-sm">
-            + Create Role
+          <button onClick={openCreateRole} className="px-6 py-3 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-xl transition-colors text-sm">
+            Create Role
           </button>
         </div>
 
         {/* Roles List */}
         {roles.length > 0 && (
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 bg-slate-50">
-              <h3 className="text-lg font-bold text-slate-800">Managed Roles</h3>
+          <div className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] overflow-hidden">
+            <div className="px-8 py-5 border-b border-[var(--border-color)]">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)]">Managed Roles</h3>
             </div>
-            <div className="p-4 space-y-2">
+            <div className="p-4">
               {roles.map((role: any) => (
-                <div key={role.id} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors">
+                <div key={role.id} className="flex items-center justify-between p-4 rounded-xl hover:bg-[var(--bg-secondary)] transition-colors">
                   <div>
-                    <span className="font-bold text-slate-800 capitalize">{role.name}</span>
-                    {role.description && <span className="text-sm text-slate-500 ml-3">{role.description}</span>}
+                    <span className="font-semibold text-[var(--text-primary)] capitalize">{role.name}</span>
+                    {role.description && <span className="text-sm text-[var(--text-secondary)] ml-3">{role.description}</span>}
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => openEditRole(role)} className="px-3 py-1.5 text-xs font-bold text-fuchsia-600 bg-fuchsia-50 rounded-lg hover:bg-fuchsia-100">Edit</button>
-                    <button onClick={() => handleDeleteRole(role.id)} className="px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 rounded-lg hover:bg-rose-100">Delete</button>
+                  <div className="flex gap-3">
+                    <button onClick={() => openEditRole(role)} className="text-sm font-medium text-[var(--text-primary)] underline hover:text-[var(--accent-color)]">Edit</button>
+                    <button onClick={() => handleDeleteRole(role.id)} className="text-sm font-medium text-rose-600 underline hover:text-rose-700">Delete</button>
                   </div>
                 </div>
               ))}
@@ -163,42 +161,42 @@ export function DashboardRolesPage() {
 
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="w-12 h-12 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-12 h-12 border-4 border-[var(--accent-color)] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-10">
             {roleNames.map(role => (
-              <div key={role} className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-                <div className="bg-slate-50 px-6 py-4 flex items-center justify-between border-b border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center">
-                      <i className="lnr lnr-shield text-xl"></i>
+              <div key={role} className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] overflow-hidden">
+                <div className="px-8 py-5 flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] flex items-center justify-center">
+                      <i className="lnr lnr-user text-lg"></i>
                     </div>
-                    <h3 className="text-lg font-bold text-slate-800 capitalize">{role}</h3>
+                    <h3 className="text-xl font-semibold text-[var(--text-primary)] capitalize">{role}</h3>
                   </div>
                   <button 
                     onClick={() => handleSave(role)}
                     disabled={saving}
-                    className="px-6 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-xl transition-colors text-sm shadow-sm"
+                    className="px-6 py-2.5 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-lg transition-colors text-sm"
                   >
-                    Save Changes
+                    Save
                   </button>
                 </div>
                 
-                <div className="p-6 space-y-8">
+                <div className="p-8 space-y-10">
                   {Object.entries(groupedPermissions).map(([category, perms]) => (
                     <div key={category}>
-                      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">
+                      <h4 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider mb-6 pb-2 border-b border-[var(--border-color)]">
                         {category}
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-4">
                         {perms.map(perm => {
                           const isChecked = (rolePermissions[role] || []).includes(perm.id);
                           return (
-                            <label key={perm.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer border border-transparent hover:border-slate-100">
-                              <div className="pt-1">
-                                <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${isChecked ? 'bg-fuchsia-500 border-fuchsia-500' : 'border border-slate-300'}`}>
-                                  {isChecked && <i className="lnr lnr-checkmark-circle text-white text-xs font-bold"></i>}
+                            <label key={perm.id} className="flex items-start gap-4 p-4 rounded-xl hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer border border-transparent">
+                              <div className="pt-0.5">
+                                <div className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${isChecked ? 'bg-[var(--accent-color)] border-[var(--accent-color)]' : 'bg-transparent border-2 border-[var(--border-color)]'}`}>
+                                  {isChecked && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                                 </div>
                                 <input 
                                   type="checkbox" 
@@ -208,17 +206,18 @@ export function DashboardRolesPage() {
                                 />
                               </div>
                               <div>
-                                <div className="font-bold text-slate-700 text-sm">{perm.label}</div>
-                                <div className="text-xs text-slate-400 font-mono mt-0.5">{perm.key}</div>
+                                <div className="font-semibold text-[var(--text-primary)] text-sm leading-tight">{perm.label}</div>
+                                <div className="text-xs text-[var(--text-secondary)] font-mono mt-1">{perm.key}</div>
                               </div>
                             </label>
                           );
                         })}
                       </div>
+
                     </div>
                   ))}
                   {permissions.length === 0 && (
-                    <div className="text-center py-8 text-slate-400 font-medium">
+                    <div className="text-center py-8 text-[var(--text-secondary)] font-medium">
                       No permissions defined in the database.
                     </div>
                   )}
@@ -231,16 +230,22 @@ export function DashboardRolesPage() {
 
       {/* Role Modal */}
       {roleModalOpen && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 space-y-5">
-            <h3 className="text-xl font-bold text-slate-800">{editingRole ? "Edit Role" : "Create Role"}</h3>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-[var(--bg-primary)] rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
+            <h3 className="text-2xl font-semibold text-[var(--text-primary)]">{editingRole ? "Edit Role" : "Create Role"}</h3>
             <div className="space-y-4">
-              <input className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-fuchsia-400" placeholder="Role Name" value={roleForm.name} onChange={e => setRoleForm({...roleForm, name: e.target.value})} />
-              <input className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-fuchsia-400" placeholder="Description (optional)" value={roleForm.description} onChange={e => setRoleForm({...roleForm, description: e.target.value})} />
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Role Name</label>
+                <input className="w-full bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm outline-none focus:border-[var(--accent-color)] focus:ring-1 focus:ring-[var(--accent-color)]" placeholder="e.g. manager" value={roleForm.name} onChange={e => setRoleForm({...roleForm, name: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Description (optional)</label>
+                <input className="w-full bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm outline-none focus:border-[var(--accent-color)] focus:ring-1 focus:ring-[var(--accent-color)]" placeholder="Brief description" value={roleForm.description} onChange={e => setRoleForm({...roleForm, description: e.target.value})} />
+              </div>
             </div>
-            <div className="flex gap-3 justify-end">
-              <button onClick={() => setRoleModalOpen(false)} className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50">Cancel</button>
-              <button onClick={handleSaveRole} disabled={saving} className="px-6 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold rounded-xl text-sm shadow-sm">
+            <div className="flex gap-4 pt-2">
+              <button onClick={() => setRoleModalOpen(false)} className="flex-1 py-3 rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] font-semibold text-sm hover:bg-[var(--bg-secondary)] transition-colors">Cancel</button>
+              <button onClick={handleSaveRole} disabled={saving} className="flex-1 py-3 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-xl text-sm transition-colors">
                 {saving ? "Saving..." : "Save"}
               </button>
             </div>
@@ -250,11 +255,11 @@ export function DashboardRolesPage() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-4 right-4 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-slide-up z-50">
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${toastType === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+        <div className="fixed bottom-6 right-6 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-slide-up z-50">
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${toastType === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
             <i className={`lnr ${toastType === 'success' ? 'lnr-checkmark-circle' : 'lnr-warning'}`}></i>
           </div>
-          <span className="font-medium text-sm">{toastMessage}</span>
+          <span className="font-semibold text-sm">{toastMessage}</span>
         </div>
       )}
     </DashboardLayout>

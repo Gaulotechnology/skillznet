@@ -4,7 +4,7 @@ import { adminApi } from "../../../services/api";
 
 interface Conversation {
   id: number;
-  participant: { id: number; name: string; role: string };
+  participant: { id: number; name: string; role: string; avatar?: string };
   last_message: string;
   last_message_at: string;
   unread_count: number;
@@ -140,13 +140,13 @@ export function DashboardConversationsPage() {
 
   const getRoleBadge = (role: string) => {
     const styles: Record<string, string> = {
-      provider: "bg-blue-50 text-blue-600 border-blue-100",
+      provider: "bg-[var(--accent-light)] text-blue-600 border-blue-100",
       seeker: "bg-teal-50 text-teal-600 border-teal-100",
-      admin: "bg-purple-50 text-purple-600 border-purple-100",
+      admin: "bg-[var(--accent-light)] text-[var(--accent-color)] border-[var(--border-color)]",
       agent: "bg-amber-50 text-amber-600 border-amber-100",
-      affiliate: "bg-pink-50 text-pink-600 border-pink-100",
+      affiliate: "bg-[var(--accent-light)] text-[var(--accent-color)] border-[var(--border-color)]",
     };
-    return styles[role] || "bg-slate-50 text-slate-600 border-slate-100";
+    return styles[role] || "bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-color)]";
   };
 
   return (
@@ -162,32 +162,32 @@ export function DashboardConversationsPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Conversations</h2>
-            <p className="text-slate-500 text-[13px] mt-0.5">Messages between platform users</p>
+            <h2 className="text-2xl font-bold text-[var(--text-primary)]">Conversations</h2>
+            <p className="text-[var(--text-secondary)] text-[13px] mt-0.5">Messages between platform users</p>
           </div>
           <button
             onClick={openNewConversation}
-            className="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold text-[13px] hover:bg-slate-800 transition-all flex items-center gap-2 whitespace-nowrap"
+            className="px-4 py-2 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-[13px] hover:bg-[var(--accent-hover)] transition-all flex items-center gap-2 whitespace-nowrap"
           >
             <i className="lnr lnr-plus-circle"></i> New Message
           </button>
         </div>
 
         {/* Main Chat Layout */}
-        <div className="bg-white rounded-xl border border-slate-50 overflow-hidden shadow-sm flex h-[calc(100%-80px)]">
+        <div className="bg-white rounded-xl border border-[var(--border-color)] overflow-hidden shadow-sm flex h-[calc(100%-80px)]">
           
           {/* Sidebar - Conversation List */}
-          <div className="w-80 border-r border-slate-100 flex flex-col shrink-0">
+          <div className="w-80 border-r border-[var(--border-color)] flex flex-col shrink-0">
             {/* Search */}
-            <div className="p-3 border-b border-slate-100">
+            <div className="p-3 border-b border-[var(--border-color)]">
               <div className="relative">
-                <i className="lnr lnr-magnifier absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]"></i>
+                <i className="lnr lnr-magnifier absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-[13px]"></i>
                 <input
                   type="text"
                   placeholder="Search conversations…"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 text-[13px] bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  className="w-full pl-9 pr-4 py-2 text-[13px] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] transition-all"
                 />
               </div>
             </div>
@@ -196,10 +196,10 @@ export function DashboardConversationsPage() {
             <div className="flex-1 overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-16">
-                  <div className="w-8 h-8 border-3 border-slate-100 border-t-indigo-500 rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-3 border-[var(--border-color)] border-t-[var(--accent-color)] rounded-full animate-spin" />
                 </div>
               ) : filteredConversations.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-slate-400 px-4 text-center">
+                <div className="flex flex-col items-center justify-center py-16 text-[var(--text-secondary)] px-4 text-center">
                   <i className="lnr lnr-bubble text-3xl mb-2 opacity-30"></i>
                   <p className="font-medium text-[13px]">No conversations yet</p>
                   <p className="text-[12px] mt-1">Start a new message to begin</p>
@@ -209,19 +209,19 @@ export function DashboardConversationsPage() {
                   <button
                     key={conv.id}
                     onClick={() => openConversation(conv)}
-                    className={`w-full text-left px-4 py-3 border-b border-slate-50 hover:bg-slate-50/50 transition-colors flex items-start gap-3 ${activeConversation?.id === conv.id ? 'bg-indigo-50/50 border-l-2 border-l-indigo-500' : ''}`}
+                    className={`w-full text-left px-4 py-3 border-b border-[var(--border-color)] hover:bg-[var(--bg-secondary)]/50 transition-colors flex items-start gap-3 ${activeConversation?.id === conv.id ? 'bg-[var(--accent-light)]/50 border-l-2 border-l-[var(--accent-color)]' : ''}`}
                   >
                     {conv.participant?.avatar ? (
                       <img src={conv.participant.avatar} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />
                     ) : (
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center font-bold text-slate-600 text-[11px] shrink-0 mt-0.5">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center font-bold text-[var(--text-primary)] text-[11px] shrink-0 mt-0.5">
                       {(conv.participant?.name || 'U').charAt(0).toUpperCase()}
                     </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-slate-800 text-[13px] truncate">{conv.participant?.name || 'Unknown'}</span>
-                        <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                        <span className="font-semibold text-[var(--text-primary)] text-[13px] truncate">{conv.participant?.name || 'Unknown'}</span>
+                        <span className="text-[10px] text-[var(--text-secondary)] whitespace-nowrap">
                           {conv.last_message_at ? new Date(conv.last_message_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}
                         </span>
                       </div>
@@ -230,10 +230,10 @@ export function DashboardConversationsPage() {
                           {conv.participant?.role || 'user'}
                         </span>
                       </div>
-                      <p className="text-[12px] text-slate-500 truncate mt-1">{conv.last_message || 'No messages yet'}</p>
+                      <p className="text-[12px] text-[var(--text-secondary)] truncate mt-1">{conv.last_message || 'No messages yet'}</p>
                     </div>
                     {conv.unread_count > 0 && (
-                      <span className="w-5 h-5 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-1">
+                      <span className="w-5 h-5 rounded-full bg-[var(--accent-light)]0 text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-1">
                         {conv.unread_count}
                       </span>
                     )}
@@ -246,8 +246,8 @@ export function DashboardConversationsPage() {
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
             {!activeConversation ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
-                <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+              <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-secondary)]">
+                <div className="w-20 h-20 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center mb-4">
                   <i className="lnr lnr-bubble text-3xl opacity-40"></i>
                 </div>
                 <p className="font-medium text-[13px]">Select a conversation to view messages</p>
@@ -256,17 +256,17 @@ export function DashboardConversationsPage() {
             ) : (
               <>
                 {/* Chat Header */}
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+                <div className="px-6 py-4 border-b border-[var(--border-color)] flex items-center justify-between bg-[var(--bg-secondary)]/30">
                   <div className="flex items-center gap-3">
                     {activeConversation.participant?.avatar ? (
                       <img src={activeConversation.participant.avatar} alt="" className="w-9 h-9 rounded-full object-cover" />
                     ) : (
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-[12px]">
+                    <div className="w-9 h-9 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white font-bold text-[12px]">
                       {(activeConversation.participant?.name || 'U').charAt(0).toUpperCase()}
                     </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-slate-800 text-[14px]">{activeConversation.participant?.name || 'Unknown'}</h3>
+                      <h3 className="font-bold text-[var(--text-primary)] text-[14px]">{activeConversation.participant?.name || 'Unknown'}</h3>
                       <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${getRoleBadge(activeConversation.participant?.role)}`}>
                         {activeConversation.participant?.role || 'user'}
                       </span>
@@ -278,10 +278,10 @@ export function DashboardConversationsPage() {
                 <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
                   {messagesLoading ? (
                     <div className="flex items-center justify-center py-16">
-                      <div className="w-8 h-8 border-3 border-slate-100 border-t-indigo-500 rounded-full animate-spin" />
+                      <div className="w-8 h-8 border-3 border-[var(--border-color)] border-t-[var(--accent-color)] rounded-full animate-spin" />
                     </div>
                   ) : messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                    <div className="flex flex-col items-center justify-center py-16 text-[var(--text-secondary)]">
                       <p className="font-medium text-[13px]">No messages in this conversation</p>
                       <p className="text-[12px] mt-1">Send the first message below</p>
                     </div>
@@ -289,7 +289,7 @@ export function DashboardConversationsPage() {
                     messages.map(msg => (
                       <div key={msg.id} className={`flex ${msg.is_admin ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[70%] ${msg.is_admin ? 'order-2' : ''}`}>
-                          <div className={`rounded-2xl px-4 py-3 ${msg.is_admin ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-800'}`}>
+                          <div className={`rounded-2xl px-4 py-3 ${msg.is_admin ? 'bg-[var(--accent-color)] text-white' : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'}`}>
                             {!msg.is_admin && (
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-bold text-[12px]">{msg.sender_name}</span>
@@ -300,7 +300,7 @@ export function DashboardConversationsPage() {
                             )}
                             <p className="text-[13px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                           </div>
-                          <p className={`text-[10px] mt-1 px-2 ${msg.is_admin ? 'text-right' : ''} text-slate-400`}>
+                          <p className={`text-[10px] mt-1 px-2 ${msg.is_admin ? 'text-right' : ''} text-[var(--text-secondary)]`}>
                             {msg.created_at ? new Date(msg.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
                           </p>
                         </div>
@@ -311,7 +311,7 @@ export function DashboardConversationsPage() {
                 </div>
 
                 {/* Input */}
-                <div className="px-4 py-3 border-t border-slate-100 bg-white">
+                <div className="px-4 py-3 border-t border-[var(--border-color)] bg-white">
                   <div className="flex items-end gap-3">
                     <textarea
                       value={newMessage}
@@ -319,12 +319,12 @@ export function DashboardConversationsPage() {
                       onKeyDown={handleKeyDown}
                       placeholder="Type a message… (Enter to send)"
                       rows={1}
-                      className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 resize-none transition-all"
+                      className="flex-1 px-4 py-2.5 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl text-[13px] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] resize-none transition-all"
                     />
                     <button
                       onClick={handleSend}
                       disabled={sendingMessage || !newMessage.trim()}
-                      className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-[13px] hover:bg-indigo-700 transition-colors disabled:opacity-50 flex items-center gap-2 whitespace-nowrap shrink-0"
+                      className="px-5 py-2.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-[13px] hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-50 flex items-center gap-2 whitespace-nowrap shrink-0"
                     >
                       {sendingMessage ? (
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -342,55 +342,55 @@ export function DashboardConversationsPage() {
         {/* New Conversation Modal */}
         {showNewModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => !creatingConversation && setShowNewModal(false)} />
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !creatingConversation && setShowNewModal(false)} />
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10 overflow-hidden">
-              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-slate-800">New Conversation</h3>
-                <button onClick={() => !creatingConversation && setShowNewModal(false)} className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+              <div className="p-5 border-b border-[var(--border-color)] flex items-center justify-between">
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">New Conversation</h3>
+                <button onClick={() => !creatingConversation && setShowNewModal(false)} className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-slate-200 transition-colors">
                   <i className="lnr lnr-cross text-[12px]"></i>
                 </button>
               </div>
               <div className="p-5 space-y-4">
                 {/* User Search */}
                 <div>
-                  <label className="block text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-1">Recipient</label>
+                  <label className="block text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">Recipient</label>
                   <div className="relative">
-                    <i className="lnr lnr-magnifier absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px]"></i>
+                    <i className="lnr lnr-magnifier absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-[13px]"></i>
                     <input
                       type="text"
                       placeholder="Search users by name or email…"
                       value={userSearch}
                       onChange={e => setUserSearch(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2.5 text-[13px] bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all"
+                      className="w-full pl-9 pr-4 py-2.5 text-[13px] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] transition-all"
                     />
                   </div>
                   {/* User list */}
-                  <div className="mt-2 max-h-40 overflow-y-auto border border-slate-100 rounded-xl">
+                  <div className="mt-2 max-h-40 overflow-y-auto border border-[var(--border-color)] rounded-xl">
                     {filteredUsers.length === 0 ? (
-                      <p className="px-4 py-3 text-[12px] text-slate-400 text-center">No users found</p>
+                      <p className="px-4 py-3 text-[12px] text-[var(--text-secondary)] text-center">No users found</p>
                     ) : (
                       filteredUsers.slice(0, 20).map(u => (
                         <button
                           key={u.id}
                           onClick={() => setNewRecipientId(u.id)}
-                          className={`w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-b-0 ${newRecipientId === u.id ? 'bg-indigo-50' : ''}`}
+                          className={`w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-[var(--bg-secondary)] transition-colors border-b border-[var(--border-color)] last:border-b-0 ${newRecipientId === u.id ? 'bg-[var(--accent-light)]' : ''}`}
                         >
                           {u.avatar ? (
                             <img src={u.avatar} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
                           ) : (
-                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center font-bold text-slate-600 text-[10px] shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center font-bold text-[var(--text-primary)] text-[10px] shrink-0">
                             {(u.name || 'U').charAt(0).toUpperCase()}
                           </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <span className="font-semibold text-slate-800 text-[13px] truncate block">{u.name}</span>
-                            <span className="text-[11px] text-slate-400">{u.email || u.phone_number || ''}</span>
+                            <span className="font-semibold text-[var(--text-primary)] text-[13px] truncate block">{u.name}</span>
+                            <span className="text-[11px] text-[var(--text-secondary)]">{u.email || u.phone_number || ''}</span>
                           </div>
                           <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${getRoleBadge(u.role)}`}>
                             {u.role}
                           </span>
                           {newRecipientId === u.id && (
-                            <i className="lnr lnr-checkmark-circle text-indigo-500 shrink-0"></i>
+                            <i className="lnr lnr-checkmark-circle text-[var(--accent-color)] shrink-0"></i>
                           )}
                         </button>
                       ))
@@ -400,23 +400,23 @@ export function DashboardConversationsPage() {
 
                 {/* Message */}
                 <div>
-                  <label className="block text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-1">Message</label>
+                  <label className="block text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">Message</label>
                   <textarea
                     value={newFirstMessage}
                     onChange={e => setNewFirstMessage(e.target.value)}
                     placeholder="Type your message…"
                     rows={3}
-                    className="w-full px-4 py-2.5 text-[13px] bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 resize-none transition-all"
+                    className="w-full px-4 py-2.5 text-[13px] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] resize-none transition-all"
                   />
                 </div>
 
                 {/* Actions */}
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => !creatingConversation && setShowNewModal(false)} className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold text-[13px] hover:bg-slate-200 transition-colors">Cancel</button>
+                  <button type="button" onClick={() => !creatingConversation && setShowNewModal(false)} className="flex-1 py-2.5 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-semibold text-[13px] hover:bg-slate-200 transition-colors">Cancel</button>
                   <button
                     onClick={handleStartConversation}
                     disabled={creatingConversation || !newRecipientId || !newFirstMessage.trim()}
-                    className="flex-1 py-2.5 rounded-xl bg-slate-900 text-white font-semibold text-[13px] hover:bg-slate-800 transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
+                    className="flex-1 py-2.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-[13px] hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
                   >
                     {creatingConversation ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Sending…</> : "Send Message"}
                   </button>

@@ -25,7 +25,7 @@ export function DashboardMyBookingsPage() {
       case 'completed': return <span className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Completed</span>;
       case 'cancelled':
       case 'rejected': return <span className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600"><span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>{status}</span>;
-      default: return <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500"><span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>{status}</span>;
+      default: return <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)]"><span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>{status}</span>;
     }
   };
 
@@ -38,15 +38,15 @@ export function DashboardMyBookingsPage() {
           {b.provider?.avatar ? (
             <img src={b.provider.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
+            <div className="w-8 h-8 rounded-full bg-[var(--accent-light)] flex items-center justify-center text-sm font-medium text-[var(--accent-color)]">
               {b.provider?.name?.charAt(0) || "P"}
             </div>
           )}
           <div>
-            <Link to={`/professional/${b.provider_id}`} className="text-sm font-medium text-gray-900 hover:text-gray-600 transition-colors">
+            <Link to={`/professional/${b.provider_id}`} className="text-sm font-medium text-[var(--text-primary)] hover:text-[var(--accent-color)] transition-colors">
               {b.provider?.name || "Professional"}
             </Link>
-            <div className="text-xs text-gray-400 mt-0.5">{b.provider?.service_category}</div>
+            <div className="text-xs text-[var(--text-secondary)] mt-0.5">{b.provider?.service_category}</div>
           </div>
         </div>
       ),
@@ -57,8 +57,8 @@ export function DashboardMyBookingsPage() {
       label: "Date & Time",
       render: (b) => (
         <div>
-          <div className="text-sm text-gray-900">{b.booking_date}</div>
-          <div className="text-xs text-gray-500 mt-0.5">{b.start_time.substring(0, 5)} - {b.end_time.substring(0, 5)}</div>
+          <div className="text-sm text-[var(--text-primary)]">{b.booking_date}</div>
+          <div className="text-xs text-[var(--text-secondary)] mt-0.5">{b.start_time.substring(0, 5)} - {b.end_time.substring(0, 5)}</div>
         </div>
       ),
       exportValue: (b) => `${b.booking_date} ${b.start_time}-${b.end_time}`,
@@ -72,21 +72,21 @@ export function DashboardMyBookingsPage() {
     {
       key: "notes",
       label: "Notes",
-      render: (b) => <p className="text-sm text-gray-500 max-w-xs truncate" title={b.notes}>{b.notes || '-'}</p>,
+      render: (b) => <p className="text-sm text-[var(--text-secondary)] max-w-xs truncate" title={b.notes}>{b.notes || '-'}</p>,
       exportValue: (b) => b.notes || '',
     },
   ];
 
   return (
     <SeekerLayout>
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6 font-['Inter',sans-serif]">
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">My Bookings</h2>
-            <p className="text-sm text-gray-500 mt-1">Track your requested services and appointments.</p>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">My Bookings</h2>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">Track your requested services and appointments.</p>
           </div>
-          <Link to="/search" className="px-4 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+          <Link to="/search" className="px-5 py-2.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors flex items-center justify-center gap-2">
             <i className="lnr lnr-magnifier"></i> Find Professionals
           </Link>
         </div>
@@ -100,7 +100,7 @@ export function DashboardMyBookingsPage() {
           exportFileName="my-bookings"
           actions={(b) => (
             <div className="flex items-center justify-end">
-              <Link to={`/professional/${b.provider_id}`} className="px-3 py-1.5 rounded-md border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              <Link to={`/professional/${b.provider_id}`} className="px-3 py-1.5 rounded-xl border border-[var(--border-color)] text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] transition-colors">
                 View Profile
               </Link>
             </div>

@@ -37,13 +37,13 @@ export function isLoggedIn(): boolean {
   return !!getToken()
 }
 
-export function getCurrentUser(): { name: string; role: string } | null {
+export function getCurrentUser(): { name: string; role: string; id?: number; email?: string } | null {
   const raw = localStorage.getItem("skillzlink_user")
   if (!raw) return null
-  try { return JSON.parse(raw) as { name: string; role: string } } catch { return null }
+  try { return JSON.parse(raw) as { name: string; role: string; id?: number; email?: string } } catch { return null }
 }
 
-export function setCurrentUser(user: { name: string; role: string }): void {
+export function setCurrentUser(user: { name: string; role: string; id?: number; email?: string }): void {
   localStorage.setItem("skillzlink_user", JSON.stringify(user))
   window.dispatchEvent(new Event("auth_change"))
 }
@@ -100,6 +100,7 @@ export interface PublicProvider {
   success_rate?: number
   dynamic_data?: Record<string, any>
   response_time?: string
+  years_of_experience?: number
   experience?: {
     title: string
     company: string
@@ -141,26 +142,44 @@ export interface SearchResult {
 // ─── Auth endpoints ───────────────────────────────────────────────────────────
 export const authApi = {
   requestOtp: (phone_number: string) =>
-    fetchJson<{ message: string; otp?: string }>(`${API_BASE_URL}/auth/login`, {
+    fetchJson<{ message: string; otp?: string }>(`${API_BASE_URL}/auth/request-otp`, {
       method: "POST",
       body: JSON.stringify({ phone_number }),
     }),
 
   verifyOtp: (phone_number: string, otp: string) =>
-    fetchJson<{ token: string; user: { name: string; role: string } }>(
+    fetchJson<{ message: string }>(
       `${API_BASE_URL}/auth/verify-otp`,
       { method: "POST", body: JSON.stringify({ phone_number, otp }) }
     ),
 
+  loginWithPin: (phone_number: string, pin: string) =>
+    fetchJson<{ token: string; user: { name: string; role: string } }>(
+      `${API_BASE_URL}/auth/login`,
+      { method: "POST", body: JSON.stringify({ phone_number, pin }) }
+    ),
+    
+  requestPinReset: (phone_number: string) =>
+    fetchJson<{ message: string; otp?: string }>(`${API_BASE_URL}/auth/request-pin-reset`, {
+      method: "POST",
+      body: JSON.stringify({ phone_number }),
+    }),
+    
+  resetPin: (phone_number: string, otp: string, pin: string) =>
+    fetchJson<{ token: string; user: { name: string; role: string } }>(`${API_BASE_URL}/auth/reset-pin`, {
+      method: "POST",
+      body: JSON.stringify({ phone_number, otp, pin }),
+    }),
+
   registerSeeker: (payload: {
-    name: string; phone_number: string; default_latitude?: number; default_longitude?: number
+    name: string; phone_number: string; otp: string; pin: string; default_latitude?: number; default_longitude?: number
   }) =>
     fetchJson<{ message: string; user_id: number }>(`${API_BASE_URL}/auth/register-seeker`, {
       method: "POST", body: JSON.stringify(payload),
     }),
 
   registerProvider: (payload: {
-    name: string; phone_number: string; identity_number: string;
+    name: string; phone_number: string; otp: string; pin: string; identity_number: string;
     address: string; service_category: string; service_radius: number;
     latitude?: number; longitude?: number; description?: string;
     dynamic_data?: Record<string, any>;
@@ -278,6 +297,9 @@ export const providerApi = {
     address: string; service_category: string; service_radius: number;
     latitude: number; longitude: number; description: string; contact_opt_in: boolean;
     dynamic_data: Record<string, any>;
+    skills: string[];
+    portfolios: any[];
+    services: any[];
   }>) =>
     fetchJson<{ message: string; provider: PublicProvider }>(`${API_BASE_URL}/provider/profile`, {
       method: "PUT", body: JSON.stringify(payload),
@@ -428,21 +450,23 @@ export const adminApi = {
   },
 
   getConversations: () =>
-    fetchJson<{ conversations: any[] }>(`${API_BASE_URL}/admin/conversations`),
+    fetchJson<{ conversations: any[] }>(`${API_BASE_URL}/admin/conversations/all`),
   getConversation: (id: number) =>
-    fetchJson<{ conversation: any; messages: any[] }>(`${API_BASE_URL}/admin/conversations/${id}`),
+    fetchJson<{ conversation: any; messages: any[] }>(`${API_BASE_URL}/conversations/${id}`),
   sendMessage: (conversationId: number, payload: { content: string }) =>
-    fetchJson<{ message: string; entry: any }>(`${API_BASE_URL}/admin/conversations/${conversationId}/messages`, {
+    fetchJson<{ message: any }>(`${API_BASE_URL}/conversations/${conversationId}/messages`, {
       method: "POST", body: JSON.stringify(payload),
     }),
   startConversation: (payload: { recipient_id: number; content: string }) =>
-    fetchJson<{ message: string; conversation: any }>(`${API_BASE_URL}/admin/conversations`, {
+    fetchJson<{ message: string; conversation: any }>(`${API_BASE_URL}/conversations`, {
       method: "POST", body: JSON.stringify(payload),
     }),
+  getUserList: () =>
+    fetchJson<{ users: any[] }>(`${API_BASE_URL}/users/list`),
 
   getInsights: (period?: string) => {
     const qs = period ? `?period=${period}` : '';
-    return fetchJson<{ stats: { ongoing: number; completed: number; cancelled: number; reposted: number }; hired_providers: any[]; chart_data: any[] }>(`${API_BASE_URL}/admin/insights${qs}`);
+    return fetchJson<{ stats: { ongoing: number; completed: number; cancelled: number; reposted: number; revenue?: number; active_users?: number; completion_rate?: number }; hired_providers: any[]; chart_data: any[] }>(`${API_BASE_URL}/admin/insights${qs}`);
   },
 
   getPackages: () => fetchJson<{ packages: any[] }>(`${API_BASE_URL}/admin/packages`),

@@ -1,10 +1,11 @@
-import { useState } from "react"
-import type { FormEvent } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { authApi, setToken, setCurrentUser } from "../services/api"
+import re
 
-export function LoginPage() {
-  const [phoneNumber, setPhoneNumber] = useState("")
+with open("src/pages/LoginPage.tsx", "r") as f:
+    content = f.read()
+
+# I will replace the state variables, the API handlers, and the form render sections using regex.
+state_pattern = re.compile(r'  const \[phoneNumber, setPhoneNumber\] = useState\(""\).*?const navigate = useNavigate\(\)\n', re.DOTALL)
+state_repl = """  const [phoneNumber, setPhoneNumber] = useState("")
   const [pin, setPin] = useState("")
   const [otp, setOtp] = useState("")
   const [newPin, setNewPin] = useState("")
@@ -14,15 +15,10 @@ export function LoginPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
+"""
 
-  const formatPhone = (phone: string) => {
-    const clean = phone.replace(/\D/g, '')
-    if (clean.startsWith('263')) return `+${clean}`
-    if (clean.startsWith('0')) return `+263${clean.substring(1)}`
-    return `+263${clean}`
-  }
-
-  const handleLogin = async (e: FormEvent) => {
+handlers_pattern = re.compile(r'  const handleRequestOtp = async.*?finally \{\n      setLoading\(false\)\n    \}\n  \}\n', re.DOTALL)
+handlers_repl = """  const handleLogin = async (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
@@ -89,81 +85,13 @@ export function LoginPage() {
       setLoading(false)
     }
   }
+"""
 
-  const handleVerifyOtp = async (e: FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    setMessage(null)
-    try {
-      const formattedPhone = formatPhone(phoneNumber)
-      const data = await authApi.verifyOtp(formattedPhone, otp)
-      setToken(data.token)
-      setCurrentUser(data.user)
-      const role = data.user.role
-      if (role === "admin") navigate("/dashboard/admin/overview")
-      else if (role === "provider") navigate("/dashboard/provider/overview")
-      else navigate("/dashboard/seeker/overview")
-    } catch {
-      setError("Invalid or expired OTP. Please try again.")
-    } finally {
-      setLoading(false)
-    }
-  }
+content = state_pattern.sub(state_repl, content)
+content = handlers_pattern.sub(handlers_repl, content)
 
-  return (
-    <div className="min-h-screen flex" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {/* Left Panel — Light branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-[var(--bg-auth-panel)] flex-col items-center justify-center p-12">
-        <div className="relative z-10 text-center max-w-sm">
-          <Link to="/" className="inline-flex items-center gap-3 mb-10">
-            <div className="w-12 h-12 rounded-xl bg-[var(--accent-color)] flex items-center justify-center">
-              <span className="text-white font-black text-lg">SL</span>
-            </div>
-            <span className="font-bold text-2xl text-[var(--text-primary)]">SkillzLink</span>
-          </Link>
-
-          <div className="mb-8">
-            <div className="w-20 h-20 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-color)] flex items-center justify-center mx-auto mb-6">
-              <i className="fab fa-whatsapp text-4xl text-[#25D366]" />
-            </div>
-            <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-3">Zimbabwe's #1<br />Skills Platform</h2>
-            <p className="text-[var(--text-secondary)] text-sm leading-relaxed">
-              Connect with 2,400+ verified professionals across Harare, Bulawayo, and 6 other cities — right through WhatsApp.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 mt-8">
-            {[["2,400+","Verified Pros"], ["8","Cities"], ["98%","Satisfaction"]].map(([n, l]) => (
-              <div key={l} className="bg-[var(--bg-primary)] rounded-xl p-4 border border-[var(--border-color)]">
-                <div className="text-[var(--accent-color)] font-bold text-lg">{n}</div>
-                <div className="text-[var(--text-secondary)] text-xs mt-1">{l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-[var(--bg-primary)]">
-        <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="lg:hidden flex justify-center mb-8">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[var(--accent-color)] flex items-center justify-center">
-                <span className="text-white font-black">SL</span>
-              </div>
-              <span className="font-bold text-xl text-[var(--text-primary)]">SkillzLink</span>
-            </Link>
-          </div>
-
-          <div className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] p-8 shadow-sm">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <div className={`w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center transition-all duration-300 ${step === "phone" ? "bg-[var(--accent-color)]" : "bg-[#25D366]"}`}>
-                <i className={`text-white text-xl ${step === "phone" ? "lnr lnr-phone" : "fab fa-whatsapp"}`} />
-              </div>
-              <h1 className="text-xl font-bold text-[var(--text-primary)]">
+header_pattern = re.compile(r'              <h1 className="text-xl font-bold text-\[var\(--text-primary\)\]">\n.*?We sent a code to \$\{phoneNumber\} via WhatsApp\`\}\n              </p>\n            </div>', re.DOTALL)
+header_repl = """              <h1 className="text-xl font-bold text-[var(--text-primary)]">
                 {step === "login" ? "Sign in to SkillzLink" : step === "forgot_pin" ? "Reset your PIN" : "Verify & New PIN"}
               </h1>
               <p className="text-[var(--text-secondary)] mt-2 text-sm">
@@ -173,23 +101,12 @@ export function LoginPage() {
                   ? "Enter your phone number to receive a reset code"
                   : `We sent a code to ${phoneNumber} via WhatsApp`}
               </p>
-            </div>
+            </div>"""
 
-            {/* Error / Message */}
-            {error && (
-              <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-3">
-                <i className="lnr lnr-cross-circle text-red-500 mt-0.5" />
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-            )}
-            {message && (
-              <div className="mb-5 p-3 rounded-xl bg-green-50 border border-green-100 flex items-start gap-3">
-                <i className="lnr lnr-checkmark-circle text-green-500 mt-0.5" />
-                <p className="text-green-700 text-sm font-mono">{message}</p>
-              </div>
-            )}
+content = header_pattern.sub(header_repl, content)
 
-            {step === "login" && (
+forms_pattern = re.compile(r'            \{step === "phone" \? \(\n              <form onSubmit=\{handleRequestOtp\}.*?            \)\}', re.DOTALL)
+forms_repl = """            {step === "login" && (
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">Phone Number</label>
@@ -331,17 +248,13 @@ export function LoginPage() {
                   ← Resend code to different number
                 </button>
               </form>
-            )}
+            )}"""
+            
+# fix the replace of \D manually because of the warning earlier
+forms_repl = forms_repl.replace('\\D', '\\\\D')
 
-            <p className="text-center text-[var(--text-secondary)] text-sm mt-8">
-              Don't have an account?{" "}
-              <Link to="/register" className="font-semibold text-[var(--accent-color)] hover:text-[var(--accent-hover)] transition-colors">
-                Join SkillzLink
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+content = forms_pattern.sub(forms_repl, content)
+
+with open("src/pages/LoginPage.tsx", "w") as f:
+    f.write(content)
+

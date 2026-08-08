@@ -85,9 +85,9 @@ export function DashboardInvitationsPage() {
 
   const typeBadge = (type: string) => {
     const styles: Record<string, string> = {
-      affiliate: 'bg-purple-50 text-purple-700',
+      affiliate: 'bg-[var(--accent-light)] text-[var(--accent-color)]',
       agent: 'bg-amber-50 text-amber-700',
-      provider: 'bg-blue-50 text-blue-700',
+      provider: 'bg-[var(--accent-light)] text-blue-700',
     };
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${styles[type] || ''}`}>
@@ -139,29 +139,29 @@ export function DashboardInvitationsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'Inter, sans-serif' }}>
             Invitations & Applications
           </h1>
-          <p className="mt-1 text-sm text-gray-500">Manage incoming applications from affiliates, agents, and providers.</p>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">Manage incoming applications from affiliates, agents, and providers.</p>
         </div>
 
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total', value: stats.total, color: 'border-gray-200' },
+            { label: 'Total', value: stats.total, color: 'border-[var(--border-color)]' },
             { label: 'Pending', value: stats.pending, color: 'border-amber-400' },
             { label: 'Approved', value: stats.approved, color: 'border-green-400' },
             { label: 'Rejected', value: stats.rejected, color: 'border-red-400' },
           ].map((s) => (
-            <div key={s.label} className={`bg-white rounded-lg border-l-4 ${s.color} border border-gray-100 p-4`}>
-              <p className="text-sm text-gray-500">{s.label}</p>
-              <p className="text-2xl font-semibold text-gray-900">{s.value}</p>
+            <div key={s.label} className={`bg-white rounded-lg border-l-4 ${s.color} border border-[var(--border-color)] p-4`}>
+              <p className="text-sm text-[var(--text-secondary)]">{s.label}</p>
+              <p className="text-2xl font-semibold text-[var(--text-primary)]">{s.value}</p>
             </div>
           ))}
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg border border-[var(--border-color)] overflow-hidden">
           <DataTable columns={columns} data={applications} loading={loading} title="Applications" pageSize={10} />
         </div>
       </div>
@@ -170,10 +170,10 @@ export function DashboardInvitationsPage() {
       {rejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900">Confirm Rejection</h3>
-            <p className="mt-2 text-sm text-gray-600">Are you sure you want to reject this application? This action cannot be undone.</p>
+            <h3 className="text-lg font-semibold text-[var(--text-primary)]">Confirm Rejection</h3>
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">Are you sure you want to reject this application? This action cannot be undone.</p>
             <div className="mt-4 flex justify-end gap-3">
-              <button onClick={() => setRejectModal(null)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+              <button onClick={() => setRejectModal(null)} className="px-4 py-2 text-sm font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] rounded-lg hover:bg-[var(--bg-secondary)] transition">
                 Cancel
               </button>
               <button onClick={() => handleReject(rejectModal)} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition">

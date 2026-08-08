@@ -84,7 +84,7 @@ export function DashboardCategoryPage() {
       accessorKey: "id",
       header: "ID",
       cell: ({ row }: { row: any }) => (
-        <span className="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs">
+        <span className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-secondary)] flex items-center justify-center font-bold text-xs">
           #{row.original.id}
         </span>
       ),
@@ -94,13 +94,13 @@ export function DashboardCategoryPage() {
       header: "Details",
       cell: ({ row }: { row: any }) => (
         <div>
-          <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <h4 className="font-bold text-[var(--text-primary)] text-sm flex items-center gap-2">
             {row.original.name}
-            <span className="bg-slate-100 text-slate-500 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md">
+            <span className="bg-[var(--bg-secondary)] text-[var(--text-secondary)] text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md">
               /{row.original.slug}
             </span>
           </h4>
-          <p className="text-[11px] text-slate-500 font-medium mt-0.5 max-w-[200px] truncate">
+          <p className="text-[11px] text-[var(--text-secondary)] font-medium mt-0.5 max-w-[200px] truncate">
             {row.original.description || "No description provided."}
           </p>
         </div>
@@ -121,14 +121,14 @@ export function DashboardCategoryPage() {
                 description: row.original.description || ""
               });
             }}
-            className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 font-bold flex items-center justify-center hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-500 transition-colors shadow-sm"
+            className="w-8 h-8 rounded-lg bg-white border border-[var(--border-color)] text-[var(--text-secondary)] font-bold flex items-center justify-center hover:bg-[var(--accent-light)] hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] transition-colors shadow-sm"
             title="Edit Category"
           >
             <i className="lnr lnr-pencil text-xs"></i>
           </button>
           <button 
             onClick={() => openDeleteModal(row.original.id)}
-            className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 font-bold flex items-center justify-center hover:bg-rose-50 hover:border-rose-200 hover:text-rose-500 transition-colors shadow-sm"
+            className="w-8 h-8 rounded-lg bg-white border border-[var(--border-color)] text-[var(--text-secondary)] font-bold flex items-center justify-center hover:bg-[var(--accent-light)] hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] transition-colors shadow-sm"
             title="Delete Category"
           >
             <i className="lnr lnr-trash text-xs"></i>
@@ -157,8 +157,8 @@ export function DashboardCategoryPage() {
       <div className="p-6 md:p-8 max-w-7xl mx-auto relative">
         
         {/* Toast Notification */}
-        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-2xl transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100 visible' : '-translate-y-10 opacity-0 invisible'}`}>
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${toastType === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-[var(--accent-color)] text-white px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-2xl transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100 visible' : '-translate-y-10 opacity-0 invisible'}`}>
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${toastType === 'success' ? 'bg-emerald-500' : 'bg-[var(--accent-light)]0'}`}>
             <i className={`lnr ${toastType === 'success' ? 'lnr-checkmark-circle' : 'lnr-warning'}`}></i>
           </div>
           {toastMessage}
@@ -167,24 +167,24 @@ export function DashboardCategoryPage() {
         {/* Delete Confirmation Modal */}
         {deleteModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setDeleteModalOpen(false)}></div>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteModalOpen(false)}></div>
             <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full relative z-10 shadow-2xl animate-fade-in-up">
-              <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-3xl mx-auto mb-4">
+              <div className="w-16 h-16 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center text-3xl mx-auto mb-4">
                 <i className="lnr lnr-trash"></i>
               </div>
-              <h3 className="text-2xl font-black text-slate-800 text-center mb-2">Delete Category?</h3>
-              <p className="text-slate-500 text-center mb-8">This action cannot be undone. Any services tied to this category may be affected.</p>
+              <h3 className="text-2xl font-black text-[var(--text-primary)] text-center mb-2">Delete Category?</h3>
+              <p className="text-[var(--text-secondary)] text-center mb-8">This action cannot be undone. Any services tied to this category may be affected.</p>
               
               <div className="flex gap-4">
                 <button 
                   onClick={() => setDeleteModalOpen(false)}
-                  className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold hover:bg-slate-200 transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={handleDelete}
-                  className="flex-1 py-3 rounded-xl bg-rose-500 text-white font-bold hover:bg-rose-600 shadow-lg shadow-rose-200 transition-all active:scale-95"
+                  className="flex-1 py-3 rounded-xl bg-[var(--accent-light)]0 text-white font-bold hover:bg-rose-600 shadow-lg shadow-lg transition-all active:scale-95"
                 >
                   Yes, Delete
                 </button>
@@ -194,25 +194,25 @@ export function DashboardCategoryPage() {
         )}
 
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-800">Service Categories</h2>
-          <p className="text-slate-500 mt-1">Manage the types of services professionals can offer.</p>
+          <h2 className="text-3xl font-bold text-[var(--text-primary)]">Service Categories</h2>
+          <p className="text-[var(--text-secondary)] mt-1">Manage the types of services professionals can offer.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Add/Edit Form */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/60 overflow-hidden sticky top-24">
-              <div className="p-6 border-b border-slate-50 bg-slate-50/50">
-                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <i className={`lnr ${isEditing ? 'lnr-pencil text-indigo-500' : 'lnr-file-add text-emerald-500'}`}></i>
+            <div className="bg-white rounded-2xl shadow-sm border border-[var(--border-color)] overflow-hidden sticky top-24">
+              <div className="p-6 border-b border-[var(--border-color)] bg-[var(--bg-secondary)]/50">
+                <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+                  <i className={`lnr ${isEditing ? 'lnr-pencil text-[var(--accent-color)]' : 'lnr-file-add text-emerald-500'}`}></i>
                   {isEditing ? 'Edit Category' : 'Add New Category'}
                 </h3>
               </div>
               
               <form onSubmit={handleSubmit} className="p-6 space-y-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Category Name</label>
+                  <label className="block text-sm font-bold text-[var(--text-primary)] mb-1.5">Category Name</label>
                   <input 
                     type="text" 
                     value={formData.name} 
@@ -220,12 +220,12 @@ export function DashboardCategoryPage() {
                     required 
                     disabled={formLoading}
                     placeholder="e.g. Plumbing"
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400"
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-xl px-4 py-2.5 outline-none focus:bg-white focus:border-[var(--accent-color)] focus:ring-4 focus:ring-[var(--accent-light)] transition-all font-medium placeholder:text-[var(--text-secondary)]"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">URL Slug</label>
+                  <label className="block text-sm font-bold text-[var(--text-primary)] mb-1.5">URL Slug</label>
                   <input 
                     type="text" 
                     value={formData.slug} 
@@ -233,19 +233,19 @@ export function DashboardCategoryPage() {
                     required 
                     disabled={formLoading}
                     placeholder="e.g. plumbing"
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all font-mono placeholder:text-slate-400"
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-xl px-4 py-2.5 outline-none focus:bg-white focus:border-[var(--accent-color)] focus:ring-4 focus:ring-[var(--accent-light)] transition-all font-mono placeholder:text-[var(--text-secondary)]"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Description (Optional)</label>
+                  <label className="block text-sm font-bold text-[var(--text-primary)] mb-1.5">Description (Optional)</label>
                   <textarea 
                     value={formData.description} 
                     onChange={e => setFormData({...formData, description: e.target.value})} 
                     disabled={formLoading}
                     rows={3}
                     placeholder="Brief description of the service category..."
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:bg-white focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 transition-all font-medium placeholder:text-slate-400 resize-none"
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-xl px-4 py-2.5 outline-none focus:bg-white focus:border-[var(--accent-color)] focus:ring-4 focus:ring-[var(--accent-light)] transition-all font-medium placeholder:text-[var(--text-secondary)] resize-none"
                   ></textarea>
                 </div>
 
@@ -253,7 +253,7 @@ export function DashboardCategoryPage() {
                   <button 
                     type="submit" 
                     disabled={formLoading}
-                    className="flex-1 py-3 px-4 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 shadow-lg shadow-slate-200 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 text-sm"
+                    className="flex-1 py-3 px-4 rounded-xl bg-[var(--accent-color)] text-white font-semibold hover:bg-[var(--accent-hover)] shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 text-sm"
                   >
                     {formLoading ? (
                       <><i className="lnr lnr-sync animate-spin mr-2"></i> Saving...</>
@@ -264,7 +264,7 @@ export function DashboardCategoryPage() {
                       type="button" 
                       disabled={formLoading}
                       onClick={() => { setIsEditing(null); setFormData({ name: "", slug: "", icon: "", description: "" }); }}
-                      className="py-3 px-4 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-all active:scale-95 text-sm"
+                      className="py-3 px-4 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold hover:bg-slate-200 transition-all active:scale-95 text-sm"
                     >
                       Cancel
                     </button>
@@ -278,9 +278,9 @@ export function DashboardCategoryPage() {
           <div className="lg:col-span-2">
             <div className="relative">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100/60">
-                  <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-500 rounded-full animate-spin mb-4" />
-                  <p className="text-slate-500 font-medium">Loading categories...</p>
+                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl shadow-sm border border-[var(--border-color)]">
+                  <div className="w-12 h-12 border-4 border-[var(--border-color)] border-t-[var(--accent-color)] rounded-full animate-spin mb-4" />
+                  <p className="text-[var(--text-secondary)] font-medium">Loading categories...</p>
                 </div>
               ) : (
                 <DataTable columns={columns} data={categories} />

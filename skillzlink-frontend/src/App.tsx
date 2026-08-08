@@ -17,8 +17,20 @@ function App() {
   useEffect(() => {
     publicApi.getThemeSettings().then(res => {
       if (res.settings) {
+        // Map settings keys to CSS variable names
+        const keyMap: Record<string, string> = {
+          accentColor: '--accent-color',
+          accentHover: '--accent-hover',
+          accentLight: '--accent-light',
+          textPrimary: '--text-primary',
+          textSecondary: '--text-secondary',
+          bgPrimary: '--bg-primary',
+          bgSecondary: '--bg-secondary',
+          borderColor: '--border-color',
+        };
         Object.entries(res.settings).forEach(([key, value]) => {
-          document.documentElement.style.setProperty(`--${key.replace(/_/g, '-')}`, value as string);
+          const varName = keyMap[key] || `--${key.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/_/g, '-')}`;
+          document.documentElement.style.setProperty(varName, value as string);
         });
       }
     }).catch(console.error);

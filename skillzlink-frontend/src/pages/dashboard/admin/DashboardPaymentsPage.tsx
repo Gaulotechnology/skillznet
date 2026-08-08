@@ -40,65 +40,65 @@ export function DashboardPaymentsPage() {
   const pendingPayouts = payments.filter(p => p.status === "Pending").reduce((s, p) => s + p.amount, 0);
   const refunds = payments.filter(p => p.status === "Refunded").reduce((s, p) => s + p.amount, 0);
 
-  const statusColor: Record<string, string> = { Completed: "bg-green-50 text-green-700", Pending: "bg-yellow-50 text-yellow-700", Failed: "bg-red-50 text-red-600", Refunded: "bg-gray-100 text-gray-600" };
+  const statusColor: Record<string, string> = { Completed: "bg-green-50 text-green-700", Pending: "bg-yellow-50 text-yellow-700", Failed: "bg-red-50 text-red-600", Refunded: "bg-[var(--bg-secondary)] text-[var(--text-secondary)]" };
 
   const columns: Column<any>[] = [
-    { key: "id", label: "Transaction ID", render: (row) => <span className="text-xs font-mono text-gray-700">{row.id}</span> },
+    { key: "id", label: "Transaction ID", render: (row) => <span className="text-xs font-mono text-[var(--text-primary)]">{row.id}</span> },
     {
       key: "payer", label: "Payer", render: (row) => (
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">{row.payer.charAt(0)}</div>
-          <span className="text-sm text-gray-900">{row.payer}</span>
+          <div className="w-6 h-6 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-xs font-medium text-[var(--text-secondary)]">{row.payer.charAt(0)}</div>
+          <span className="text-sm text-[var(--text-primary)]">{row.payer}</span>
         </div>
       ),
     },
     {
       key: "recipient", label: "Recipient", render: (row) => (
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">{row.recipient.charAt(0)}</div>
-          <span className="text-sm text-gray-900">{row.recipient}</span>
+          <div className="w-6 h-6 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-xs font-medium text-[var(--text-secondary)]">{row.recipient.charAt(0)}</div>
+          <span className="text-sm text-[var(--text-primary)]">{row.recipient}</span>
         </div>
       ),
     },
-    { key: "amount", label: "Amount", render: (row) => <span className="text-gray-900 font-medium">R {row.amount.toLocaleString()}</span> },
-    { key: "method", label: "Method", render: (row) => <span className="text-gray-500 text-xs">{row.method}</span> },
+    { key: "amount", label: "Amount", render: (row) => <span className="text-[var(--text-primary)] font-medium">R {row.amount.toLocaleString()}</span> },
+    { key: "method", label: "Method", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.method}</span> },
     { key: "status", label: "Status", render: (row) => <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${statusColor[row.status] || ""}`}>{row.status}</span> },
-    { key: "date", label: "Date", render: (row) => <span className="text-gray-500 text-xs">{row.date}</span> },
+    { key: "date", label: "Date", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.date}</span> },
   ];
 
   return (
     <DashboardLayout>
-      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-gray-900 text-white" : "bg-red-600 text-white"}`}>
+      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-[var(--accent-color)] text-white" : "bg-red-600 text-white"}`}>
         <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
         {toastMessage}
       </div>
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Payments</h1>
-          <p className="text-sm text-gray-500 mt-1">All payment transactions</p>
+          <h1 className="text-xl font-semibold text-[var(--text-primary)]">Payments</h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">All payment transactions</p>
         </div>
-        <button className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors" onClick={() => toast("Payout modal coming soon.")}>
+        <button className="px-4 py-2 bg-[var(--accent-color)] text-white text-sm font-medium rounded-xl hover:bg-[var(--accent-hover)] transition-colors" onClick={() => toast("Payout modal coming soon.")}>
           Payout
         </button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Revenue</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">R {totalRevenue.toLocaleString()}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Total Revenue</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">R {totalRevenue.toLocaleString()}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">This Month</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">R {thisMonth.toLocaleString()}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">This Month</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">R {thisMonth.toLocaleString()}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Pending Payouts</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">R {pendingPayouts.toLocaleString()}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Pending Payouts</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">R {pendingPayouts.toLocaleString()}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Refunds</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">R {refunds.toLocaleString()}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Refunds</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">R {refunds.toLocaleString()}</p>
         </div>
       </div>
 
@@ -109,8 +109,8 @@ export function DashboardPaymentsPage() {
         exportFileName="payments"
         actions={(row) => (
           <div className="flex items-center gap-1">
-            <button onClick={() => toast("View receipt coming soon.")} className="p-1.5 text-gray-400 hover:text-gray-700 rounded"><i className="lnr lnr-file-empty text-sm"></i></button>
-            {row.status === "Completed" && <button onClick={() => toast("Refund modal coming soon.")} className="p-1.5 text-gray-400 hover:text-orange-600 rounded"><i className="lnr lnr-undo text-sm"></i></button>}
+            <button onClick={() => toast("View receipt coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded"><i className="lnr lnr-file-empty text-sm"></i></button>
+            {row.status === "Completed" && <button onClick={() => toast("Refund modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-orange-600 rounded"><i className="lnr lnr-undo text-sm"></i></button>}
           </div>
         )}
       />

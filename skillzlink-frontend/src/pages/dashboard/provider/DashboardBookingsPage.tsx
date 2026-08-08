@@ -60,14 +60,14 @@ export function DashboardBookingsPage() {
           {b.seeker?.avatar ? (
             <img src={b.seeker.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
+            <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm font-medium text-[var(--text-secondary)]">
               {b.seeker?.name?.charAt(0) || "C"}
             </div>
           )}
           <div>
-            <span className="text-sm font-medium text-gray-900">{b.seeker?.name || "Client"}</span>
+            <span className="text-sm font-medium text-[var(--text-primary)]">{b.seeker?.name || "Client"}</span>
             {b.status === "accepted" && b.seeker?.phone_number && (
-              <div className="text-xs text-gray-400 mt-0.5">{b.seeker.phone_number}</div>
+              <div className="text-xs text-[var(--text-secondary)] mt-0.5">{b.seeker.phone_number}</div>
             )}
           </div>
         </div>
@@ -79,8 +79,8 @@ export function DashboardBookingsPage() {
       label: "Date & Time",
       render: (b) => (
         <div>
-          <div className="text-sm text-gray-900">{b.booking_date}</div>
-          <div className="text-xs text-gray-500 mt-0.5">{b.start_time.substring(0, 5)} - {b.end_time.substring(0, 5)}</div>
+          <div className="text-sm text-[var(--text-primary)]">{b.booking_date}</div>
+          <div className="text-xs text-[var(--text-secondary)] mt-0.5">{b.start_time.substring(0, 5)} - {b.end_time.substring(0, 5)}</div>
         </div>
       ),
       exportValue: (b) => `${b.booking_date} ${b.start_time}-${b.end_time}`,
@@ -94,17 +94,17 @@ export function DashboardBookingsPage() {
     {
       key: "notes",
       label: "Notes",
-      render: (b) => <p className="text-sm text-gray-500 max-w-xs truncate" title={b.notes}>{b.notes || '-'}</p>,
+      render: (b) => <p className="text-sm text-[var(--text-secondary)] max-w-xs truncate" title={b.notes}>{b.notes || '-'}</p>,
       exportValue: (b) => b.notes || '',
     },
   ];
 
   return (
     <DashboardLayout>
-      <div className="p-8 relative">
+      <div className="p-8 relative font-['Inter',sans-serif]">
 
         {/* Toast */}
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg bg-gray-900 text-white transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}`}>
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg bg-[var(--accent-color)] text-white transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}`}>
           <i className="lnr lnr-checkmark-circle text-sm"></i>
           {toastMessage}
         </div>
@@ -123,28 +123,28 @@ export function DashboardBookingsPage() {
             <div className="flex items-center justify-end gap-2">
               {b.status === 'pending' && (
                 <>
-                  <button onClick={() => updateStatus(b.id, 'accepted')} className="px-4 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors">
+                  <button onClick={() => updateStatus(b.id, 'accepted')} className="px-4 py-2.5 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-medium text-sm transition-colors">
                     Accept
                   </button>
-                  <button onClick={() => updateStatus(b.id, 'rejected')} className="px-4 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors">
+                  <button onClick={() => updateStatus(b.id, 'rejected')} className="px-4 py-2.5 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium text-sm hover:bg-gray-200 transition-colors">
                     Reject
                   </button>
                 </>
               )}
               {b.status === 'accepted' && (
-                <button onClick={() => updateStatus(b.id, 'completed')} className="px-4 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors">
+                <button onClick={() => updateStatus(b.id, 'completed')} className="px-4 py-2.5 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-medium text-sm transition-colors">
                   Mark Completed
                 </button>
               )}
             </div>
           )}
           headerActions={
-            <div className="flex items-center gap-1 p-1 border border-gray-200 rounded-lg">
+            <div className="flex items-center gap-1 p-1 border border-[var(--border-color)] rounded-lg">
               {['all', 'pending', 'accepted'].map(f => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium capitalize transition-colors ${filter === f ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium capitalize transition-colors ${filter === f ? 'bg-[var(--accent-color)] text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                 >
                   {f}
                 </button>

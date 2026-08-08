@@ -86,7 +86,7 @@ export function DashboardInsightsPage() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-[3px] border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-[3px] border-[var(--border-color)] border-t-[var(--accent-color)] rounded-full animate-spin" />
         </div>
       </DashboardLayout>
     );
@@ -98,21 +98,21 @@ export function DashboardInsightsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 tracking-tight">Reports & Insights</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Platform analytics and performance metrics</p>
+            <h2 className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">Reports & Insights</h2>
+            <p className="text-sm text-[var(--text-secondary)] mt-0.5">Platform analytics and performance metrics</p>
           </div>
           <div className="flex items-center gap-2">
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-900 bg-white"
+              className="text-sm border border-[var(--border-color)] rounded-lg px-3 py-2 outline-none focus:border-[var(--accent-color)] bg-white"
             >
               <option value="7d">Last 7 days</option>
               <option value="30d">Last 30 days</option>
               <option value="90d">Last 90 days</option>
               <option value="1y">Last 12 months</option>
             </select>
-            <button className="px-4 py-2 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 flex items-center gap-2">
+            <button className="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] flex items-center gap-2">
               <i className="lnr lnr-download text-sm"></i> Export Report
             </button>
           </div>
@@ -121,15 +121,15 @@ export function DashboardInsightsPage() {
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {kpis.map((kpi, i) => (
-            <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+            <div key={i} className="bg-white border border-[var(--border-color)] rounded-lg p-4 hover:shadow-sm transition-shadow">
               <div className="flex items-center justify-between mb-2">
-                <i className={`${kpi.icon} text-gray-400`}></i>
+                <i className={`${kpi.icon} text-[var(--text-secondary)]`}></i>
                 <span className={`text-xs font-medium ${kpi.change >= 0 ? "text-emerald-600" : "text-red-500"}`}>
                   {kpi.change >= 0 ? "+" : ""}{kpi.change}%
                 </span>
               </div>
-              <p className="text-lg font-semibold text-gray-900">{kpi.value}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{kpi.label}</p>
+              <p className="text-lg font-semibold text-[var(--text-primary)]">{kpi.value}</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">{kpi.label}</p>
             </div>
           ))}
         </div>
@@ -137,9 +137,9 @@ export function DashboardInsightsPage() {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Revenue Trend */}
-          <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg p-6">
+          <div className="lg:col-span-2 bg-white border border-[var(--border-color)] rounded-lg p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-semibold text-gray-900">Weekly Performance</h3>
+              <h3 className="text-sm font-semibold text-[var(--text-primary)]">Weekly Performance</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px', borderSpacing: 0 }}>
@@ -154,7 +154,7 @@ export function DashboardInsightsPage() {
                 </thead>
                 <tbody>
                   {trends.map((row, i) => (
-                    <tr key={i} className="hover:bg-gray-50" style={{ borderBottom: '1px solid #f3f4f6' }}>
+                    <tr key={i} className="hover:bg-[var(--bg-secondary)]" style={{ borderBottom: '1px solid #f3f4f6' }}>
                       <td style={{ padding: '12px', color: '#111827', fontWeight: 500, border: 'none' }}>{row.period}</td>
                       <td style={{ padding: '12px', textAlign: 'right', color: '#4b5563', border: 'none' }}>{row.users}</td>
                       <td style={{ padding: '12px', textAlign: 'right', color: '#4b5563', border: 'none' }}>{row.bookings}</td>
@@ -170,20 +170,20 @@ export function DashboardInsightsPage() {
           </div>
 
           {/* Top Categories */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Top Categories</h3>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-6">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-4">Top Categories</h3>
             <div className="space-y-4">
               {topCategories.map((cat, i) => (
                 <div key={i} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500">{i + 1}</span>
+                    <span className="w-6 h-6 rounded bg-[var(--bg-secondary)] flex items-center justify-center text-xs font-bold text-[var(--text-secondary)]">{i + 1}</span>
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{cat.name}</p>
-                      <p className="text-xs text-gray-500">{cat.bookings} bookings</p>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">{cat.name}</p>
+                      <p className="text-xs text-[var(--text-secondary)]">{cat.bookings} bookings</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{cat.revenue}</p>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{cat.revenue}</p>
                     <p className="text-xs text-emerald-600">+{cat.growth}%</p>
                   </div>
                 </div>
@@ -193,10 +193,10 @@ export function DashboardInsightsPage() {
         </div>
 
         {/* Top Providers */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Top Performing Providers</h3>
-            <button className="text-xs text-gray-500 hover:text-gray-900 font-medium">View All →</button>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">Top Performing Providers</h3>
+            <button className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium">View All →</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '13px', borderSpacing: 0 }}>
@@ -210,13 +210,13 @@ export function DashboardInsightsPage() {
               </thead>
               <tbody>
                 {topProviders.map((p, i) => (
-                  <tr key={i} className="hover:bg-gray-50" style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <tr key={i} className="hover:bg-[var(--bg-secondary)]" style={{ borderBottom: '1px solid #f3f4f6' }}>
                     <td style={{ padding: '12px', border: 'none' }}>
                       <div className="flex items-center gap-3">
                         {p.avatar ? (
                           <img src={p.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
+                          <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm font-medium text-[var(--text-secondary)]">
                             {p.name.charAt(0)}
                           </div>
                         )}
@@ -239,35 +239,35 @@ export function DashboardInsightsPage() {
 
         {/* Quick Reports */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow cursor-pointer group">
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-5 hover:shadow-sm transition-shadow cursor-pointer group">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[var(--accent-light)] text-blue-600 flex items-center justify-center">
                 <i className="lnr lnr-chart-bars"></i>
               </div>
-              <h4 className="text-sm font-semibold text-gray-900">User Growth Report</h4>
+              <h4 className="text-sm font-semibold text-[var(--text-primary)]">User Growth Report</h4>
             </div>
-            <p className="text-xs text-gray-500 mb-3">Registration trends, retention rates, and user demographics breakdown.</p>
-            <span className="text-xs font-medium text-gray-400 group-hover:text-gray-900 transition-colors">Generate →</span>
+            <p className="text-xs text-[var(--text-secondary)] mb-3">Registration trends, retention rates, and user demographics breakdown.</p>
+            <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">Generate →</span>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow cursor-pointer group">
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-5 hover:shadow-sm transition-shadow cursor-pointer group">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <i className="lnr lnr-diamond"></i>
               </div>
-              <h4 className="text-sm font-semibold text-gray-900">Financial Report</h4>
+              <h4 className="text-sm font-semibold text-[var(--text-primary)]">Financial Report</h4>
             </div>
-            <p className="text-xs text-gray-500 mb-3">Revenue breakdown, payment methods, refunds, and payout summaries.</p>
-            <span className="text-xs font-medium text-gray-400 group-hover:text-gray-900 transition-colors">Generate →</span>
+            <p className="text-xs text-[var(--text-secondary)] mb-3">Revenue breakdown, payment methods, refunds, and payout summaries.</p>
+            <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">Generate →</span>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow cursor-pointer group">
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-5 hover:shadow-sm transition-shadow cursor-pointer group">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center">
                 <i className="lnr lnr-pie-chart"></i>
               </div>
-              <h4 className="text-sm font-semibold text-gray-900">Service Analytics</h4>
+              <h4 className="text-sm font-semibold text-[var(--text-primary)]">Service Analytics</h4>
             </div>
-            <p className="text-xs text-gray-500 mb-3">Category performance, provider utilization, and matching efficiency.</p>
-            <span className="text-xs font-medium text-gray-400 group-hover:text-gray-900 transition-colors">Generate →</span>
+            <p className="text-xs text-[var(--text-secondary)] mb-3">Category performance, provider utilization, and matching efficiency.</p>
+            <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">Generate →</span>
           </div>
         </div>
       </div>

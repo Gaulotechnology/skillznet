@@ -5,14 +5,14 @@ import { DataTable, type Column } from "../../../components/shared/DataTable";
 
 const STATUS_COLORS: Record<string, string> = {
   "2": "bg-emerald-50 text-emerald-700",
-  "3": "bg-blue-50 text-blue-700",
+  "3": "bg-[var(--accent-light)] text-blue-700",
   "4": "bg-amber-50 text-amber-700",
-  "5": "bg-rose-50 text-rose-700",
+  "5": "bg-[var(--accent-light)] text-rose-700",
 };
 
 function getStatusColor(code: number) {
   const first = String(code)[0];
-  return STATUS_COLORS[first] || "bg-gray-100 text-gray-700";
+  return STATUS_COLORS[first] || "bg-[var(--bg-secondary)] text-[var(--text-primary)]";
 }
 
 export function DashboardApiLogsPage() {
@@ -42,7 +42,7 @@ export function DashboardApiLogsPage() {
       key: "created_at",
       label: "Timestamp",
       render: (log) => (
-        <span className="text-xs font-mono text-gray-500 whitespace-nowrap">
+        <span className="text-xs font-mono text-[var(--text-secondary)] whitespace-nowrap">
           {new Date(log.created_at).toLocaleString()}
         </span>
       ),
@@ -54,18 +54,18 @@ export function DashboardApiLogsPage() {
       render: (log) => (
         <div className="flex items-center gap-3">
           <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
-            log.method === 'GET' ? 'bg-blue-50 text-blue-700' :
+            log.method === 'GET' ? 'bg-[var(--accent-light)] text-blue-700' :
             log.method === 'POST' ? 'bg-emerald-50 text-emerald-700' :
-            log.method === 'DELETE' ? 'bg-rose-50 text-rose-700' :
+            log.method === 'DELETE' ? 'bg-[var(--accent-light)] text-rose-700' :
             'bg-amber-50 text-amber-700'
           }`}>
             {log.method}
           </span>
-          <span className="text-sm text-gray-900 font-mono max-w-[280px] truncate" title={log.url}>
+          <span className="text-sm text-[var(--text-primary)] font-mono max-w-[280px] truncate" title={log.url}>
             {log.url.replace(/^https?:\/\/[^/]+/, '')}
           </span>
           {log.request_body && (
-            <i className={`lnr lnr-chevron-down text-gray-400 text-xs ml-auto transition-transform ${expanded === log.id ? 'rotate-180' : ''}`}></i>
+            <i className={`lnr lnr-chevron-down text-[var(--text-secondary)] text-xs ml-auto transition-transform ${expanded === log.id ? 'rotate-180' : ''}`}></i>
           )}
         </div>
       ),
@@ -85,7 +85,7 @@ export function DashboardApiLogsPage() {
       key: "response_time_ms",
       label: "Time",
       render: (log) => (
-        <span className={`text-sm font-mono ${log.response_time_ms > 500 ? 'text-red-600' : 'text-gray-900'}`}>
+        <span className={`text-sm font-mono ${log.response_time_ms > 500 ? 'text-red-600' : 'text-[var(--text-primary)]'}`}>
           {log.response_time_ms ?? '-'}ms
         </span>
       ),
@@ -95,9 +95,9 @@ export function DashboardApiLogsPage() {
       key: "ip_address",
       label: "IP / User",
       render: (log) => (
-        <div className="text-xs font-mono text-gray-500">
+        <div className="text-xs font-mono text-[var(--text-secondary)]">
           <div>{log.ip_address}</div>
-          <div className="text-gray-400">UID: {log.user_id ?? 'N/A'}</div>
+          <div className="text-[var(--text-secondary)]">UID: {log.user_id ?? 'N/A'}</div>
         </div>
       ),
       exportValue: (log) => `${log.ip_address} (UID: ${log.user_id ?? 'N/A'})`,
@@ -109,37 +109,37 @@ export function DashboardApiLogsPage() {
       <div className="p-8 space-y-8">
 
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">API Health & Logs</h2>
-          <p className="text-sm text-gray-500 mt-1">Monitor all incoming and outgoing API requests across the platform.</p>
+          <h2 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">API Health & Logs</h2>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">Monitor all incoming and outgoing API requests across the platform.</p>
         </div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center text-xl">
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-6 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-secondary)] flex items-center justify-center text-xl">
               <i className="lnr lnr-cloud-sync"></i>
             </div>
             <div>
-              <h4 className="text-2xl font-semibold text-gray-900">{logs.length}</h4>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Requests</p>
+              <h4 className="text-2xl font-semibold text-[var(--text-primary)]">{logs.length}</h4>
+              <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Total Requests</p>
             </div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-6 flex items-center gap-4">
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-6 flex items-center gap-4">
             <div className="w-12 h-12 rounded-lg bg-red-50 text-red-600 flex items-center justify-center text-xl">
               <i className="lnr lnr-warning"></i>
             </div>
             <div>
-              <h4 className="text-2xl font-semibold text-gray-900">{errorCount}</h4>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Errors (4xx/5xx)</p>
+              <h4 className="text-2xl font-semibold text-[var(--text-primary)]">{errorCount}</h4>
+              <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Errors (4xx/5xx)</p>
             </div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-6 flex items-center gap-4">
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-6 flex items-center gap-4">
             <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
               <i className="lnr lnr-hourglass"></i>
             </div>
             <div>
-              <h4 className="text-2xl font-semibold text-gray-900">{avgResponse}ms</h4>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Response Time</p>
+              <h4 className="text-2xl font-semibold text-[var(--text-primary)]">{avgResponse}ms</h4>
+              <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Avg Response Time</p>
             </div>
           </div>
         </div>
@@ -159,18 +159,18 @@ export function DashboardApiLogsPage() {
               <select
                 value={methodFilter}
                 onChange={e => setMethodFilter(e.target.value)}
-                className="bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors"
+                className="bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors"
               >
                 <option value="">All Methods</option>
                 {["GET", "POST", "PUT", "DELETE"].map(m => (
                   <option key={m} value={m}>{m}</option>
                 ))}
               </select>
-              <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--text-primary)]">
                 <input type="checkbox" checked={errorsOnly} onChange={e => setErrorsOnly(e.target.checked)} className="w-4 h-4 rounded border-gray-300 accent-gray-900" />
                 Errors Only
               </label>
-              <button onClick={fetchLogs} className="px-4 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors flex items-center gap-2">
+              <button onClick={fetchLogs} className="px-4 py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] transition-colors flex items-center gap-2">
                 <i className={`lnr lnr-sync ${loading ? 'animate-spin' : ''}`}></i> Refresh
               </button>
             </div>
@@ -179,9 +179,9 @@ export function DashboardApiLogsPage() {
 
         {/* Expanded request body rows - rendered outside DataTable for expandable detail */}
         {expanded && logs.find(l => l.id === expanded)?.request_body && (
-          <div className="border border-gray-200 rounded-lg overflow-hidden -mt-4">
-            <div className="px-6 py-4 border-l-4 border-gray-900 bg-gray-50">
-              <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Request Body</h5>
+          <div className="border border-[var(--border-color)] rounded-lg overflow-hidden -mt-4">
+            <div className="px-6 py-4 border-l-4 border-gray-900 bg-[var(--bg-secondary)]">
+              <h5 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-2">Request Body</h5>
               <pre className="bg-gray-900 text-emerald-400 p-4 rounded-lg text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all">
                 {logs.find(l => l.id === expanded)?.request_body}
               </pre>

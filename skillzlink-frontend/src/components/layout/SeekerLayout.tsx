@@ -22,17 +22,17 @@ export function SeekerLayout({ children }: SeekerLayoutProps) {
   ];
 
   return (
-    <div className="bg-slate-50 min-h-[calc(100vh-80px)] pt-12 pb-24 font-sans text-slate-800">
+    <div className="bg-[var(--bg-secondary)] min-h-[calc(100vh-72px)] pt-10 pb-20" style={{ fontFamily: "'Inter', sans-serif" }}>
       
       {/* Top Banner Area */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-black shadow-lg border-4 border-white">
+        <div className="flex flex-col md:flex-row items-center gap-5">
+          <div className="w-20 h-20 rounded-full bg-[var(--accent-light)] flex items-center justify-center text-[var(--accent-color)] text-2xl font-bold border-2 border-[var(--border-color)]">
             {(user?.name || "U")[0].toUpperCase()}
           </div>
           <div className="text-center md:text-left">
-            <h1 className="text-3xl font-black text-slate-900">{user?.name || "User"}</h1>
-            <span className="inline-block mt-2 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100">
+            <h1 className="text-2xl font-bold text-[var(--text-primary)]">{user?.name || "User"}</h1>
+            <span className="inline-block mt-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-[var(--accent-color)] bg-[var(--accent-light)]">
               Customer Account
             </span>
           </div>
@@ -41,21 +41,21 @@ export function SeekerLayout({ children }: SeekerLayoutProps) {
 
       {/* Navigation Tabs */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto custom-scrollbar">
-          <nav className="flex min-w-max p-2 gap-2">
+        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-x-auto">
+          <nav className="flex min-w-max p-1.5 gap-1">
             {tabs.map((tab) => {
               const isActive = location.pathname.startsWith(tab.to);
               return (
                 <Link
                   key={tab.to}
                   to={tab.to}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     isActive
-                      ? "bg-indigo-600 text-white shadow-md"
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                      ? "bg-[var(--accent-color)] text-white"
+                      : "text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
-                  <i className={`lnr ${tab.icon} ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}></i>
+                  <i className={`lnr ${tab.icon} text-xs`}></i>
                   {tab.label}
                 </Link>
               );

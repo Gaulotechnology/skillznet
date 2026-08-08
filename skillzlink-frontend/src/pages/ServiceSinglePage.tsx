@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 
 export function ServiceSinglePage() {
   return (
-    <>
-      {/* Inner Home Banner Start */}
-      <div className="wt-haslayout wt-innerbannerholder">
+    <div className="min-h-screen bg-white font-['Inter',sans-serif]">
+      {/* Breadcrumb */}
+      <div className="bg-[var(--bg-secondary)] py-6">
         <div className="container">
           <div className="row justify-content-md-center">
             <div className="col-xs-12 col-sm-12 col-md-8 push-md-2 col-lg-6 push-lg-3">
@@ -180,6 +180,6 @@ export function ServiceSinglePage() {
         </div>
       </main>
       {/* Main End */}
-    </>
+    </div>
   );
 }

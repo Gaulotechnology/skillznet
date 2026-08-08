@@ -26,7 +26,7 @@ export function DashboardInvoicesPage() {
       key: "id",
       label: "Invoice ID",
       render: (invoice, index) => (
-        <span className="text-sm font-medium text-gray-900">
+        <span className="text-sm font-medium text-[var(--text-primary)]">
           #{invoice.id || `INV-${Date.now().toString().slice(-6)}-${index}`}
         </span>
       ),
@@ -36,7 +36,7 @@ export function DashboardInvoicesPage() {
       key: "date",
       label: "Date",
       render: (invoice) => (
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-[var(--text-secondary)]">
           {new Date(invoice.date || invoice.created_at || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
         </span>
       ),
@@ -62,32 +62,32 @@ export function DashboardInvoicesPage() {
     {
       key: "amount",
       label: "Amount",
-      render: (invoice) => <span className="text-sm font-semibold text-gray-900">${invoice.amount || "19.00"}</span>,
+      render: (invoice) => <span className="text-sm font-semibold text-[var(--text-primary)]">${invoice.amount || "19.00"}</span>,
       exportValue: (invoice) => invoice.amount || "19.00",
     },
   ];
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-8 font-['Inter',sans-serif]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Billing & Invoices</h2>
-            <p className="text-sm text-gray-500 mt-1">Manage your billing history and view past invoices.</p>
+            <h2 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">Billing & Invoices</h2>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">Manage your billing history and view past invoices.</p>
           </div>
           {role === "provider" && (
-            <Link to="/dashboard/subscription" className="px-4 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors flex items-center gap-2">
+            <Link to="/dashboard/subscription" className="px-5 py-2.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors flex items-center gap-2">
               <i className="lnr lnr-rocket"></i> Manage Subscription
             </Link>
           )}
         </div>
 
         {role !== "provider" ? (
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="border border-[var(--border-color)] bg-[var(--bg-primary)] rounded-3xl overflow-hidden shadow-sm">
             <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-              <i className="lnr lnr-file-empty text-4xl text-gray-300 block mb-3"></i>
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">Not Applicable</h3>
-              <p className="text-sm text-gray-400 max-w-md mx-auto">
+              <i className="lnr lnr-file-empty text-4xl text-[var(--text-secondary)] block mb-3"></i>
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Not Applicable</h3>
+              <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
                 Invoices are only applicable to Professional accounts with active subscriptions.
               </p>
             </div>
@@ -101,7 +101,7 @@ export function DashboardInvoicesPage() {
             emptyMessage="You have no past invoices or billing history."
             exportFileName="invoices"
             actions={() => (
-              <button className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+              <button className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent-color)] hover:bg-[var(--accent-light)] transition-colors">
                 <i className="lnr lnr-download text-sm"></i>
               </button>
             )}

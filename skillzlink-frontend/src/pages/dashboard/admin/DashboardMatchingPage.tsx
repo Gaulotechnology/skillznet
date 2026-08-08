@@ -47,57 +47,57 @@ export function DashboardMatchingPage() {
   const pending = requests.filter(r => r.status === "Pending").length;
   const matchedToday = requests.filter(r => r.status === "Matched" && r.createdAt === "2026-08-08").length;
 
-  const urgencyColor: Record<string, string> = { Low: "bg-blue-50 text-blue-700", Medium: "bg-yellow-50 text-yellow-700", High: "bg-orange-50 text-orange-700", Urgent: "bg-red-50 text-red-700" };
-  const statusColor: Record<string, string> = { Pending: "bg-yellow-50 text-yellow-700", Matched: "bg-green-50 text-green-700", Completed: "bg-gray-100 text-gray-600", Cancelled: "bg-red-50 text-red-600" };
+  const urgencyColor: Record<string, string> = { Low: "bg-[var(--accent-light)] text-blue-700", Medium: "bg-yellow-50 text-yellow-700", High: "bg-orange-50 text-orange-700", Urgent: "bg-red-50 text-red-700" };
+  const statusColor: Record<string, string> = { Pending: "bg-yellow-50 text-yellow-700", Matched: "bg-green-50 text-green-700", Completed: "bg-[var(--bg-secondary)] text-[var(--text-secondary)]", Cancelled: "bg-red-50 text-red-600" };
 
   const columns: Column<any>[] = [
-    { key: "id", label: "Request ID", render: (row) => <span className="text-xs font-mono text-gray-700">{row.id}</span> },
+    { key: "id", label: "Request ID", render: (row) => <span className="text-xs font-mono text-[var(--text-primary)]">{row.id}</span> },
     {
       key: "seeker", label: "Seeker", render: (row) => (
         <div className="flex items-center gap-2">
           {row.seekerAvatar ? <img src={row.seekerAvatar} alt="" className="w-7 h-7 rounded-full object-cover" /> : (
-            <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600">{row.seeker.charAt(0)}</div>
+            <div className="w-7 h-7 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-xs font-medium text-[var(--text-secondary)]">{row.seeker.charAt(0)}</div>
           )}
-          <span className="text-sm text-gray-900">{row.seeker}</span>
+          <span className="text-sm text-[var(--text-primary)]">{row.seeker}</span>
         </div>
       ),
     },
-    { key: "category", label: "Category", render: (row) => <span className="text-gray-700">{row.category}</span> },
-    { key: "location", label: "Location", render: (row) => <span className="text-gray-500 text-xs">{row.location}</span> },
-    { key: "budgetRange", label: "Budget", render: (row) => <span className="text-gray-700 text-xs">{row.budgetRange}</span> },
+    { key: "category", label: "Category", render: (row) => <span className="text-[var(--text-primary)]">{row.category}</span> },
+    { key: "location", label: "Location", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.location}</span> },
+    { key: "budgetRange", label: "Budget", render: (row) => <span className="text-[var(--text-primary)] text-xs">{row.budgetRange}</span> },
     { key: "urgency", label: "Urgency", render: (row) => <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${urgencyColor[row.urgency] || ""}`}>{row.urgency}</span> },
     { key: "status", label: "Status", render: (row) => <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${statusColor[row.status] || ""}`}>{row.status}</span> },
-    { key: "createdAt", label: "Created", render: (row) => <span className="text-gray-500 text-xs">{row.createdAt}</span> },
+    { key: "createdAt", label: "Created", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.createdAt}</span> },
   ];
 
   return (
     <DashboardLayout>
-      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-gray-900 text-white" : "bg-red-600 text-white"}`}>
+      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-[var(--accent-color)] text-white" : "bg-red-600 text-white"}`}>
         <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
         {toastMessage}
       </div>
 
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">On-Demand Matching</h1>
-        <p className="text-sm text-gray-500 mt-1">Service requests from seekers awaiting provider matching</p>
+        <h1 className="text-xl font-semibold text-[var(--text-primary)]">On-Demand Matching</h1>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">Service requests from seekers awaiting provider matching</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Requests</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">{requests.length}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Total Requests</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{requests.length}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Pending</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">{pending}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Pending</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{pending}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Matched Today</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">{matchedToday}</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Matched Today</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{matchedToday}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Match Time</p>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">2.4h</p>
+        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Avg Match Time</p>
+          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">2.4h</p>
         </div>
       </div>
 
@@ -108,9 +108,9 @@ export function DashboardMatchingPage() {
         exportFileName="matching-requests"
         actions={(row) => (
           <div className="flex items-center gap-1">
-            <button onClick={() => toast("Match modal coming soon.")} className="p-1.5 text-gray-400 hover:text-green-600 rounded" title="Match"><i className="lnr lnr-sync text-sm"></i></button>
-            <button onClick={() => toast("View details coming soon.")} className="p-1.5 text-gray-400 hover:text-gray-700 rounded" title="View"><i className="lnr lnr-eye text-sm"></i></button>
-            {row.status === "Pending" && <button onClick={() => handleCancel(row)} className="p-1.5 text-gray-400 hover:text-red-600 rounded" title="Cancel"><i className="lnr lnr-cross-circle text-sm"></i></button>}
+            <button onClick={() => toast("Match modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-green-600 rounded" title="Match"><i className="lnr lnr-sync text-sm"></i></button>
+            <button onClick={() => toast("View details coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded" title="View"><i className="lnr lnr-eye text-sm"></i></button>
+            {row.status === "Pending" && <button onClick={() => handleCancel(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-red-600 rounded" title="Cancel"><i className="lnr lnr-cross-circle text-sm"></i></button>}
           </div>
         )}
       />

@@ -92,11 +92,16 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/conversations', [ConversationController::class, 'store']);
         Route::get('/conversations/{id}', [ConversationController::class, 'show']);
         Route::post('/conversations/{id}/messages', [ConversationController::class, 'sendMessage']);
+        Route::get('/admin/conversations/all', [ConversationController::class, 'adminIndex']);
+        Route::get('/users/list', [ConversationController::class, 'userList']);
 
         Route::get('/applications', [ApplicationController::class, 'index']);
         Route::post('/applications/{id}/approve', [ApplicationController::class, 'approve']);
         Route::post('/applications/{id}/reject', [ApplicationController::class, 'reject']);
         
+        Route::get('/permissions', [AdminController::class, 'permissions']);
+        Route::post('/permissions/sync', [AdminController::class, 'syncPermissions']);
+
         // Super admin only routes
         Route::middleware('role:super_admin')->group(function (): void {
             Route::get('/theme-settings', [AdminController::class, 'themeSettings']);
@@ -106,9 +111,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
             Route::get('/api-logs', [AdminController::class, 'apiLogs']);
             Route::get('/sms-logs', [AdminController::class, 'smsLogs']);
             Route::get('/comm-logs', [AdminController::class, 'commLogs']);
-            
-            Route::get('/permissions', [AdminController::class, 'permissions']);
-            Route::post('/permissions/sync', [AdminController::class, 'syncPermissions']);
         });
     });
+
 });

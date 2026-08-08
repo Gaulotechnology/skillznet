@@ -52,6 +52,7 @@ import { DashboardConversationsPage } from './pages/dashboard/admin/DashboardCon
 import { DashboardInsightsPage } from './pages/dashboard/admin/DashboardInsightsPage';
 import { DashboardRolesPage } from './pages/dashboard/admin/DashboardRolesPage';
 import { DashboardEmployeesPage } from './pages/dashboard/admin/DashboardEmployeesPage';
+import { DashboardAdminConversationsPage } from './pages/dashboard/admin/DashboardAdminConversationsPage';
 import { DashboardAgentsPage } from './pages/dashboard/admin/DashboardAgentsPage';
 import { DashboardAffiliatesPage } from './pages/dashboard/admin/DashboardAffiliatesPage';
 import { DashboardInvitationsPage } from './pages/dashboard/admin/DashboardInvitationsPage';
@@ -166,6 +167,8 @@ export function AppRoutes() {
       <Route path="/dashboard/settings" element={<DashboardAccountSettingsPage />} />
       <Route path="/dashboard/help" element={<DashboardHelpSupportPage />} />
       <Route path="/dashboard/help-support" element={<DashboardHelpSupportPage />} />
+      <Route path="/dashboard/messages" element={<SeekerMessagesPage />} />
+      <Route path="/dashboard/saved" element={<SeekerSavedItemsPage />} />
 
       {/* Dashboard: Seekers (using MainLayout and inner SeekerLayout) */}
       <Route path="/dashboard/seeker/overview" element={withLayout(<DashboardSeekerOverviewPage />)} />
@@ -213,6 +216,7 @@ export function AppRoutes() {
       <Route path="/dashboard/admin/packages" element={<DashboardPackagesPage />} />
       <Route path="/dashboard/admin/roles" element={<DashboardRolesPage />} />
       <Route path="/dashboard/admin/employees" element={<DashboardEmployeesPage />} />
+      <Route path="/dashboard/admin/conversations" element={<DashboardAdminConversationsPage />} />
       <Route path="/dashboard/admin/agents" element={<DashboardAgentsPage />} />
       <Route path="/dashboard/admin/affiliates" element={<DashboardAffiliatesPage />} />
       <Route path="/dashboard/admin/matching" element={<DashboardMatchingPage />} />

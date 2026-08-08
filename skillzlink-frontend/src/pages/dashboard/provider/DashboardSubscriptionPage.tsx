@@ -74,19 +74,19 @@ export function DashboardSubscriptionPage() {
     {
       key: "tier",
       label: "Plan Details",
-      render: (h) => <span className="text-sm font-medium text-gray-900 capitalize">{h.tier?.replace(/_/g, ' ')}</span>,
+      render: (h) => <span className="text-sm font-medium text-[var(--text-primary)] capitalize">{h.tier?.replace(/_/g, ' ')}</span>,
       exportValue: (h) => h.tier?.replace(/_/g, ' ') || '',
     },
     {
       key: "start_date",
       label: "Start Date",
-      render: (h) => <span className="text-sm text-gray-500">{h.start_date ? new Date(h.start_date).toLocaleDateString() : '—'}</span>,
+      render: (h) => <span className="text-sm text-[var(--text-secondary)]">{h.start_date ? new Date(h.start_date).toLocaleDateString() : '—'}</span>,
       exportValue: (h) => h.start_date ? new Date(h.start_date).toLocaleDateString() : '',
     },
     {
       key: "end_date",
       label: "End Date",
-      render: (h) => <span className="text-sm text-gray-500">{h.end_date ? new Date(h.end_date).toLocaleDateString() : '—'}</span>,
+      render: (h) => <span className="text-sm text-[var(--text-secondary)]">{h.end_date ? new Date(h.end_date).toLocaleDateString() : '—'}</span>,
       exportValue: (h) => h.end_date ? new Date(h.end_date).toLocaleDateString() : '',
     },
     {
@@ -100,7 +100,7 @@ export function DashboardSubscriptionPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400">Expired</span>
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)]">Expired</span>
         );
       },
       exportValue: (h) => isActive(h.tier) ? 'Active' : 'Expired',
@@ -109,10 +109,10 @@ export function DashboardSubscriptionPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-8 font-['Inter',sans-serif]">
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Subscription & Plans</h2>
-          <p className="text-sm text-gray-500 mt-1">Manage your subscription to unlock premium features and visibility.</p>
+          <h2 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">Subscription & Plans</h2>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">Manage your subscription to unlock premium features and visibility.</p>
         </div>
 
         {/* Notifications */}
@@ -131,22 +131,22 @@ export function DashboardSubscriptionPage() {
 
         {/* Current Plan Summary */}
         {subscription && (
-          <div className="mb-8 bg-gray-900 rounded-lg p-6 text-white">
+          <div className="mb-8 bg-[var(--accent-light)] border border-[var(--border-color)] rounded-3xl p-6 shadow-sm">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center text-2xl">
+                <div className="w-12 h-12 rounded-lg bg-[var(--accent-color)]/10 flex items-center justify-center text-2xl">
                   {subscription.tier === 'free' || !subscription.tier ? '🌟' : '👑'}
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">Current Plan</p>
-                  <h3 className="text-xl font-semibold capitalize text-white">
+                  <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-0.5">Current Plan</p>
+                  <h3 className="text-xl font-semibold capitalize text-[var(--text-primary)]">
                     {subscription.tier?.replace(/_/g, ' ') || 'Free Plan'}
                   </h3>
-                  {expiryDate && <p className="text-sm text-gray-400 mt-0.5">Expires on {expiryDate}</p>}
+                  {expiryDate && <p className="text-sm text-[var(--text-secondary)] mt-0.5">Expires on {expiryDate}</p>}
                 </div>
               </div>
               {(!subscription.tier || subscription.tier === 'free') && (
-                <span className="px-3 py-1.5 rounded-md bg-white/10 text-sm text-gray-300">Basic visibility</span>
+                <span className="px-3 py-1.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)]">Basic visibility</span>
               )}
             </div>
           </div>
@@ -157,37 +157,37 @@ export function DashboardSubscriptionPage() {
             const isPlanActive = isActive(plan.id);
             const isSelected = selectedPlan === plan.id;
             return (
-              <div key={plan.id} className={`bg-white rounded-lg overflow-hidden transition-all relative ${isPlanActive ? 'ring-2 ring-gray-900' : 'border border-gray-200 hover:border-gray-300'} flex flex-col`}>
+              <div key={plan.id} className={`bg-[var(--bg-primary)] rounded-3xl overflow-hidden transition-all duration-300 relative ${isPlanActive ? 'ring-2 ring-[var(--accent-color)] shadow-sm' : 'border border-[var(--border-color)] hover:border-[var(--accent-color)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]'} flex flex-col`}>
                 {plan.badge && (
                   <div className="absolute top-4 right-4">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 text-amber-700">{plan.badge}</span>
                   </div>
                 )}
-                <div className="p-6 border-b border-gray-100">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">{plan.title}</h3>
+                <div className="p-6 border-b border-[var(--border-color)]">
+                  <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">{plan.title}</h3>
                   <div className="flex items-end gap-1">
-                    <span className="text-4xl font-semibold text-gray-900 tracking-tight">{plan.price}</span>
-                    <span className="text-sm text-gray-500 mb-1">{plan.period}</span>
+                    <span className="text-4xl font-semibold text-[var(--text-primary)] tracking-tight">{plan.price}</span>
+                    <span className="text-sm text-[var(--text-secondary)] mb-1">{plan.period}</span>
                   </div>
                 </div>
                 <div className="p-6 flex-1 flex flex-col">
                   <ul className="space-y-3 mb-6 flex-1">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-900 mt-1.5 shrink-0"></span>
-                        <span className="text-sm text-gray-600">{feature}</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-color)] mt-1.5 shrink-0"></span>
+                        <span className="text-sm text-[var(--text-secondary)]">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   {isPlanActive ? (
-                    <div className="w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm text-center flex items-center justify-center gap-2">
+                    <div className="w-full py-2.5 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium text-sm text-center flex items-center justify-center gap-2">
                       <i className="lnr lnr-checkmark-circle"></i> Active Plan
                     </div>
                   ) : isSelected ? (
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="bg-[var(--bg-secondary)] rounded-xl p-4 border border-[var(--border-color)]">
                       <div className="mb-3">
-                        <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Payment Method</label>
-                        <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors">
+                        <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Payment Method</label>
+                        <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-xl px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors">
                           <option value="ecocash">EcoCash</option>
                           <option value="onemoney">OneMoney</option>
                           <option value="innbucks">InnBucks</option>
@@ -195,16 +195,16 @@ export function DashboardSubscriptionPage() {
                         </select>
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => handleSubscribe(plan.id)} disabled={subscribing || loading} className="flex-1 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors flex items-center justify-center">
+                        <button onClick={() => handleSubscribe(plan.id)} disabled={subscribing || loading} className="flex-1 py-2.5 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-medium text-sm transition-colors flex items-center justify-center">
                           {subscribing ? <i className="lnr lnr-sync animate-spin"></i> : 'Pay Now'}
                         </button>
-                        <button onClick={() => setSelectedPlan(null)} disabled={subscribing} className="py-2.5 px-3 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors">
+                        <button onClick={() => setSelectedPlan(null)} disabled={subscribing} className="py-2.5 px-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] font-medium text-sm hover:bg-[var(--bg-secondary)] transition-colors">
                           <i className="lnr lnr-cross"></i>
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <button onClick={() => setSelectedPlan(plan.id)} disabled={loading} className="w-full py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors">
+                    <button onClick={() => setSelectedPlan(plan.id)} disabled={loading} className="w-full py-2.5 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-medium text-sm transition-colors">
                       Upgrade Now
                     </button>
                   )}

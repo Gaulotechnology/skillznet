@@ -193,7 +193,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <i className={`lnr ${sidebarOpen ? 'lnr-cross' : 'lnr-menu'} text-lg`}></i>
           </button>
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-[var(--accent-color)] flex items-center justify-center text-white font-bold text-sm">
               S
             </div>
             <span className="text-lg font-bold tracking-tight text-gray-900 hidden sm:block">SkillzLink</span>

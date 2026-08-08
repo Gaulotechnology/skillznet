@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --accent-color: #FF385C;
+  --accent-hover: #E31C5F;
+  --accent-light: #FFF1F3;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --bg-auth-panel: #F0F4F8;
+  --border-color: #E5E7EB;
+  --success-color: #059669;
+  --whatsapp-color: #25D366;
+}
+
 body {
   margin: 0;
 }

@@ -24,7 +24,7 @@ export function ProfessionalsListingPage() {
   const [searchText, setSearchText] = useState("")
   const [categoryFilter, setCategoryFilter] = useState(initialService)
   const [cityFilter, setCityFilter] = useState(initialCity)
-  const [levelFilter, setLevelFilter] = useState("All")
+  const [experienceFilter, setExperienceFilter] = useState("All")
   const [hourlyRateFilter, setHourlyRateFilter] = useState("All")
   const [successRateFilter, setSuccessRateFilter] = useState("All")
   const [currentPage, setCurrentPage] = useState(1)
@@ -49,15 +49,23 @@ export function ProfessionalsListingPage() {
     if (categoryFilter !== "All") params.set("service", categoryFilter)
     setSearchParams(params, { replace: true })
     setCurrentPage(1)
-  }, [categoryFilter, cityFilter, searchText, levelFilter, hourlyRateFilter, successRateFilter, setSearchParams])
+  }, [categoryFilter, cityFilter, searchText, experienceFilter, hourlyRateFilter, successRateFilter, setSearchParams])
 
   const filteredProfessionals = professionals.filter(pro => {
     const cat = pro.service_category ?? ""
     const loc = pro.location ?? ""
-    const lvl = pro.level ?? "Junior"
+    const yoe = Number(pro.years_of_experience ?? 0)
     const matchesCategory = categoryFilter === "All" || cat.toLowerCase().includes(categoryFilter.toLowerCase())
     const matchesCity = cityFilter === "All" || loc.toLowerCase().includes(cityFilter.toLowerCase())
-    const matchesLevel = levelFilter === "All" || lvl === levelFilter
+
+    let matchesExperience = true
+    if (experienceFilter !== "All") {
+      if (experienceFilter === "0–1 year") matchesExperience = yoe <= 1
+      else if (experienceFilter === "1–3 years") matchesExperience = yoe >= 1 && yoe <= 3
+      else if (experienceFilter === "3–5 years") matchesExperience = yoe >= 3 && yoe <= 5
+      else if (experienceFilter === "5–10 years") matchesExperience = yoe >= 5 && yoe <= 10
+      else if (experienceFilter === "10+ years") matchesExperience = yoe > 10
+    }
 
     let matchesRate = true
     if (hourlyRateFilter !== "All") {
@@ -82,108 +90,104 @@ export function ProfessionalsListingPage() {
       cat.toLowerCase().includes(searchText.toLowerCase()) ||
       (pro.skills ?? []).some(s => s.toLowerCase().includes(searchText.toLowerCase()))
 
-    return matchesCategory && matchesCity && matchesLevel && matchesRate && matchesSuccess && matchesSearch
+    return matchesCategory && matchesCity && matchesExperience && matchesRate && matchesSuccess && matchesSearch
   })
 
   const totalPages = Math.ceil(filteredProfessionals.length / ITEMS_PER_PAGE)
   const paginatedProfessionals = filteredProfessionals.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
   const activeFiltersCount = [
-    categoryFilter !== "All", cityFilter !== "All", levelFilter !== "All",
+    categoryFilter !== "All", cityFilter !== "All", experienceFilter !== "All",
     hourlyRateFilter !== "All", successRateFilter !== "All", !!searchText
   ].filter(Boolean).length
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-24">
-      {/* Premium Header - Solid Background */}
-      <div className="relative bg-slate-900 pt-16 pb-24 overflow-hidden">
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+    <div className="bg-[var(--bg-primary)] min-h-screen pb-20" style={{ fontFamily: "'Inter', sans-serif" }}>
+      {/* Header */}
+      <div className="bg-[var(--bg-secondary)] border-b border-[var(--border-color)] py-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
             <div>
-              <Link to="/" className="text-rose-400 font-semibold text-sm tracking-wide uppercase mb-2 block hover:text-rose-300">
+              <Link to="/" className="text-[var(--accent-color)] font-medium text-sm mb-2 block hover:underline">
                 ← Back to Home
               </Link>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">
                 Find Professionals
               </h1>
-              <p className="text-slate-300 text-lg">
-                Discover {filteredProfessionals.length} verified experts ready to work.
+              <p className="text-[var(--text-secondary)] text-sm mt-1">
+                {filteredProfessionals.length} verified experts available
               </p>
             </div>
             
-            {/* Search Input in Header */}
-            <div className="w-full md:w-96 relative">
+            {/* Search Input */}
+            <div className="w-full md:w-80 relative">
               <input 
                 type="text" 
-                placeholder="Search by name, skill, or keyword..."
+                placeholder="Search by name, skill..."
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-slate-300 outline-none focus:bg-white/20 focus:border-white/40 transition-all shadow-xl"
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm placeholder-[var(--text-secondary)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] transition-all"
               />
-              <i className="lnr lnr-magnifier absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 text-lg" />
+              <i className="lnr lnr-magnifier absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-sm" />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 -mt-10 relative z-20">
+      <div className="max-w-7xl mx-auto px-6 mt-8">
         <div className="flex flex-col lg:flex-row gap-8">
           
           {/* Filter Sidebar */}
-          <div className="w-full lg:w-1/4 shrink-0">
-            <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sticky top-24">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                  <i className="lnr lnr-funnel text-rose-500" />
+          <div className="w-full lg:w-64 shrink-0">
+            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] p-5 sticky top-20">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
+                  <i className="lnr lnr-funnel text-[var(--accent-color)]" />
                   Filters
                 </h2>
                 {activeFiltersCount > 0 && (
-                  <span className="bg-rose-100 text-rose-600 text-xs font-bold px-2 py-1 rounded-lg">
-                    {activeFiltersCount} active
+                  <span className="bg-[var(--accent-light)] text-[var(--accent-color)] text-xs font-medium px-2 py-0.5 rounded-md">
+                    {activeFiltersCount}
                   </span>
                 )}
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {/* Location Filter */}
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">Location</h3>
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                  <h3 className="text-xs font-medium text-[var(--text-secondary)] mb-2 uppercase tracking-wider">Location</h3>
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto">
                     {["All", ...zimbabweCities].map(city => (
-                      <label key={city} className="flex items-center gap-3 cursor-pointer group">
+                      <label key={city} className="flex items-center gap-2.5 cursor-pointer group">
                         <input
-                          type="radio"
-                          name="city"
-                          value={city}
+                          type="radio" name="city" value={city}
                           checked={cityFilter === city}
                           onChange={(e) => setCityFilter(e.target.value)}
-                          className="w-4 h-4 text-rose-500 border-slate-300 focus:ring-rose-500 cursor-pointer"
+                          className="w-3.5 h-3.5 accent-[var(--accent-color)] cursor-pointer"
                         />
-                        <span className={`text-sm group-hover:text-slate-800 transition-colors ${cityFilter === city ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>
-                          {city === "All" ? "Anywhere in Zimbabwe" : city}
+                        <span className={`text-sm ${cityFilter === city ? 'font-medium text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+                          {city === "All" ? "Anywhere" : city}
                         </span>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                <hr className="border-slate-100" />
+                <hr className="border-[var(--border-color)]" />
 
                 {/* Category Filter */}
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">Category</h3>
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                  <h3 className="text-xs font-medium text-[var(--text-secondary)] mb-2 uppercase tracking-wider">Category</h3>
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto">
                     {["All", ...categories.map(c => c.name)].map(cat => (
-                      <label key={cat} className="flex items-center gap-3 cursor-pointer group">
+                      <label key={cat} className="flex items-center gap-2.5 cursor-pointer">
                         <input
-                          type="radio"
-                          name="category"
-                          value={cat}
+                          type="radio" name="category" value={cat}
                           checked={categoryFilter === cat}
                           onChange={(e) => setCategoryFilter(e.target.value)}
-                          className="w-4 h-4 text-rose-500 border-slate-300 focus:ring-rose-500 cursor-pointer"
+                          className="w-3.5 h-3.5 accent-[var(--accent-color)] cursor-pointer"
                         />
-                        <span className={`text-sm group-hover:text-slate-800 transition-colors ${categoryFilter === cat ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>
+                        <span className={`text-sm ${categoryFilter === cat ? 'font-medium text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
                           {cat}
                         </span>
                       </label>
@@ -191,150 +195,133 @@ export function ProfessionalsListingPage() {
                   </div>
                 </div>
 
-                <hr className="border-slate-100" />
+                <hr className="border-[var(--border-color)]" />
 
-                {/* Level Filter */}
+                {/* Experience Filter */}
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">Professional Level</h3>
-                  <div className="space-y-2">
-                    {["All", "Junior", "Intermediate", "Senior", "Expert"].map(lvl => (
-                      <label key={lvl} className="flex items-center gap-3 cursor-pointer group">
+                  <h3 className="text-xs font-medium text-[var(--text-secondary)] mb-2 uppercase tracking-wider">Years of Experience</h3>
+                  <div className="space-y-1.5">
+                    {["All", "0–1 year", "1–3 years", "3–5 years", "5–10 years", "10+ years"].map(opt => (
+                      <label key={opt} className="flex items-center gap-2.5 cursor-pointer">
                         <input
-                          type="radio"
-                          name="level"
-                          value={lvl}
-                          checked={levelFilter === lvl}
-                          onChange={(e) => setLevelFilter(e.target.value)}
-                          className="w-4 h-4 text-rose-500 border-slate-300 focus:ring-rose-500 cursor-pointer"
+                          type="radio" name="experience" value={opt}
+                          checked={experienceFilter === opt}
+                          onChange={(e) => setExperienceFilter(e.target.value)}
+                          className="w-3.5 h-3.5 accent-[var(--accent-color)] cursor-pointer"
                         />
-                        <span className={`text-sm group-hover:text-slate-800 transition-colors ${levelFilter === lvl ? 'font-semibold text-slate-800' : 'text-slate-500'}`}>
-                          {lvl}
+                        <span className={`text-sm ${experienceFilter === opt ? 'font-medium text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
+                          {opt === "All" ? "Any experience" : opt}
                         </span>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                <hr className="border-slate-100" />
-
                 {/* Clear Filters */}
                 {activeFiltersCount > 0 && (
-                  <button 
-                    onClick={() => {
-                      setSearchText("")
-                      setCategoryFilter("All")
-                      setCityFilter("All")
-                      setLevelFilter("All")
-                      setHourlyRateFilter("All")
-                      setSuccessRateFilter("All")
-                    }}
-                    className="w-full py-3 rounded-xl border border-rose-200 text-rose-500 font-semibold text-sm hover:bg-rose-50 transition-colors"
-                  >
-                    Clear All Filters
-                  </button>
+                  <>
+                    <hr className="border-[var(--border-color)]" />
+                    <button 
+                      onClick={() => { setSearchText(""); setCategoryFilter("All"); setCityFilter("All"); setExperienceFilter("All"); setHourlyRateFilter("All"); setSuccessRateFilter("All"); }}
+                      className="w-full py-2.5 rounded-lg border border-[var(--accent-color)]/20 text-[var(--accent-color)] font-medium text-sm hover:bg-[var(--accent-light)] transition-colors"
+                    >
+                      Clear All Filters
+                    </button>
+                  </>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Results Area */}
-          <div className="w-full lg:w-3/4">
-            
+          {/* Results */}
+          <div className="flex-1">
             {loading ? (
-              <div className="grid md:grid-cols-2 gap-6 pt-4">
+              <div className="grid md:grid-cols-2 gap-5">
                 {[1, 2, 3, 4].map(n => (
-                  <div key={n} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm animate-pulse">
+                  <div key={n} className="bg-[var(--bg-primary)] rounded-xl p-5 border border-[var(--border-color)] animate-pulse">
                     <div className="flex gap-4">
-                      <div className="w-20 h-20 rounded-2xl bg-slate-200 shrink-0" />
-                      <div className="flex-1 space-y-3 py-1">
-                        <div className="h-5 bg-slate-200 rounded w-2/3" />
-                        <div className="h-4 bg-slate-100 rounded w-1/2" />
-                        <div className="h-4 bg-slate-100 rounded w-1/3" />
+                      <div className="w-16 h-16 rounded-xl bg-[var(--bg-secondary)]" />
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-4 bg-[var(--bg-secondary)] rounded w-2/3" />
+                        <div className="h-3 bg-[var(--bg-secondary)] rounded w-1/2" />
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : error ? (
-              <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm mt-4">
-                <i className="lnr lnr-warning text-5xl text-rose-500 mb-4 block" />
-                <h3 className="text-xl font-bold text-slate-800 mb-2">Oops! Something went wrong.</h3>
-                <p className="text-slate-500">{error}</p>
+              <div className="bg-[var(--bg-primary)] rounded-xl p-12 text-center border border-[var(--border-color)]">
+                <i className="lnr lnr-warning text-4xl text-[var(--accent-color)] mb-4 block" />
+                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Something went wrong</h3>
+                <p className="text-[var(--text-secondary)] text-sm">{error}</p>
               </div>
             ) : filteredProfessionals.length === 0 ? (
-              <div className="bg-white rounded-3xl p-16 text-center border border-slate-100 shadow-sm mt-4">
-                <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <i className="lnr lnr-magnifier text-4xl text-slate-300" />
+              <div className="bg-[var(--bg-primary)] rounded-xl p-12 text-center border border-[var(--border-color)]">
+                <div className="w-16 h-16 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="lnr lnr-magnifier text-2xl text-[var(--text-secondary)]" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">No professionals found</h3>
-                <p className="text-slate-500 mb-6">We couldn't find anyone matching your exact filters.</p>
+                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">No professionals found</h3>
+                <p className="text-[var(--text-secondary)] text-sm mb-4">Try adjusting your filters.</p>
                 <button 
-                  onClick={() => {
-                    setCategoryFilter("All")
-                    setCityFilter("All")
-                    setSearchText("")
-                  }}
-                  className="px-6 py-3 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition-colors"
+                  onClick={() => { setCategoryFilter("All"); setCityFilter("All"); setSearchText(""); }}
+                  className="px-5 py-2.5 bg-[var(--accent-light)] text-[var(--accent-color)] font-medium text-sm rounded-lg hover:bg-[var(--accent-color)] hover:text-white transition-colors"
                 >
                   Clear Filters
                 </button>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 gap-6 pt-4">
+              <div className="grid md:grid-cols-2 gap-5">
                 {paginatedProfessionals.map(pro => (
-                  <div key={pro.id} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl shadow-slate-200/50 transition-all group relative">
-                    
-                    <div className="flex items-start gap-5">
+                  <div key={pro.id} className="bg-[var(--bg-primary)] rounded-xl p-5 border border-[var(--border-color)] hover:shadow-md transition-shadow group">
+                    <div className="flex items-start gap-4">
                       <img 
                         src={pro.image || "https://via.placeholder.com/150"} 
                         alt={pro.name} 
-                        className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-sm border border-slate-100 group-hover:scale-105 transition-transform"
+                        className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[var(--border-color)]"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-bold text-lg text-slate-800 truncate mb-1">
-                            <Link to={`/professional-profile/${pro.id}`} className="hover:text-rose-500 transition-colors">
+                          <h3 className="font-semibold text-[var(--text-primary)] truncate">
+                            <Link to={`/professional-profile/${pro.id}`} className="hover:text-[var(--accent-color)] transition-colors">
                               {pro.name}
                             </Link>
                           </h3>
                           {pro.id_verified && (
-                            <i className="lnr lnr-checkmark-circle text-blue-500 text-lg flex-shrink-0" title="Verified Professional" />
+                            <i className="lnr lnr-checkmark-circle text-blue-500 flex-shrink-0" title="Verified" />
                           )}
                         </div>
-                        <p className="text-sm text-indigo-600 font-semibold mb-2 truncate">
+                        <p className="text-sm text-[var(--accent-color)] font-medium truncate">
                           {pro.service_category || "General Services"}
                         </p>
-                        <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
-                          <span className="flex items-center gap-1.5"><i className="lnr lnr-map-marker" /> {pro.location || "Zimbabwe"}</span>
-                          <span className="flex items-center gap-1.5"><i className="lnr lnr-briefcase" /> {pro.level || "Junior"}</span>
+                        <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] mt-1.5">
+                          <span className="flex items-center gap-1"><i className="lnr lnr-map-marker" /> {pro.location || "Zimbabwe"}</span>
+                          {(pro as any).years_of_experience != null && (
+                            <span className="flex items-center gap-1"><i className="lnr lnr-briefcase" /> {(pro as any).years_of_experience} yr{(pro as any).years_of_experience !== 1 ? 's' : ''} exp</span>
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Divider */}
-                    <div className="h-px bg-slate-100 my-4" />
+                    <div className="h-px bg-[var(--border-color)] my-4" />
 
-                    {/* Stats & Actions */}
                     <div className="flex items-center justify-between">
-                      <div className="flex gap-4 text-sm font-semibold text-slate-700">
-                        <div className="flex items-center gap-1">
-                          <i className="lnr lnr-star text-orange-400" />
-                          <span>5.0 <span className="text-slate-400 font-normal">({pro.success_rate || 98}%)</span></span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <i className="lnr lnr-tag text-slate-400" />
-                          <span>${pro.rate || "15"}/hr</span>
-                        </div>
+                      <div className="flex gap-4 text-sm text-[var(--text-primary)]">
+                        <span className="flex items-center gap-1">
+                          <i className="lnr lnr-star text-amber-400" />
+                          <span className="font-medium">5.0</span>
+                          <span className="text-[var(--text-secondary)] text-xs">({pro.success_rate || 98}%)</span>
+                        </span>
+                        <span className="font-medium">${pro.rate || "15"}/hr</span>
                       </div>
                       
                       <a 
-                        href={`https://wa.me/${pro.phone?.replace(/\+/g, '')}?text=Hi ${pro.name}, I found your profile on SkillzLink and would like to discuss a job.`}
+                        href={`https://wa.me/${pro.phone?.replace(/\+/g, '')}?text=Hi ${pro.name}, I found your profile on SkillzLink.`}
                         target="_blank"
                         rel="noreferrer"
-                        className="w-10 h-10 rounded-xl bg-green-50 text-green-500 flex items-center justify-center hover:bg-green-500 hover:text-white transition-all shadow-sm"
+                        className="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors"
                         title="Chat on WhatsApp"
                       >
-                        <i className="fab fa-whatsapp text-xl" />
+                        <i className="fab fa-whatsapp text-lg" />
                       </a>
                     </div>
                   </div>
@@ -344,23 +331,23 @@ export function ProfessionalsListingPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-12">
+              <div className="flex items-center justify-center gap-1.5 mt-10">
                 <button 
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(p => p - 1)}
-                  className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                  className="w-9 h-9 rounded-lg border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-40 transition-colors"
                 >
-                  <i className="lnr lnr-chevron-left" />
+                  <i className="lnr lnr-chevron-left text-xs" />
                 </button>
                 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`w-10 h-10 rounded-xl font-bold transition-all ${
+                    className={`w-9 h-9 rounded-lg font-medium text-sm transition-all ${
                       currentPage === page 
-                        ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' 
-                        : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        ? 'bg-[var(--accent-color)] text-white' 
+                        : 'border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
                     }`}
                   >
                     {page}
@@ -370,13 +357,12 @@ export function ProfessionalsListingPage() {
                 <button 
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(p => p + 1)}
-                  className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                  className="w-9 h-9 rounded-lg border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-40 transition-colors"
                 >
-                  <i className="lnr lnr-chevron-right" />
+                  <i className="lnr lnr-chevron-right text-xs" />
                 </button>
               </div>
             )}
-            
           </div>
         </div>
       </div>

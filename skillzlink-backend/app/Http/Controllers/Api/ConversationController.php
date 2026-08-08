@@ -110,7 +110,22 @@ class ConversationController extends Controller
             'sent_at' => now(),
         ]);
 
+
         $conversation->update([
+            'last_message'    => \Illuminate\Support\Str::limit($request->input('content'), 100),
+            'last_message_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => [
+                'id'          => $message->id,
+                'sender_id'   => $message->sender_id,
+                'sender_name' => $request->user()->name,
+                'sender_role' => $request->user()->role,
+                'content'     => $message->content,
+                'created_at'  => $message->created_at,
+                'is_admin'    => true,
+            ],
         ]);
     }
 
@@ -160,5 +175,47 @@ class ConversationController extends Controller
                 'unread_count' => 0,
             ],
         ]);
+    }
+
+    /** Admin: list ALL conversations across the system */
+    public function adminIndex(Request $request): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $conversations = Conversation::with([
+            'userOne:id,name,role',
+            'userTwo:id,name,role',
+        ])
+            ->orderByDesc('last_message_at')
+            ->get()
+            ->map(function ($conv) {
+                return [
+                    'id'              => $conv->id,
+                    'user_one'        => $conv->userOne ? ['id' => $conv->userOne->id, 'name' => $conv->userOne->name, 'role' => $conv->userOne->role] : null,
+                    'user_two'        => $conv->userTwo ? ['id' => $conv->userTwo->id, 'name' => $conv->userTwo->name, 'role' => $conv->userTwo->role] : null,
+                    'last_message'    => $conv->last_message,
+                    'last_message_at' => $conv->last_message_at,
+                    'message_count'   => $conv->messages()->count(),
+                ];
+            });
+
+        return response()->json(['conversations' => $conversations]);
+    }
+
+    /** Return list of all users (for admin new message picker) */
+    public function userList(Request $request): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $users = User::select('id', 'name', 'role', 'email')
+            ->where('id', '!=', $request->user()->id)
+            ->orderBy('name')
+            ->get();
+
+        return response()->json(['users' => $users]);
     }
 }

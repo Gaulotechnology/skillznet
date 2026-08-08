@@ -263,8 +263,8 @@ export function DataTable<T extends Record<string, any>>({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
         <div>
-          {title && <h2 className="text-xl font-semibold text-gray-900 tracking-tight">{title}</h2>}
-          {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+          {title && <h2 className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">{title}</h2>}
+          {subtitle && <p className="text-sm text-[var(--text-secondary)] mt-0.5">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Search */}
@@ -275,7 +275,7 @@ export function DataTable<T extends Record<string, any>>({
               placeholder="Search…"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-56 pl-9 pr-4 py-2 text-sm bg-white border border-gray-200 rounded-lg outline-none focus:border-gray-900 transition-colors placeholder:text-gray-400"
+              className="w-56 pl-9 pr-4 py-2 text-sm bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] transition-all placeholder:text-[var(--text-secondary)] text-[var(--text-primary)]"
             />
             {search && (
               <button
@@ -309,7 +309,7 @@ export function DataTable<T extends Record<string, any>>({
       )}
 
       {/* Table */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="border border-[var(--border-color)] bg-[var(--bg-primary)] rounded-3xl overflow-hidden shadow-sm">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-[3px] border-gray-200 border-t-gray-900 rounded-full animate-spin" />
@@ -319,7 +319,7 @@ export function DataTable<T extends Record<string, any>>({
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50/80">
+                  <tr className="border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
                     {selectable && (
                       <th className="w-10 px-4 py-3 text-left">
                         <input
@@ -333,7 +333,7 @@ export function DataTable<T extends Record<string, any>>({
                     {columns.map((col) => (
                       <th
                         key={col.key}
-                        className={`px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"} ${col.sortable !== false ? "cursor-pointer select-none hover:text-gray-900" : ""}`}
+                        className={`px-4 py-3 text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider whitespace-nowrap ${col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"} ${col.sortable !== false ? "cursor-pointer select-none hover:text-[var(--text-primary)]" : ""}`}
                         style={col.width ? { width: col.width } : undefined}
                         onClick={() => col.sortable !== false && handleSort(col.key)}
                       >
@@ -352,7 +352,7 @@ export function DataTable<T extends Record<string, any>>({
                     )}
                   </tr>
                 </thead>
-                <tbody className="bg-white">
+                <tbody className="bg-[var(--bg-primary)]">
                   {paginated.length === 0 ? (
                     <tr>
                       <td colSpan={columns.length + (selectable ? 1 : 0) + (actions ? 1 : 0)} className="py-16 text-center">
@@ -364,7 +364,7 @@ export function DataTable<T extends Record<string, any>>({
                     paginated.map((row, idx) => (
                       <tr
                         key={row[idField] ?? idx}
-                        className={`border-b border-gray-100 last:border-b-0 hover:bg-gray-50/70 transition-colors ${selectedIds.has(row[idField]) ? "bg-blue-50/40" : ""} ${onRowClick ? "cursor-pointer" : ""}`}
+                        className={`border-b border-[var(--border-color)]/50 last:border-b-0 hover:bg-[var(--bg-secondary)] transition-colors ${selectedIds.has(row[idField]) ? "bg-[var(--accent-light)]" : ""} ${onRowClick ? "cursor-pointer" : ""}`}
                         onClick={() => onRowClick?.(row)}
                       >
                         {selectable && (
@@ -383,7 +383,7 @@ export function DataTable<T extends Record<string, any>>({
                             className={`px-4 py-3 text-[13px] ${col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"}`}
                           >
                             {col.render ? col.render(row, (page - 1) * pageSize + idx) : (
-                              <span className="text-gray-900">{row[col.key] ?? "—"}</span>
+                              <span className="text-[var(--text-primary)]">{row[col.key] ?? "—"}</span>
                             )}
                           </td>
                         ))}
@@ -400,15 +400,15 @@ export function DataTable<T extends Record<string, any>>({
             </div>
 
             {/* Footer: pagination + page size */}
-            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50/30 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-3 text-sm text-gray-500">
+            <div className="px-4 py-3 border-t border-[var(--border-color)] bg-[var(--bg-secondary)]/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
                 <span>
-                  Showing <strong className="text-gray-700">{Math.min((page - 1) * pageSize + 1, sorted.length)}</strong>–<strong className="text-gray-700">{Math.min(page * pageSize, sorted.length)}</strong> of <strong className="text-gray-700">{sorted.length}</strong>
+                  Showing <strong className="text-[var(--text-primary)]">{Math.min((page - 1) * pageSize + 1, sorted.length)}</strong>–<strong className="text-[var(--text-primary)]">{Math.min(page * pageSize, sorted.length)}</strong> of <strong className="text-[var(--text-primary)]">{sorted.length}</strong>
                 </span>
                 <select
                   value={pageSize}
                   onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                  className="text-sm border border-gray-200 rounded-md px-2 py-1 outline-none focus:border-gray-400 bg-white"
+                  className="text-sm border border-[var(--border-color)] rounded-lg px-2 py-1 outline-none focus:border-[var(--accent-color)] bg-[var(--bg-primary)] text-[var(--text-primary)]"
                 >
                   {pageSizeOptions.map((s) => (
                     <option key={s} value={s}>{s} / page</option>
@@ -420,7 +420,7 @@ export function DataTable<T extends Record<string, any>>({
                 <button
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1}
-                  className="px-2.5 py-1.5 rounded-md border border-gray-200 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <i className="lnr lnr-chevron-left text-xs"></i>
                 </button>
@@ -428,7 +428,7 @@ export function DataTable<T extends Record<string, any>>({
                   <button
                     key={p}
                     onClick={() => handlePageChange(p)}
-                    className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${p === page ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"}`}
+                    className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${p === page ? "bg-[var(--accent-color)] text-white" : "text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"}`}
                   >
                     {p}
                   </button>
@@ -436,7 +436,7 @@ export function DataTable<T extends Record<string, any>>({
                 <button
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page === totalPages || totalPages === 0}
-                  className="px-2.5 py-1.5 rounded-md border border-gray-200 text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <i className="lnr lnr-chevron-right text-xs"></i>
                 </button>

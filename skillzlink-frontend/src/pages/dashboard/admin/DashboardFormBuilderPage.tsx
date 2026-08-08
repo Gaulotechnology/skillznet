@@ -100,7 +100,7 @@ export function DashboardFormBuilderPage() {
       label: "Order",
       align: "center",
       width: "80px",
-      render: (f) => <span className="text-sm font-medium text-gray-500">{f.sort_order}</span>,
+      render: (f) => <span className="text-sm font-medium text-[var(--text-secondary)]">{f.sort_order}</span>,
       exportValue: (f) => f.sort_order,
     },
     {
@@ -108,8 +108,8 @@ export function DashboardFormBuilderPage() {
       label: "Field Details",
       render: (f) => (
         <div>
-          <span className="text-sm font-medium text-gray-900">{f.label}</span>
-          <span className="text-xs text-gray-400 font-mono ml-2">{f.name}</span>
+          <span className="text-sm font-medium text-[var(--text-primary)]">{f.label}</span>
+          <span className="text-xs text-[var(--text-secondary)] font-mono ml-2">{f.name}</span>
         </div>
       ),
       exportValue: (f) => `${f.label} (${f.name})`,
@@ -122,7 +122,7 @@ export function DashboardFormBuilderPage() {
           {f.category_name}
         </span>
       ) : (
-        <span className="text-xs text-gray-400">Global</span>
+        <span className="text-xs text-[var(--text-secondary)]">Global</span>
       ),
       exportValue: (f) => f.category_name || 'Global',
     },
@@ -130,7 +130,7 @@ export function DashboardFormBuilderPage() {
       key: "type",
       label: "Type",
       render: (f) => (
-        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 uppercase">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--bg-secondary)] text-[var(--text-primary)] uppercase">
           {f.type}
         </span>
       ),
@@ -145,7 +145,7 @@ export function DashboardFormBuilderPage() {
           <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> Yes
         </span>
       ) : (
-        <span className="text-xs text-gray-400">No</span>
+        <span className="text-xs text-[var(--text-secondary)]">No</span>
       ),
       exportValue: (f) => f.is_required ? 'Yes' : 'No',
     },
@@ -156,78 +156,78 @@ export function DashboardFormBuilderPage() {
       <div className="p-8 space-y-8 relative">
 
         {/* Toast */}
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg bg-gray-900 text-white transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}`}>
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg bg-[var(--accent-color)] text-white transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}`}>
           <i className="lnr lnr-checkmark-circle text-sm"></i>
           {toastMessage}
         </div>
 
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Registration Form Builder</h2>
-          <p className="text-sm text-gray-500 mt-1">Customize the fields required when professionals register on the platform.</p>
+          <h2 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">Registration Form Builder</h2>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">Customize the fields required when professionals register on the platform.</p>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
 
           {/* Builder Form */}
-          <div className="xl:col-span-1 bg-white border border-gray-200 rounded-lg overflow-hidden sticky top-24">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <i className={`lnr ${editingId ? 'lnr-pencil' : 'lnr-file-add'} text-gray-500`}></i>
+          <div className="xl:col-span-1 bg-white border border-[var(--border-color)] rounded-lg overflow-hidden sticky top-24">
+            <div className="p-6 border-b border-[var(--border-color)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
+                <i className={`lnr ${editingId ? 'lnr-pencil' : 'lnr-file-add'} text-[var(--text-secondary)]`}></i>
                 {editingId ? "Edit Field" : "Add New Field"}
               </h3>
             </div>
             <div className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Label</label>
-                  <input type="text" required value={form.label} onChange={handleLabelChange} placeholder="e.g. Years of Experience" className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors placeholder:text-gray-400" />
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Label</label>
+                  <input type="text" required value={form.label} onChange={handleLabelChange} placeholder="e.g. Years of Experience" className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors placeholder:text-[var(--text-secondary)]" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Field Name (API Key)</label>
-                  <input type="text" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. years_experience" className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors font-mono" />
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Field Name (API Key)</label>
+                  <input type="text" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. years_experience" className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors font-mono" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Category Assignment</label>
-                  <select value={form.category_name} onChange={e => setForm(f => ({ ...f, category_name: e.target.value }))} className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors">
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Category Assignment</label>
+                  <select value={form.category_name} onChange={e => setForm(f => ({ ...f, category_name: e.target.value }))} className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors">
                     <option value="">All Categories (Global Field)</option>
                     {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                   </select>
-                  <p className="text-xs text-gray-400 mt-1.5">If selected, this field will only be shown to professionals registering under this category.</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1.5">If selected, this field will only be shown to professionals registering under this category.</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Field Type</label>
-                    <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors">
+                <div className="flex flex-col sm:flex-row gap-5">
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Field Type</label>
+                    <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors">
                       {FIELD_TYPES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Sort Order</label>
-                    <input type="number" min={0} value={form.sort_order} onChange={e => setForm(f => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))} className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors" />
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Sort Order</label>
+                    <input type="number" min={0} value={form.sort_order} onChange={e => setForm(f => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))} className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Placeholder</label>
-                  <input type="text" value={form.placeholder} onChange={e => setForm(f => ({ ...f, placeholder: e.target.value }))} placeholder="Hint text inside the input" className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors placeholder:text-gray-400" />
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Placeholder</label>
+                  <input type="text" value={form.placeholder} onChange={e => setForm(f => ({ ...f, placeholder: e.target.value }))} placeholder="Hint text inside the input" className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors placeholder:text-[var(--text-secondary)]" />
                 </div>
                 {form.type === "dropdown" && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Options <span className="text-gray-400 normal-case">(comma-separated)</span></label>
-                    <input type="text" value={form.options_raw} onChange={e => setForm(f => ({ ...f, options_raw: e.target.value }))} placeholder="e.g. Option 1, Option 2, Option 3" className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors placeholder:text-gray-400" />
+                    <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Options <span className="text-[var(--text-secondary)] normal-case">(comma-separated)</span></label>
+                    <input type="text" value={form.options_raw} onChange={e => setForm(f => ({ ...f, options_raw: e.target.value }))} placeholder="e.g. Option 1, Option 2, Option 3" className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors placeholder:text-[var(--text-secondary)]" />
                   </div>
                 )}
                 <div>
                   <label className="flex items-center gap-2.5 cursor-pointer">
                     <input type="checkbox" checked={form.is_required} onChange={e => setForm(f => ({ ...f, is_required: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 accent-gray-900" />
-                    <span className="text-sm font-medium text-gray-900">Required Field</span>
+                    <span className="text-sm font-medium text-[var(--text-primary)]">Required Field</span>
                   </label>
                 </div>
                 <div className="pt-2 flex gap-3">
-                  <button type="submit" className="flex-1 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors">
+                  <button type="submit" className="flex-1 py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] transition-colors">
                     {editingId ? "Update Field" : "Add Field"}
                   </button>
                   {editingId && (
-                    <button type="button" onClick={() => { setEditingId(null); setForm({ ...emptyForm }); }} className="py-2.5 px-4 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors">
+                    <button type="button" onClick={() => { setEditingId(null); setForm({ ...emptyForm }); }} className="py-2.5 px-4 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium text-sm hover:bg-[var(--bg-secondary)] transition-colors">
                       Cancel
                     </button>
                   )}
@@ -249,10 +249,10 @@ export function DashboardFormBuilderPage() {
               emptyMessage="No custom fields added yet."
               actions={(f) => (
                 <div className="flex items-center justify-end gap-1">
-                  <button onClick={() => handleEdit(f)} className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors" title="Edit Field">
+                  <button onClick={() => handleEdit(f)} className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors" title="Edit Field">
                     <i className="lnr lnr-pencil text-sm"></i>
                   </button>
-                  <button onClick={() => handleDelete(f.id)} className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors" title="Delete Field">
+                  <button onClick={() => handleDelete(f.id)} className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors" title="Delete Field">
                     <i className="lnr lnr-trash text-sm"></i>
                   </button>
                 </div>

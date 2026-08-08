@@ -86,19 +86,19 @@ export function DashboardEmployeesPage() {
           {u.avatar ? (
             <img src={u.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600">
+            <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm font-medium text-[var(--text-secondary)]">
               {u.name.charAt(0).toUpperCase()}
             </div>
           )}
           <div>
-            <span className="text-sm font-medium text-gray-900">{u.name}</span>
-            <span className="text-xs text-gray-400 font-normal ml-1.5">#{String(u.id).padStart(6, '0')}</span>
+            <span className="text-sm font-medium text-[var(--text-primary)]">{u.name}</span>
+            <span className="text-xs text-[var(--text-secondary)] font-normal ml-1.5">#{String(u.id).padStart(6, '0')}</span>
           </div>
         </div>
       ),
       exportValue: (u) => u.name,
     },
-    { key: "email", label: "Email", render: (u) => <span className="text-gray-500">{u.email}</span> },
+    { key: "email", label: "Email", render: (u) => <span className="text-[var(--text-secondary)]">{u.email}</span> },
     {
       key: "status",
       label: "Status",
@@ -113,7 +113,7 @@ export function DashboardEmployeesPage() {
       key: "created_at",
       label: "Joined",
       render: (u) => (
-        <span className="text-sm text-gray-500 whitespace-nowrap">
+        <span className="text-sm text-[var(--text-secondary)] whitespace-nowrap">
           {new Date(u.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
         </span>
       ),
@@ -126,7 +126,7 @@ export function DashboardEmployeesPage() {
       <div className="p-8">
 
         {/* Toast */}
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'} ${toastType === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}>
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'} ${toastType === 'success' ? 'bg-[var(--accent-color)] text-white' : 'bg-red-600 text-white'}`}>
           <i className={`lnr ${toastType === 'success' ? 'lnr-checkmark-circle' : 'lnr-warning'} text-sm`}></i>
           {toastMessage}
         </div>
@@ -136,15 +136,15 @@ export function DashboardEmployeesPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteModalOpen(false)} />
             <div className="bg-white rounded-2xl p-8 max-w-sm w-full relative z-10 shadow-xl">
-              <div className="w-14 h-14 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-2xl mx-auto mb-4">
+              <div className="w-14 h-14 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center text-2xl mx-auto mb-4">
                 <i className="lnr lnr-trash"></i>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Remove Employee?</h3>
-              <p className="text-sm text-gray-500 text-center mb-6">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] text-center mb-2">Remove Employee?</h3>
+              <p className="text-sm text-[var(--text-secondary)] text-center mb-6">
                 Remove <strong>{userToDelete?.name}</strong> from the admin team? This cannot be undone.
               </p>
               <div className="flex gap-3">
-                <button onClick={() => setDeleteModalOpen(false)} className="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors">Cancel</button>
+                <button onClick={() => setDeleteModalOpen(false)} className="flex-1 py-2.5 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium text-sm hover:bg-[var(--bg-secondary)] transition-colors">Cancel</button>
                 <button onClick={handleDelete} className="flex-1 py-2.5 rounded-lg bg-red-600 text-white font-medium text-sm hover:bg-red-700 transition-colors">Remove</button>
               </div>
             </div>
@@ -164,7 +164,7 @@ export function DashboardEmployeesPage() {
           emptyMessage="No employees found"
           actions={(u) => (
             <div className="flex items-center justify-end gap-1">
-              <button onClick={() => openEditModal(u)} title="Edit" className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+              <button onClick={() => openEditModal(u)} title="Edit" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors">
                 <i className="lnr lnr-pencil text-sm"></i>
               </button>
               <button
@@ -183,17 +183,17 @@ export function DashboardEmployeesPage() {
                     setTimeout(() => navigate('/dashboard/admin/overview'), 800);
                   } catch { showNotification("Impersonation failed.", "error"); }
                 }}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors"
               >
                 <i className="lnr lnr-enter text-sm"></i>
               </button>
-              <button onClick={() => { setUserToDelete(u); setDeleteModalOpen(true); }} title="Remove" className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+              <button onClick={() => { setUserToDelete(u); setDeleteModalOpen(true); }} title="Remove" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors">
                 <i className="lnr lnr-trash text-sm"></i>
               </button>
             </div>
           )}
           headerActions={
-            <button onClick={openCreateModal} className="px-4 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors flex items-center gap-2 whitespace-nowrap">
+            <button onClick={openCreateModal} className="px-4 py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] transition-colors flex items-center gap-2 whitespace-nowrap">
               <i className="lnr lnr-plus-circle"></i> Add Employee
             </button>
           }
@@ -204,34 +204,34 @@ export function DashboardEmployeesPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !formLoading && setIsModalOpen(false)} />
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md relative z-10 overflow-hidden">
-              <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">{editingId ? "Edit Employee" : "Add New Employee"}</h3>
-                <button onClick={() => !formLoading && setIsModalOpen(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 transition-colors">
+              <div className="p-6 border-b border-[var(--border-color)] flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">{editingId ? "Edit Employee" : "Add New Employee"}</h3>
+                <button onClick={() => !formLoading && setIsModalOpen(false)} className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors">
                   <i className="lnr lnr-cross text-xs"></i>
                 </button>
               </div>
               <form onSubmit={handleSubmit} className="p-6 space-y-5">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Full Name</label>
-                  <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required disabled={formLoading} placeholder="Jane Doe" className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors" />
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Full Name</label>
+                  <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required disabled={formLoading} placeholder="Jane Doe" className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
-                  <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required disabled={formLoading} placeholder="jane@company.com" className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors" />
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Email</label>
+                  <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required disabled={formLoading} placeholder="jane@company.com" className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">
-                    Password {editingId && <span className="text-gray-400 font-normal normal-case">(leave blank to keep)</span>}
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">
+                    Password {editingId && <span className="text-[var(--text-secondary)] font-normal normal-case">(leave blank to keep)</span>}
                   </label>
-                  <input type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required={!editingId} disabled={formLoading} placeholder="••••••••" className="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg px-4 py-2.5 outline-none focus:border-gray-900 transition-colors" />
+                  <input type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required={!editingId} disabled={formLoading} placeholder="••••••••" className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors" />
                 </div>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 flex items-start gap-2 text-sm text-gray-700">
+                <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-4 py-3 flex items-start gap-2 text-sm text-[var(--text-primary)]">
                   <i className="lnr lnr-information-circle mt-0.5 shrink-0"></i>
                   Employees are granted <strong>admin</strong> access to the dashboard.
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => !formLoading && setIsModalOpen(false)} className="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors">Cancel</button>
-                  <button type="submit" disabled={formLoading} className="flex-1 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors disabled:opacity-70 flex items-center justify-center gap-2">
+                  <button type="button" onClick={() => !formLoading && setIsModalOpen(false)} className="flex-1 py-2.5 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium text-sm hover:bg-[var(--bg-secondary)] transition-colors">Cancel</button>
+                  <button type="submit" disabled={formLoading} className="flex-1 py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-70 flex items-center justify-center gap-2">
                     {formLoading ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Saving…</> : (editingId ? "Update" : "Add Employee")}
                   </button>
                 </div>

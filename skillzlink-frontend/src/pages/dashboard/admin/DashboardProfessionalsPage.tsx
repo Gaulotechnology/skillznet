@@ -61,7 +61,7 @@ export function DashboardProfessionalsPage() {
       key: "id",
       label: "ID",
       width: "80px",
-      render: (p) => <span className="text-sm text-gray-500 font-medium">#{p.id}</span>,
+      render: (p) => <span className="text-sm text-[var(--text-secondary)] font-medium">#{p.id}</span>,
       exportValue: (p) => p.id,
     },
     {
@@ -73,7 +73,7 @@ export function DashboardProfessionalsPage() {
             <img
               src={p.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=f3f4f6&color=4b5563&bold=true`}
               alt={p.name}
-              className="w-8 h-8 rounded-full object-cover shrink-0 bg-gray-100"
+              className="w-8 h-8 rounded-full object-cover shrink-0 bg-[var(--bg-secondary)]"
             />
             {p.id_verified && (
               <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center text-white">
@@ -82,8 +82,8 @@ export function DashboardProfessionalsPage() {
             )}
           </div>
           <div>
-            <span className="text-sm font-medium text-gray-900">{p.name}</span>
-            <div className="text-xs text-gray-500 mt-0.5">{p.level} Provider</div>
+            <span className="text-sm font-medium text-[var(--text-primary)]">{p.name}</span>
+            <div className="text-xs text-[var(--text-secondary)] mt-0.5">{p.level} Provider</div>
           </div>
         </div>
       ),
@@ -93,7 +93,7 @@ export function DashboardProfessionalsPage() {
       key: "service_category",
       label: "Specialty",
       render: (p) => (
-        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-[var(--bg-secondary)] text-[var(--text-primary)]">
           {p.service_category}
         </span>
       ),
@@ -120,7 +120,7 @@ export function DashboardProfessionalsPage() {
       <div className="p-8 relative">
 
         {/* Toast */}
-        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'} ${toastType === 'success' ? 'bg-gray-900 text-white' : 'bg-red-600 text-white'}`}>
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'} ${toastType === 'success' ? 'bg-[var(--accent-color)] text-white' : 'bg-red-600 text-white'}`}>
           <i className={`lnr ${toastType === 'success' ? 'lnr-checkmark-circle' : 'lnr-warning'} text-sm`}></i>
           {toastMessage}
         </div>
@@ -130,13 +130,13 @@ export function DashboardProfessionalsPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setModalOpen(false)}></div>
             <div className="bg-white rounded-2xl p-8 max-w-sm w-full relative z-10 shadow-xl">
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 ${modalAction === 'verify' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'}`}>
+              <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 ${modalAction === 'verify' ? 'bg-emerald-50 text-emerald-500' : 'bg-[var(--accent-light)] text-[var(--accent-color)]'}`}>
                 <i className={`lnr ${modalAction === 'verify' ? 'lnr-checkmark-circle' : modalAction === 'delete' ? 'lnr-trash' : 'lnr-warning'}`}></i>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] text-center mb-2">
                 {modalAction === 'verify' ? 'Verify Provider?' : modalAction === 'delete' ? 'Delete Provider?' : 'Suspend Provider?'}
               </h3>
-              <p className="text-sm text-gray-500 text-center mb-6">
+              <p className="text-sm text-[var(--text-secondary)] text-center mb-6">
                 {modalAction === 'verify'
                   ? `Are you sure you want to verify the identity of ${selectedProvider?.name}?`
                   : modalAction === 'delete'
@@ -145,7 +145,7 @@ export function DashboardProfessionalsPage() {
                 }
               </p>
               <div className="flex gap-3">
-                <button onClick={() => setModalOpen(false)} className="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors">Cancel</button>
+                <button onClick={() => setModalOpen(false)} className="flex-1 py-2.5 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium text-sm hover:bg-[var(--bg-secondary)] transition-colors">Cancel</button>
                 <button onClick={executeAction} className={`flex-1 py-2.5 rounded-lg text-white font-medium text-sm transition-colors ${modalAction === 'verify' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}`}>
                   Yes, {modalAction === 'verify' ? 'Verify' : modalAction === 'delete' ? 'Delete' : 'Suspend'}
                 </button>
@@ -167,14 +167,14 @@ export function DashboardProfessionalsPage() {
           actions={(p) => (
             <div className="flex items-center justify-end gap-1">
               {!p.id_verified && (
-                <button onClick={() => openModal(p, "verify")} className="px-4 py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm hover:bg-gray-800 transition-colors">
+                <button onClick={() => openModal(p, "verify")} className="px-4 py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] transition-colors">
                   Verify
                 </button>
               )}
-              <button onClick={() => openModal(p, "suspend")} className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors" title="Suspend Account">
+              <button onClick={() => openModal(p, "suspend")} className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors" title="Suspend Account">
                 <i className="lnr lnr-warning text-sm"></i>
               </button>
-              <button onClick={() => openModal(p, "delete")} className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors" title="Delete Account">
+              <button onClick={() => openModal(p, "delete")} className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors" title="Delete Account">
                 <i className="lnr lnr-trash text-sm"></i>
               </button>
             </div>
