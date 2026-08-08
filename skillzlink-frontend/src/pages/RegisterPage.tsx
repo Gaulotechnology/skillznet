@@ -46,6 +46,7 @@ export function RegisterPage() {
   const [otp, setOtp] = useState("")
   const [pin, setPin] = useState("")
   const [confirmPin, setConfirmPin] = useState("")
+  const [devOtp, setDevOtp] = useState<string | null>(null)
 
   // Options
   const [categories, setCategories] = useState<any[]>([])
@@ -108,7 +109,9 @@ export function RegisterPage() {
 
       if (step === "details") {
         const res = await authApi.requestOtp(formattedPhone)
-        setMessage(res.otp ? `Dev OTP: ${res.otp}` : "OTP sent via WhatsApp/SMS")
+        if (res.otp) {
+          setDevOtp(res.otp)
+        }
         setStep("otp")
       } else if (step === "otp") {
         await authApi.verifyOtp(formattedPhone, otp)
@@ -538,6 +541,12 @@ export function RegisterPage() {
                   <div className="text-center mb-6">
                     <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">Verify Your Number</h3>
                     <p className="text-[var(--text-secondary)] text-sm">We sent a code to {phoneNumber}</p>
+                    {devOtp && (
+                      <div className="mt-4 p-3 bg-green-50 rounded">
+                        <p className="text-sm font-medium text-green-800">For testing purposes, your OTP is:</p>
+                        <p className="text-lg text-green-700 font-mono font-bold tracking-widest">{devOtp}</p>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">Enter OTP Code</label>

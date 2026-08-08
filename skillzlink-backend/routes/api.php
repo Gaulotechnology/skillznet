@@ -30,10 +30,13 @@ Route::get('/careers', function () {
 
 
 Route::prefix('auth')->group(function (): void {
+    Route::post('/request-otp', [AuthController::class, 'requestOtp']);
     Route::post('/register-provider', [AuthController::class, 'registerProvider']);
     Route::post('/register-seeker', [AuthController::class, 'registerSeeker']);
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'loginWithPin']);
     Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('/request-pin-reset', [AuthController::class, 'requestPinReset']);
+    Route::post('/reset-pin', [AuthController::class, 'resetPin']);
 });
 
 Route::middleware('auth:sanctum')->group(function (): void {

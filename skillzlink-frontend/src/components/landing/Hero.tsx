@@ -63,10 +63,10 @@ export function Hero({ selectedService, onServiceChange }: HeroProps) {
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="mt-10 max-w-2xl mx-auto">
-          <div className="flex items-center rounded-full bg-white border border-gray-200 shadow-md overflow-hidden">
+          <div className="flex items-center rounded-full bg-white border border-gray-200 shadow-md relative focus-within:ring-2 focus-within:ring-[var(--accent-light)] focus-within:border-[var(--accent-color)] transition-all">
             
             {/* Category */}
-            <div className="relative flex-1 border-r border-gray-100" ref={dropdownRef}>
+            <div className="relative flex-1" ref={dropdownRef}>
               <button
                 type="button"
                 onClick={() => { setDropdownOpen(p => !p); setCityDropdownOpen(false) }}
@@ -86,7 +86,7 @@ export function Hero({ selectedService, onServiceChange }: HeroProps) {
             </div>
 
             {/* City */}
-            <div className="relative flex-1 border-r border-gray-100" ref={cityDropdownRef}>
+            <div className="relative flex-1" ref={cityDropdownRef}>
               <button
                 type="button"
                 onClick={() => { setCityDropdownOpen(p => !p); setDropdownOpen(false) }}
