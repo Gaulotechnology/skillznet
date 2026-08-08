@@ -188,7 +188,14 @@ class AuthController extends Controller
         $user->save();
         $otpRecord->update(['verified' => true]);
 
-        return response()->json(['message' => 'PIN reset successfully']);
+        $token = $user->createToken('api-token')->plainTextToken;
+        $user->append('permissions');
+
+        return response()->json([
+            'message' => 'PIN reset successfully',
+            'token' => $token,
+            'user' => $user,
+        ]);
     }
 
     public function verifyOtp(Request $request): JsonResponse
