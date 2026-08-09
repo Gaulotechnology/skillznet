@@ -99,6 +99,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     {
       title: 'Services',
       items: [
+        { to: '/dashboard/quotes',                icon: 'lnr lnr-inbox',           label: 'Quotes' },
+        { to: '/dashboard/ongoing-service',       icon: 'lnr lnr-sync',            label: 'Ongoing' },
+        { to: '/dashboard/completed-services',    icon: 'lnr lnr-checkmark-circle',label: 'Completed' },
+        { to: '/dashboard/cancelled-services',    icon: 'lnr lnr-cross-circle',    label: 'Cancelled' },
         { to: '/dashboard/provider/bookings',     icon: 'lnr lnr-calendar-full',  label: 'My Bookings' },
         { to: '/dashboard/provider/availability', icon: 'lnr lnr-clock',          label: 'Availability' },
         { to: '/dashboard/subscription',          icon: 'lnr lnr-star',           label: 'Subscription' },
@@ -107,7 +111,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     {
       title: 'Communication',
       items: [
-        { to: '/dashboard/messages',              icon: 'lnr lnr-bubble',         label: 'Messages' },
+        { to: '/dashboard/provider/messages',     icon: 'lnr lnr-bubble',         label: 'Messages' },
         { to: '/dashboard/saved',                 icon: 'lnr lnr-heart',          label: 'Saved Items' },
       ]
     },
@@ -123,7 +127,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const agentSections: NavSection[] = [
     { title: 'Dashboard', items: [
       { to: '/dashboard/agent/overview',    icon: 'lnr lnr-pie-chart',   label: 'Overview' },
-      { to: '/dashboard/agent/onboardings', icon: 'lnr lnr-users',       label: 'My Onboardings' },
+      { to: '/dashboard/agent/referrals',   icon: 'lnr lnr-users',       label: 'My Referrals' },
       { to: '/dashboard/agent/commissions', icon: 'lnr lnr-chart-bars',  label: 'Commissions' },
     ]},
     { title: 'Account', items: [

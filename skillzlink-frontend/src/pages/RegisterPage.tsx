@@ -148,9 +148,10 @@ export function RegisterPage() {
             service_radius: parseInt(serviceRadius, 10),
             description: description,
             dynamic_data: Object.keys(dynamicDataPayload).length > 0 ? dynamicDataPayload : undefined,
+            referral_code: localStorage.getItem("skillzlink_referral_code") || undefined,
           })
         } else {
-          await authApi.registerSeeker({ name, phone_number: formattedPhone, otp, pin, default_latitude: undefined, default_longitude: undefined })
+          await authApi.registerSeeker({ name, phone_number: formattedPhone, otp, pin, default_latitude: undefined, default_longitude: undefined, referral_code: localStorage.getItem("skillzlink_referral_code") || undefined })
         }
         setMessage("Registration successful! You can now login with your phone number and PIN.")
       }
@@ -617,7 +618,7 @@ export function RegisterPage() {
             </form>
             
             <p className="text-center text-[var(--text-secondary)] text-xs mt-4">
-              By creating an account, you agree to our <a href="#" className="underline hover:text-[var(--text-primary)]">Terms of Service</a> and <a href="#" className="underline hover:text-[var(--text-primary)]">Privacy Policy</a>.
+              By creating an account, you agree to our <Link to="/terms-and-conditions" className="underline hover:text-[var(--text-primary)]">Terms of Service</Link> and <Link to="/privacy-policy" className="underline hover:text-[var(--text-primary)]">Privacy Policy</Link>.
             </p>
 
 

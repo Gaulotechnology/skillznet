@@ -2,8 +2,11 @@ import { useState } from "react"
 import { useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
 import { Hero } from "./components/landing/Hero"
+import { FeaturedProfessionals } from "./components/landing/FeaturedProfessionals"
 import { PopularServices } from "./components/landing/PopularServices"
+import { HowItWorks } from "./components/landing/HowItWorks"
 import { JoinInfo } from "./components/landing/JoinInfo"
+import { PlatformFeatures } from "./components/landing/PlatformFeatures"
 import { LimitlessExperience } from "./components/landing/LimitlessExperience"
 import { SkillsFooter } from "./components/landing/SkillsFooter"
 import { ApplyBannerSection } from "./pages/ApplyBannerSection"
@@ -46,8 +49,11 @@ function App() {
   return (
     <>
       <Hero selectedService={selectedService} onServiceChange={setSelectedService} />
+      <FeaturedProfessionals />
       <PopularServices />
+      <HowItWorks />
       <JoinInfo />
+      <PlatformFeatures />
       <LimitlessExperience />
       <ApplyBannerSection />
       <SkillsFooter />

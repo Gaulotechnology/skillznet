@@ -68,6 +68,8 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name'             => ['required', 'string', 'max:255'],
             'phone_number'     => ['required', 'string', 'max:20', 'unique:users,phone_number'],
+            'pin'              => ['required', 'string', 'size:4'],
+            'otp'              => ['required', 'string', 'size:6'],
             'identity_number'  => ['required', 'string', 'max:255'],
             'address'          => ['required', 'string'],
             'service_category' => ['required', 'string', 'max:100'],
@@ -78,14 +80,17 @@ class AuthController extends Controller
             'dynamic_data'     => ['nullable', 'array'],
         ]);
 
+        $this->verifyRegistrationOtp($validated['phone_number'], $validated['otp']);
+
         $user = User::create([
             'name'           => $validated['name'],
             'email'          => sprintf('provider-%s@skillzlink.local', Str::uuid()),
             'phone_number'   => $validated['phone_number'],
-            'password'       => Hash::make($request->input('pin', Str::random(24))),
+            'password'       => Hash::make($validated['pin']),
             'role'           => 'provider',
             'is_active'      => true,
             'pin_changed_at' => now(),
+            'referred_by'    => $this->resolveReferrer($request),
         ]);
 
         $provider = Provider::create([
@@ -112,18 +117,23 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name'              => ['required', 'string', 'max:255'],
             'phone_number'      => ['required', 'string', 'max:20', 'unique:users,phone_number'],
+            'pin'               => ['required', 'string', 'size:4'],
+            'otp'               => ['required', 'string', 'size:6'],
             'default_latitude'  => ['nullable', 'numeric'],
             'default_longitude' => ['nullable', 'numeric'],
         ]);
+
+        $this->verifyRegistrationOtp($validated['phone_number'], $validated['otp']);
 
         $user = User::create([
             'name'           => $validated['name'],
             'email'          => sprintf('seeker-%s@skillzlink.local', Str::uuid()),
             'phone_number'   => $validated['phone_number'],
-            'password'       => Hash::make($request->input('pin', Str::random(24))),
+            'password'       => Hash::make($validated['pin']),
             'role'           => 'seeker',
             'is_active'      => true,
             'pin_changed_at' => now(),
+            'referred_by'    => $this->resolveReferrer($request),
         ]);
 
         $seeker = Seeker::create([
@@ -318,5 +328,102 @@ class AuthController extends Controller
         }
 
         return response()->json(['message' => 'OTP verified']);
+    }
+
+    // ─── Agent registration ────────────────────────────────────────────────────
+
+    public function registerAgent(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'         => ['required', 'string', 'max:255'],
+            'phone_number' => ['required', 'string', 'max:20', 'unique:users,phone_number'],
+            'pin'          => ['required', 'string', 'size:4'],
+            'otp'          => ['required', 'string', 'size:6'],
+        ]);
+
+        $this->verifyRegistrationOtp($validated['phone_number'], $validated['otp']);
+
+        $user = User::create([
+            'name'           => $validated['name'],
+            'email'          => sprintf('agent-%s@skillzlink.local', Str::uuid()),
+            'phone_number'   => $validated['phone_number'],
+            'password'       => Hash::make($validated['pin']),
+            'role'           => 'agent',
+            'is_active'      => true,
+            'pin_changed_at' => now(),
+            'referred_by'    => $this->resolveReferrer($request),
+        ]);
+
+        return response()->json([
+            'message' => 'Agent registered successfully',
+            'user_id' => $user->id,
+        ], 201);
+    }
+
+    // ─── Affiliate registration ────────────────────────────────────────────────
+
+    public function registerAffiliate(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'         => ['required', 'string', 'max:255'],
+            'phone_number' => ['required', 'string', 'max:20', 'unique:users,phone_number'],
+            'pin'          => ['required', 'string', 'size:4'],
+            'otp'          => ['required', 'string', 'size:6'],
+        ]);
+
+        $this->verifyRegistrationOtp($validated['phone_number'], $validated['otp']);
+
+        $user = User::create([
+            'name'           => $validated['name'],
+            'email'          => sprintf('affiliate-%s@skillzlink.local', Str::uuid()),
+            'phone_number'   => $validated['phone_number'],
+            'password'       => Hash::make($validated['pin']),
+            'role'           => 'affiliate',
+            'is_active'      => true,
+            'pin_changed_at' => now(),
+            'referred_by'    => $this->resolveReferrer($request),
+        ]);
+
+        return response()->json([
+            'message' => 'Affiliate registered successfully',
+            'user_id' => $user->id,
+        ], 201);
+    }
+
+    // ─── Password reset (placeholder) ──────────────────────────────────────────
+
+    public function requestPasswordReset(Request $request): JsonResponse
+    {
+        return response()->json([
+            'message' => 'If an account with that email exists, a password reset link has been sent.',
+        ]);
+    }
+
+    // ─── Helpers ───────────────────────────────────────────────────────────────
+
+    private function verifyRegistrationOtp(string $phoneNumber, string $otp): void
+    {
+        $otpRecord = OtpVerification::where('phone_number', $phoneNumber)
+            ->where('code', $otp)
+            ->where('verified', false)
+            ->where('expires_at', '>', now())
+            ->latest()
+            ->first();
+
+        abort_unless($otpRecord, 422, 'Invalid or expired OTP');
+        $otpRecord->update(['verified' => true]);
+    }
+
+    private function resolveReferrer(Request $request): ?int
+    {
+        $referralCode = $request->input('referral_code')
+            ?? $request->header('X-Referral-Code');
+
+        if ($referralCode) {
+            $referrer = User::where('referral_code', $referralCode)->first();
+            return $referrer?->id;
+        }
+
+        return null;
     }
 }

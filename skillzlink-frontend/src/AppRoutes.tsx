@@ -38,6 +38,7 @@ import { DashboardSubscriptionPage } from './pages/dashboard/provider/DashboardS
 import { DashboardProviderOverviewPage } from './pages/dashboard/provider/DashboardProviderOverviewPage';
 import { DashboardAvailabilityPage } from './pages/dashboard/provider/DashboardAvailabilityPage';
 import { DashboardBookingsPage } from './pages/dashboard/provider/DashboardBookingsPage';
+import { DashboardProviderMessagesPage } from './pages/dashboard/provider/DashboardProviderMessagesPage';
 import { DashboardAdminOverviewPage } from './pages/dashboard/admin/DashboardAdminOverviewPage';
 import { DashboardCategoryPage } from './pages/dashboard/admin/DashboardCategoryPage';
 import { DashboardKnowledgeBasePage } from './pages/dashboard/admin/DashboardKnowledgeBasePage';
@@ -64,10 +65,15 @@ import { DashboardSmsLogsPage } from './pages/dashboard/admin/DashboardSmsLogsPa
 import { DashboardCommLogsPage } from './pages/dashboard/admin/DashboardCommLogsPage';
 
 import { DashboardAgentOverviewPage } from './pages/dashboard/agent/DashboardAgentOverviewPage';
+import { DashboardAgentReferralsPage } from './pages/dashboard/agent/DashboardAgentReferralsPage';
+import { DashboardAgentCommissionsPage } from './pages/dashboard/agent/DashboardAgentCommissionsPage';
 import { DashboardAffiliateOverviewPage } from './pages/dashboard/affiliate/DashboardAffiliateOverviewPage';
+import { DashboardAffiliateLinksPage } from './pages/dashboard/affiliate/DashboardAffiliateLinksPage';
+import { DashboardAffiliatePayoutsPage } from './pages/dashboard/affiliate/DashboardAffiliatePayoutsPage';
 import { ServiceListingPage } from './pages/ServiceListingPage';
 import { ServiceQuotePage } from './pages/ServiceQuotePage';
 import { ServiceSinglePage } from "./pages/ServiceSinglePage"
+import { JoinRedirect } from "./pages/JoinRedirect"
 import { NotFoundPage } from "./pages/NotFoundPage"
 
 import { TrustAndSafetyPage } from "./pages/TrustAndSafetyPage"
@@ -107,18 +113,6 @@ export function AppRoutes() {
           ]} quickLinks={quickLinks} />
       )} />
 
-      <Route path="/agent">
-          <Route path="overview" element={<DashboardAgentOverviewPage />} />
-          <Route path="onboardings" element={<DashboardAgentOverviewPage />} />
-          <Route path="commissions" element={<DashboardAgentOverviewPage />} />
-        </Route>
-
-        <Route path="affiliate">
-          <Route path="overview" element={<DashboardAffiliateOverviewPage />} />
-          <Route path="links" element={<DashboardAffiliateOverviewPage />} />
-          <Route path="payouts" element={<DashboardAffiliateOverviewPage />} />
-        </Route>
-
       <Route path="/book-professional" element={withLayout(
         <InfoPage title="Book a Professional" breadcrumb="Book a Professional" subtitle="From Discovery to Booking"
           sections={[
@@ -144,6 +138,7 @@ export function AppRoutes() {
       <Route path="/login" element={withLayout(<LoginPage />)} />
       <Route path="/register" element={withLayout(<RegisterPage />)} />
       <Route path="/register-provider" element={<Navigate to="/register" replace />} />
+      <Route path="/join/:code" element={<JoinRedirect />} />
       <Route path="/search" element={withLayout(<SearchPage />)} />
       <Route path="/services" element={<ServiceListingPage />} />
       <Route path="/service-quote" element={withLayout(<ServiceQuotePage />)} />
@@ -187,21 +182,22 @@ export function AppRoutes() {
       <Route path="/dashboard/insights-user" element={<DashboardInsightsUserPage />} />
       <Route path="/dashboard/subscription" element={<DashboardSubscriptionPage />} />
       <Route path="/dashboard/ongoing-service" element={<DashboardOngoingServicePage />} />
-      <Route path="/dashboard/ongoing-single" element={<DashboardOngoingServiceSinglePage />} />
+      <Route path="/dashboard/ongoing-single/:id" element={<DashboardOngoingServiceSinglePage />} />
       <Route path="/dashboard/completed-services" element={<DashboardCompleteServicesPage />} />
       <Route path="/dashboard/cancelled-services" element={<DashboardCancelServicesPage />} />
       <Route path="/dashboard/quotes" element={<DashboardQuotesPage />} />
       <Route path="/dashboard/provider/availability" element={<DashboardAvailabilityPage />} />
       <Route path="/dashboard/provider/bookings" element={<DashboardBookingsPage />} />
+      <Route path="/dashboard/provider/messages" element={<DashboardProviderMessagesPage />} />
 
       {/* ─── Admin Dashboard Routes ───────────────────────────────────────── */}
       <Route path="/dashboard/agent/overview" element={<DashboardAgentOverviewPage />} />
-      <Route path="/dashboard/agent/onboardings" element={<DashboardAgentOverviewPage />} />
-      <Route path="/dashboard/agent/commissions" element={<DashboardAgentOverviewPage />} />
+      <Route path="/dashboard/agent/referrals" element={<DashboardAgentReferralsPage />} />
+      <Route path="/dashboard/agent/commissions" element={<DashboardAgentCommissionsPage />} />
       
       <Route path="/dashboard/affiliate/overview" element={<DashboardAffiliateOverviewPage />} />
-      <Route path="/dashboard/affiliate/links" element={<DashboardAffiliateOverviewPage />} />
-      <Route path="/dashboard/affiliate/payouts" element={<DashboardAffiliateOverviewPage />} />
+      <Route path="/dashboard/affiliate/links" element={<DashboardAffiliateLinksPage />} />
+      <Route path="/dashboard/affiliate/payouts" element={<DashboardAffiliatePayoutsPage />} />
       <Route path="/dashboard/admin/overview" element={<DashboardAdminOverviewPage />} />
       <Route path="/dashboard/admin/users" element={<DashboardUsersPage />} />
       <Route path="/dashboard/admin/professionals" element={<DashboardProfessionalsPage />} />

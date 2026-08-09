@@ -172,7 +172,7 @@ export const authApi = {
     }),
 
   registerSeeker: (payload: {
-    name: string; phone_number: string; otp: string; pin: string; default_latitude?: number; default_longitude?: number
+    name: string; phone_number: string; otp: string; pin: string; default_latitude?: number; default_longitude?: number; referral_code?: string
   }) =>
     fetchJson<{ message: string; user_id: number }>(`${API_BASE_URL}/auth/register-seeker`, {
       method: "POST", body: JSON.stringify(payload),
@@ -183,6 +183,7 @@ export const authApi = {
     address: string; service_category: string; service_radius: number;
     latitude?: number; longitude?: number; description?: string;
     dynamic_data?: Record<string, any>;
+    referral_code?: string;
   }) =>
     fetchJson<{ message: string; user_id: number; provider_id: number }>(
       `${API_BASE_URL}/auth/register-provider`,
@@ -496,12 +497,22 @@ export const adminApi = {
     }),
   deleteRole: (id: number) =>
     fetchJson<{ message: string }>(`${API_BASE_URL}/admin/roles/${id}`, { method: "DELETE" }),
+
+  getAffiliates: () => fetchJson<{ users: any[] }>(`${API_BASE_URL}/admin/affiliates`),
+  getAgents: () => fetchJson<{ users: any[] }>(`${API_BASE_URL}/admin/agents`),
+  getPayments: () => fetchJson<{ payments: any[] }>(`${API_BASE_URL}/admin/payments`),
+  getAppointments: () => fetchJson<{ appointments: any[] }>(`${API_BASE_URL}/admin/appointments`),
+  getMatchingRequests: () => fetchJson<{ requests: any[] }>(`${API_BASE_URL}/admin/matching`),
 }
 
 // ─── Affiliate endpoints (auth required) ─────────────────────────────────────
 export const affiliateApi = {
   getOverview: () =>
     fetchJson<{ stats: { total_clicks: number; total_signups: number; total_earnings: number; pending_payout: number }; referral_code: string; referral_link: string; recent_referrals: any[] }>(`${API_BASE_URL}/affiliate/overview`),
+  getLinks: () =>
+    fetchJson<{ referral_code: string; referral_link: string; recent_clicks: any[]; stats: { total_clicks: number; today_clicks: number } }>(`${API_BASE_URL}/affiliate/links`),
+  getPayouts: () =>
+    fetchJson<{ commissions: any[]; stats: { total_earned: number; total_pending: number; total_paid: number } }>(`${API_BASE_URL}/affiliate/payouts`),
   requestPayout: () =>
     fetchJson<{ message: string }>(`${API_BASE_URL}/affiliate/payout`, { method: "POST" }),
 }
@@ -509,9 +520,15 @@ export const affiliateApi = {
 // ─── Agent endpoints (auth required) ─────────────────────────────────────────
 export const agentApi = {
   getOverview: () =>
-    fetchJson<{ stats: { total_onboarded: number; commission_earned: number; active_providers: number }; onboarded_providers: any[]; onboarding_link: string }>(`${API_BASE_URL}/agent/overview`),
-  getOnboardedProviders: () =>
-    fetchJson<{ providers: any[] }>(`${API_BASE_URL}/agent/providers`),
+    fetchJson<{ stats: { total_onboarded: number; commission_earned: number; active_providers: number; pending_commission: number }; onboarding_link: string; referral_code: string; recent_referrals: any[] }>(`${API_BASE_URL}/agent/overview`),
+  getReferrals: (role?: string) => {
+    const qs = role ? `?role=${role}` : '';
+    return fetchJson<{ referrals: any[]; stats: { total: number; providers: number; seekers: number } }>(`${API_BASE_URL}/agent/referrals${qs}`);
+  },
+  getCommissions: () =>
+    fetchJson<{ commissions: any[]; stats: { total_earned: number; total_pending: number; total_paid: number } }>(`${API_BASE_URL}/agent/commissions`),
+  getOnboardingLink: () =>
+    fetchJson<{ onboarding_link: string; referral_code: string }>(`${API_BASE_URL}/agent/onboarding-link`),
 }
 
 // ─── Shared account endpoints (auth required) ────────────────────────────────

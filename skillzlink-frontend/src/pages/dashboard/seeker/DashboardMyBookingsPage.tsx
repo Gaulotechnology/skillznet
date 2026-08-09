@@ -43,7 +43,7 @@ export function DashboardMyBookingsPage() {
             </div>
           )}
           <div>
-            <Link to={`/professional/${b.provider_id}`} className="text-sm font-medium text-[var(--text-primary)] hover:text-[var(--accent-color)] transition-colors">
+            <Link to={`/professional-profile/${b.provider_id}`} className="text-sm font-medium text-[var(--text-primary)] hover:text-[var(--accent-color)] transition-colors">
               {b.provider?.name || "Professional"}
             </Link>
             <div className="text-xs text-[var(--text-secondary)] mt-0.5">{b.provider?.service_category}</div>
@@ -100,7 +100,7 @@ export function DashboardMyBookingsPage() {
           exportFileName="my-bookings"
           actions={(b) => (
             <div className="flex items-center justify-end">
-              <Link to={`/professional/${b.provider_id}`} className="px-3 py-1.5 rounded-xl border border-[var(--border-color)] text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] transition-colors">
+              <Link to={`/professional-profile/${b.provider_id}`} className="px-3 py-1.5 rounded-xl border border-[var(--border-color)] text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] transition-colors">
                 View Profile
               </Link>
             </div>

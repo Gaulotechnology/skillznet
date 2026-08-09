@@ -65,11 +65,11 @@ export function ServiceQuotePage() {
                     <ul className="wt-totalamount collapse show" id="collapseOne">
                       <li>
                         <h3>( <i className="fa fa-dollar-sign"></i> ) <em>- 00.00</em></h3>
-                        <span><strong>“ Worktern ”</strong> Service Fee</span>
+                        <span><strong>" SkillzLink "</strong> Service Fee</span>
                       </li>
                       <li>
                         <h3>( <i className="fa fa-dollar-sign"></i> ) <em>- 00.00</em></h3>
-                        <span>Amount You’ll Recive after <strong>“ Worktern ”</strong> Service Fee deduction</span>
+                        <span>Amount You'll Receive after <strong>" SkillzLink "</strong> Service Fee deduction</span>
                       </li>
                     </ul>
                   </div>

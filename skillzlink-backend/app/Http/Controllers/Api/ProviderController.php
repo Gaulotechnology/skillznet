@@ -10,6 +10,8 @@ use App\Models\ProviderView;
 use App\Models\SubscriptionHistory;
 use App\Models\ProviderAvailability;
 use App\Models\Booking;
+use App\Models\ServiceEngagement;
+use App\Models\ServiceMessage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -216,5 +218,206 @@ class ProviderController extends Controller
             'message' => 'Booking status updated',
             'booking' => $booking
         ]);
+    }
+
+    // ─── Service Engagements (Quotes / Ongoing / Completed / Cancelled) ────────
+
+    public function getQuotes(Request $request): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+
+        $quotes = ServiceEngagement::where('provider_id', $provider->id)
+            ->where('status', 'pending')
+            ->with('seeker.user')
+            ->latest()
+            ->get()
+            ->map(fn($q) => [
+                'id'          => $q->id,
+                'name'        => $q->client_name,
+                'rating'      => $q->rating ?? 5.0,
+                'reviews'     => $q->reviews ?? 0,
+                'amount'      => $q->amount,
+                'time'        => $q->time_estimate,
+                'attachments' => $q->attachments,
+                'isPremium'   => $q->is_premium,
+            ]);
+
+        $stats = [
+            'ongoing'   => ServiceEngagement::where('provider_id', $provider->id)->where('status', 'ongoing')->count(),
+            'completed' => ServiceEngagement::where('provider_id', $provider->id)->where('status', 'completed')->count(),
+            'cancelled' => ServiceEngagement::where('provider_id', $provider->id)->where('status', 'cancelled')->count(),
+        ];
+
+        return response()->json(['quotes' => $quotes, 'stats' => $stats]);
+    }
+
+    public function respondToQuote(Request $request, int $id): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+        $validated = $request->validate([
+            'action' => ['required', 'in:accept,reject'],
+        ]);
+
+        $engagement = ServiceEngagement::where('id', $id)
+            ->where('provider_id', $provider->id)
+            ->where('status', 'pending')
+            ->firstOrFail();
+
+        $engagement->update([
+            'status'     => $validated['action'] === 'accept' ? 'ongoing' : 'cancelled',
+            'hired_name' => $validated['action'] === 'accept' ? $provider->user->name : null,
+        ]);
+
+        return response()->json([
+            'message' => $validated['action'] === 'accept' ? 'Quote accepted' : 'Quote rejected',
+        ]);
+    }
+
+    public function getServices(Request $request): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+        $status = $request->query('status', 'ongoing');
+
+        $services = ServiceEngagement::where('provider_id', $provider->id)
+            ->where('status', $status)
+            ->with('seeker.user')
+            ->latest()
+            ->get()
+            ->map(fn($s) => [
+                'id'          => $s->id,
+                'clientName'  => $s->client_name,
+                'title'       => $s->title,
+                'type'        => $s->type,
+                'duration'    => $s->duration,
+                'location'    => $s->location,
+                'isPremium'   => $s->is_premium,
+                'hiredName'   => $s->hired_name,
+            ]);
+
+        $stats = [
+            'ongoing'   => ServiceEngagement::where('provider_id', $provider->id)->where('status', 'ongoing')->count(),
+            'completed' => ServiceEngagement::where('provider_id', $provider->id)->where('status', 'completed')->count(),
+            'cancelled' => ServiceEngagement::where('provider_id', $provider->id)->where('status', 'cancelled')->count(),
+        ];
+
+        return response()->json(['services' => $services, 'stats' => $stats]);
+    }
+
+    public function getService(Request $request, int $id): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+
+        $service = ServiceEngagement::where('id', $id)
+            ->where('provider_id', $provider->id)
+            ->with('messages.user')
+            ->firstOrFail();
+
+        $history = $service->messages->map(fn($m) => [
+            'id'          => $m->id,
+            'user'        => $m->user_name,
+            'avatar'      => $m->user_name ? mb_substr($m->user_name, 0, 1) : '?',
+            'date'        => $m->created_at->diffForHumans(),
+            'message'     => $m->message,
+            'attachments' => $m->attachments ?? [],
+        ])->values();
+
+        return response()->json([
+            'service' => [
+                'id'           => $service->id,
+                'title'        => $service->title,
+                'providerName' => $service->provider_name,
+                'rating'       => $service->rating ?? 5.0,
+                'reviews'      => $service->reviews ?? 0,
+                'rate'         => $service->rate,
+                'location'     => $service->location,
+                'attachments'  => $service->attachments,
+                'amount'       => $service->amount,
+                'time'         => $service->time_estimate,
+                'status'       => $service->status,
+                'isPremium'    => $service->is_premium,
+            ],
+            'history' => $history,
+        ]);
+    }
+
+    public function sendServiceMessage(Request $request, int $id): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+        $validated = $request->validate([
+            'message' => ['required', 'string'],
+        ]);
+
+        $service = ServiceEngagement::where('id', $id)
+            ->where('provider_id', $provider->id)
+            ->firstOrFail();
+
+        $msg = ServiceMessage::create([
+            'service_engagement_id' => $service->id,
+            'user_id'               => $request->user()->id,
+            'user_name'             => $request->user()->name,
+            'message'               => $validated['message'],
+        ]);
+
+        return response()->json([
+            'message' => 'Message sent',
+            'entry'   => $msg,
+        ]);
+    }
+
+    public function cancelService(Request $request, int $id): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+
+        $service = ServiceEngagement::where('id', $id)
+            ->where('provider_id', $provider->id)
+            ->firstOrFail();
+
+        $service->update(['status' => 'cancelled']);
+
+        return response()->json(['message' => 'Service cancelled']);
+    }
+
+    public function completeService(Request $request, int $id): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+
+        $service = ServiceEngagement::where('id', $id)
+            ->where('provider_id', $provider->id)
+            ->firstOrFail();
+
+        $service->update(['status' => 'completed']);
+
+        return response()->json(['message' => 'Service completed']);
+    }
+
+    public function repostService(Request $request, int $id): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+
+        $service = ServiceEngagement::where('id', $id)
+            ->where('provider_id', $provider->id)
+            ->where('status', 'cancelled')
+            ->firstOrFail();
+
+        $service->update([
+            'status'     => 'pending',
+            'hired_name' => null,
+        ]);
+
+        return response()->json(['message' => 'Service reposted']);
+    }
+
+    public function deleteService(Request $request, int $id): JsonResponse
+    {
+        $provider = Provider::where('user_id', $request->user()->id)->firstOrFail();
+
+        $service = ServiceEngagement::where('id', $id)
+            ->where('provider_id', $provider->id)
+            ->firstOrFail();
+
+        $service->messages()->delete();
+        $service->delete();
+
+        return response()->json(['message' => 'Service deleted']);
     }
 }

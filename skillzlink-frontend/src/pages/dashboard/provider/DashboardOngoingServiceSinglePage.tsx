@@ -85,7 +85,7 @@ export function DashboardOngoingServiceSinglePage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Link to="/dashboard/ongoing" className="text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-colors">
+              <Link to="/dashboard/ongoing-service" className="text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-colors">
                 <i className="lnr lnr-arrow-left font-bold"></i> Back to Services
               </Link>
             </div>

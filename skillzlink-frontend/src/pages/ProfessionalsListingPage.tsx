@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link, useSearchParams } from "react-router-dom"
-import { publicApi } from "../services/api"
+import { publicApi, seekerApi } from "../services/api"
 import type { PublicProvider } from "../services/api"
 
 const ITEMS_PER_PAGE = 6
@@ -20,6 +20,8 @@ export function ProfessionalsListingPage() {
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [revealingId, setRevealingId] = useState<number | null>(null)
+  const [revealedContacts, setRevealedContacts] = useState<Record<number, string>>({})
 
   const [searchText, setSearchText] = useState("")
   const [categoryFilter, setCategoryFilter] = useState(initialService)
@@ -42,6 +44,17 @@ export function ProfessionalsListingPage() {
       setLoading(false)
     })
   }, [])
+
+  const handleRevealContact = async (pro: PublicProvider) => {
+    setRevealingId(pro.id)
+    try {
+      const res = await seekerApi.revealContact(pro.id)
+      if (res.contact_available && res.contact_number) {
+        setRevealedContacts(prev => ({ ...prev, [pro.id]: res.contact_number! }))
+      }
+    } catch {}
+    setRevealingId(null)
+  }
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -314,15 +327,30 @@ export function ProfessionalsListingPage() {
                         <span className="font-medium">${pro.rate || "15"}/hr</span>
                       </div>
                       
-                      <a 
-                        href={`https://wa.me/${pro.phone?.replace(/\+/g, '')}?text=Hi ${pro.name}, I found your profile on SkillzLink.`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors"
-                        title="Chat on WhatsApp"
-                      >
-                        <i className="fab fa-whatsapp text-lg" />
-                      </a>
+                      {revealedContacts[pro.id] ? (
+                        <a 
+                          href={`https://wa.me/${revealedContacts[pro.id].replace(/[^0-9]/g, '')}?text=Hi ${pro.name}, I found your profile on SkillzLink.`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors"
+                          title="Chat on WhatsApp"
+                        >
+                          <i className="fab fa-whatsapp text-lg" />
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => handleRevealContact(pro)}
+                          disabled={revealingId === pro.id}
+                          className="w-9 h-9 rounded-lg bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center hover:bg-[var(--accent-color)] hover:text-white transition-colors disabled:opacity-50"
+                          title="Reveal Contact"
+                        >
+                          {revealingId === pro.id ? (
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <i className="lnr lnr-phone-handset text-lg" />
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

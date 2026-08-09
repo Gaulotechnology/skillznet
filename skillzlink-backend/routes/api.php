@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\ProviderController;
 use App\Http\Controllers\Api\PublicProviderController;
 use App\Http\Controllers\Api\SeekerController;
+use App\Http\Controllers\Api\AgentController;
+use App\Http\Controllers\Api\AffiliateController;
 use App\Http\Controllers\Api\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,7 @@ Route::get('/providers/{id}/slots', [PublicProviderController::class, 'getSlots'
 
 // Public application submission (no auth)
 Route::post('/applications', [ApplicationController::class, 'store']);
+Route::post('/referral-click', [AffiliateController::class, 'trackClick']);
 Route::get('/careers', function () {
     return response()->json([
         'jobs' => \App\Models\JobPosting::where('is_active', true)->get()
@@ -44,10 +47,13 @@ Route::prefix('auth')->group(function (): void {
     Route::post('/request-otp', [AuthController::class, 'requestOtp']);
     Route::post('/register-provider', [AuthController::class, 'registerProvider']);
     Route::post('/register-seeker', [AuthController::class, 'registerSeeker']);
+    Route::post('/register-agent', [AuthController::class, 'registerAgent']);
+    Route::post('/register-affiliate', [AuthController::class, 'registerAffiliate']);
     Route::post('/login', [AuthController::class, 'loginWithPin']);
     Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
     Route::post('/request-pin-reset', [AuthController::class, 'requestPinReset']);
     Route::post('/reset-pin', [AuthController::class, 'resetPin']);
+    Route::post('/password-reset', [AuthController::class, 'requestPasswordReset']);
 });
 
 Route::middleware('auth:sanctum')->group(function (): void {
@@ -57,7 +63,31 @@ Route::middleware('auth:sanctum')->group(function (): void {
         return response()->json(['user' => $user]);
     });
 
-    Route::prefix('provider')->group(function (): void {
+    // ─── Conversations (all authenticated users) ───────────────────────────
+    Route::get('/conversations', [ConversationController::class, 'index']);
+    Route::post('/conversations', [ConversationController::class, 'store']);
+    Route::get('/conversations/{id}', [ConversationController::class, 'show']);
+    Route::post('/conversations/{id}/messages', [ConversationController::class, 'sendMessage']);
+    Route::get('/users/list', [ConversationController::class, 'userList']);
+
+    // ─── Account (shared across all roles) ─────────────────────────────────
+    Route::prefix('account')->group(function (): void {
+        Route::get('/settings', [SeekerController::class, 'getSettings']);
+        Route::put('/settings', [SeekerController::class, 'updateSettings']);
+        Route::delete('/', [SeekerController::class, 'deleteAccount']);
+    });
+
+    // ─── Support tickets ───────────────────────────────────────────────────
+    Route::post('/support/tickets', function (Illuminate\Http\Request $request) {
+        $request->validate([
+            'category'    => ['required', 'string'],
+            'description' => ['required', 'string'],
+        ]);
+        // Placeholder: store ticket in DB for future implementation
+        return response()->json(['message' => 'Ticket received', 'ticket_id' => rand(1000, 9999)]);
+    });
+
+    Route::prefix('provider')->middleware('role:provider')->group(function (): void {
         Route::get('/profile', [ProviderController::class, 'profile']);
         Route::put('/profile', [ProviderController::class, 'updateProfile']);
         Route::post('/cv', [ProviderController::class, 'uploadCv']);
@@ -68,15 +98,49 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/availability', [ProviderController::class, 'setAvailability']);
         Route::get('/bookings', [ProviderController::class, 'getBookings']);
         Route::put('/bookings/{id}/status', [ProviderController::class, 'updateBookingStatus']);
+        Route::get('/quotes', [ProviderController::class, 'getQuotes']);
+        Route::post('/quotes/{id}/respond', [ProviderController::class, 'respondToQuote']);
+        Route::get('/services', [ProviderController::class, 'getServices']);
+        Route::get('/services/{id}', [ProviderController::class, 'getService']);
+        Route::post('/services/{id}/messages', [ProviderController::class, 'sendServiceMessage']);
+        Route::post('/services/{id}/cancel', [ProviderController::class, 'cancelService']);
+        Route::post('/services/{id}/complete', [ProviderController::class, 'completeService']);
+        Route::post('/services/{id}/repost', [ProviderController::class, 'repostService']);
+        Route::delete('/services/{id}', [ProviderController::class, 'deleteService']);
     });
 
-    Route::prefix('seeker')->group(function (): void {
+    Route::prefix('seeker')->middleware('role:seeker,customer')->group(function (): void {
         Route::get('/search', [SeekerController::class, 'search']);
         Route::get('/provider/{id}', [SeekerController::class, 'providerDetails']);
         Route::post('/provider/{id}/contact', [SeekerController::class, 'revealContact']);
         Route::post('/provider/{id}/report', [SeekerController::class, 'reportProvider']);
         Route::post('/bookings', [SeekerController::class, 'createBooking']);
         Route::get('/bookings', [SeekerController::class, 'getBookings']);
+        Route::get('/overview', [SeekerController::class, 'getOverview']);
+        Route::get('/reviews', [SeekerController::class, 'getReviews']);
+        Route::post('/reviews', [SeekerController::class, 'createReview']);
+        Route::put('/reviews/{id}', [SeekerController::class, 'updateReview']);
+        Route::delete('/reviews/{id}', [SeekerController::class, 'deleteReview']);
+        Route::get('/billing', [SeekerController::class, 'getBilling']);
+        Route::post('/billing/payment-methods', [SeekerController::class, 'addPaymentMethod']);
+        Route::delete('/billing/payment-methods/{id}', [SeekerController::class, 'deletePaymentMethod']);
+        Route::get('/settings', [SeekerController::class, 'getSettings']);
+        Route::put('/settings', [SeekerController::class, 'updateSettings']);
+        Route::delete('/account', [SeekerController::class, 'deleteAccount']);
+    });
+
+    Route::prefix('agent')->middleware('role:agent')->group(function (): void {
+        Route::get('/overview', [AgentController::class, 'getOverview']);
+        Route::get('/referrals', [AgentController::class, 'getReferrals']);
+        Route::get('/commissions', [AgentController::class, 'getCommissions']);
+        Route::get('/onboarding-link', [AgentController::class, 'getOnboardingLink']);
+    });
+
+    Route::prefix('affiliate')->middleware('role:affiliate')->group(function (): void {
+        Route::get('/overview', [AffiliateController::class, 'getOverview']);
+        Route::get('/links', [AffiliateController::class, 'getLinks']);
+        Route::get('/payouts', [AffiliateController::class, 'getPayouts']);
+        Route::post('/payout', [AffiliateController::class, 'requestPayout']);
     });
 
     Route::prefix('admin')->middleware('role:admin,super_admin')->group(function (): void {
@@ -103,12 +167,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/stats', [AdminController::class, 'stats']);
         Route::put('/provider/{id}/subscription', [AdminController::class, 'overrideSubscription']);
 
-        Route::get('/conversations', [ConversationController::class, 'index']);
-        Route::post('/conversations', [ConversationController::class, 'store']);
-        Route::get('/conversations/{id}', [ConversationController::class, 'show']);
-        Route::post('/conversations/{id}/messages', [ConversationController::class, 'sendMessage']);
-        Route::get('/admin/conversations/all', [ConversationController::class, 'adminIndex']);
-        Route::get('/users/list', [ConversationController::class, 'userList']);
+        Route::get('/conversations/all', [ConversationController::class, 'adminIndex']);
 
         Route::get('/applications', [ApplicationController::class, 'index']);
         Route::post('/applications/{id}/approve', [ApplicationController::class, 'approve']);
@@ -116,6 +175,24 @@ Route::middleware('auth:sanctum')->group(function (): void {
         
         Route::get('/permissions', [AdminController::class, 'permissions']);
         Route::post('/permissions/sync', [AdminController::class, 'syncPermissions']);
+
+        Route::get('/insights', [AdminController::class, 'insights']);
+
+        Route::get('/packages', [AdminController::class, 'getPackages']);
+        Route::post('/packages', [AdminController::class, 'createPackage']);
+        Route::put('/packages/{id}', [AdminController::class, 'updatePackage']);
+        Route::delete('/packages/{id}', [AdminController::class, 'deletePackage']);
+
+        Route::get('/roles', [AdminController::class, 'getRoles']);
+        Route::post('/roles', [AdminController::class, 'createRole']);
+        Route::put('/roles/{id}', [AdminController::class, 'updateRole']);
+        Route::delete('/roles/{id}', [AdminController::class, 'deleteRole']);
+
+        Route::get('/affiliates', [AdminController::class, 'getAffiliates']);
+        Route::get('/agents', [AdminController::class, 'getAgents']);
+        Route::get('/payments', [AdminController::class, 'getPayments']);
+        Route::get('/appointments', [AdminController::class, 'getAppointments']);
+        Route::get('/matching', [AdminController::class, 'getMatchingRequests']);
 
         // Super admin only routes
         Route::middleware('role:super_admin')->group(function (): void {

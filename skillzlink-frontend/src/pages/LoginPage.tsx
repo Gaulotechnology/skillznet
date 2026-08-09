@@ -32,8 +32,10 @@ export function LoginPage() {
       setToken(data.token)
       setCurrentUser(data.user)
       const role = data.user.role
-      if (role === "admin") navigate("/dashboard/admin/overview")
+      if (role === "admin" || role === "super_admin") navigate("/dashboard/admin/overview")
       else if (role === "provider") navigate("/dashboard/provider/overview")
+      else if (role === "agent") navigate("/dashboard/agent/overview")
+      else if (role === "affiliate") navigate("/dashboard/affiliate/overview")
       else navigate("/dashboard/seeker/overview")
     } catch {
       setError("Invalid phone number or PIN.")
@@ -90,8 +92,10 @@ export function LoginPage() {
       setToken(data.token)
       setCurrentUser(data.user)
       const role = data.user.role
-      if (role === "admin") navigate("/dashboard/admin/overview")
+      if (role === "admin" || role === "super_admin") navigate("/dashboard/admin/overview")
       else if (role === "provider") navigate("/dashboard/provider/overview")
+      else if (role === "agent") navigate("/dashboard/agent/overview")
+      else if (role === "affiliate") navigate("/dashboard/affiliate/overview")
       else navigate("/dashboard/seeker/overview")
     } catch {
       setError("Invalid or expired OTP, or could not reset PIN.")
@@ -108,11 +112,14 @@ export function LoginPage() {
     try {
       const formattedPhone = formatPhone(phoneNumber)
       const data = await authApi.verifyOtp(formattedPhone, otp)
-      setToken(data.token)
-      setCurrentUser(data.user)
-      const role = data.user.role
-      if (role === "admin") navigate("/dashboard/admin/overview")
+      const res = data as any
+      setToken(res.token)
+      setCurrentUser(res.user)
+      const role = res.user.role
+      if (role === "admin" || role === "super_admin") navigate("/dashboard/admin/overview")
       else if (role === "provider") navigate("/dashboard/provider/overview")
+      else if (role === "agent") navigate("/dashboard/agent/overview")
+      else if (role === "affiliate") navigate("/dashboard/affiliate/overview")
       else navigate("/dashboard/seeker/overview")
     } catch {
       setError("Invalid or expired OTP. Please try again.")
@@ -262,6 +269,8 @@ export function LoginPage() {
                   <button type="button" onClick={() => handleDemoLogin("771111111")} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Admin</button>
                   <button type="button" onClick={() => handleDemoLogin("772222222")} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Provider</button>
                   <button type="button" onClick={() => handleDemoLogin("773333333")} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Seeker</button>
+                  <button type="button" onClick={() => handleDemoLogin("774444444")} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Agent</button>
+                  <button type="button" onClick={() => handleDemoLogin("775555555")} className="flex-1 min-w-[80px] px-3 py-2 text-xs font-medium bg-[var(--bg-secondary)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all border border-[var(--border-color)]">Affiliate</button>
                 </div>
               </div>
             </form>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Provider;
+use App\Models\Rating;
+use App\Models\SeekerPaymentMethod;
 use App\Models\ProviderReport;
 use App\Models\ProviderView;
 use App\Models\SearchQuery;
@@ -215,5 +217,200 @@ class SeekerController extends Controller
             ->get();
 
         return response()->json(['bookings' => $bookings]);
+    }
+
+    // ─── Overview ──────────────────────────────────────────────────────────────
+
+    public function getOverview(Request $request): JsonResponse
+    {
+        $seeker = Seeker::where('user_id', $request->user()->id)->firstOrFail();
+
+        $savedCount = ProviderView::where('seeker_id', $seeker->id)
+            ->where('contact_revealed', true)
+            ->count();
+        $reportsCount = ProviderReport::where('seeker_id', $seeker->id)->count();
+        $bookingsCount = Booking::where('seeker_id', $seeker->id)->count();
+
+        $recentSaved = ProviderView::where('seeker_id', $seeker->id)
+            ->where('contact_revealed', true)
+            ->with('provider.user')
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(fn($v) => [
+                'id'   => $v->provider_id,
+                'name' => $v->provider->user->name ?? 'Professional',
+                'service_category' => $v->provider->service_category ?? '',
+            ]);
+
+        return response()->json([
+            'stats' => [
+                'saved_count'    => $savedCount,
+                'reports_count'  => $reportsCount,
+                'bookings_count' => $bookingsCount,
+            ],
+            'recent_saved' => $recentSaved,
+        ]);
+    }
+
+    // ─── Reviews ───────────────────────────────────────────────────────────────
+
+    public function getReviews(Request $request): JsonResponse
+    {
+        $seeker = Seeker::where('user_id', $request->user()->id)->firstOrFail();
+
+        $reviews = Rating::where('seeker_id', $seeker->id)
+            ->with('provider.user')
+            ->latest()
+            ->get()
+            ->map(fn($r) => [
+                'id'            => $r->id,
+                'provider_id'   => $r->provider_id,
+                'provider_name' => $r->provider->user->name ?? 'Provider',
+                'rating'        => $r->rating,
+                'comment'       => $r->comment,
+                'created_at'    => $r->created_at->toDateTimeString(),
+            ]);
+
+        return response()->json(['reviews' => $reviews]);
+    }
+
+    public function createReview(Request $request): JsonResponse
+    {
+        $seeker = Seeker::where('user_id', $request->user()->id)->firstOrFail();
+        $validated = $request->validate([
+            'provider_id' => ['required', 'exists:providers,id'],
+            'rating'      => ['required', 'integer', 'min:1', 'max:5'],
+            'comment'     => ['required', 'string'],
+        ]);
+
+        $review = Rating::create([
+            'seeker_id'   => $seeker->id,
+            'provider_id' => $validated['provider_id'],
+            'rating'      => $validated['rating'],
+            'comment'     => $validated['comment'],
+        ]);
+
+        return response()->json([
+            'message' => 'Review created',
+            'review'  => $review,
+        ], 201);
+    }
+
+    public function updateReview(Request $request, int $id): JsonResponse
+    {
+        $seeker = Seeker::where('user_id', $request->user()->id)->firstOrFail();
+        $validated = $request->validate([
+            'rating'  => ['required', 'integer', 'min:1', 'max:5'],
+            'comment' => ['required', 'string'],
+        ]);
+
+        $review = Rating::where('id', $id)
+            ->where('seeker_id', $seeker->id)
+            ->firstOrFail();
+
+        $review->update($validated);
+
+        return response()->json(['message' => 'Review updated']);
+    }
+
+    public function deleteReview(Request $request, int $id): JsonResponse
+    {
+        $seeker = Seeker::where('user_id', $request->user()->id)->firstOrFail();
+
+        $review = Rating::where('id', $id)
+            ->where('seeker_id', $seeker->id)
+            ->firstOrFail();
+
+        $review->delete();
+
+        return response()->json(['message' => 'Review deleted']);
+    }
+
+    // ─── Billing ───────────────────────────────────────────────────────────────
+
+    public function getBilling(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+
+        $paymentMethods = SeekerPaymentMethod::where('user_id', $userId)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'payment_methods' => $paymentMethods,
+            'transactions'    => [],
+        ]);
+    }
+
+    public function addPaymentMethod(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'type'    => ['required', 'string'],
+            'details' => ['required', 'array'],
+        ]);
+
+        $pm = SeekerPaymentMethod::create([
+            'user_id'    => $request->user()->id,
+            'type'       => $validated['type'],
+            'number'     => $validated['details']['number'] ?? '',
+            'label'      => $validated['details']['label'] ?? null,
+            'is_default' => !SeekerPaymentMethod::where('user_id', $request->user()->id)->exists(),
+        ]);
+
+        return response()->json([
+            'message'         => 'Payment method added',
+            'payment_method'  => $pm,
+        ]);
+    }
+
+    public function deletePaymentMethod(Request $request, int $id): JsonResponse
+    {
+        $pm = SeekerPaymentMethod::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        $pm->delete();
+
+        return response()->json(['message' => 'Payment method removed']);
+    }
+
+    // ─── Settings ──────────────────────────────────────────────────────────────
+
+    public function getSettings(Request $request): JsonResponse
+    {
+        $settings = $request->user()->settings ?? ['email_updates' => true, 'sms_updates' => true];
+
+        return response()->json(['settings' => $settings]);
+    }
+
+    public function updateSettings(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email_updates' => ['required', 'boolean'],
+            'sms_updates'   => ['required', 'boolean'],
+        ]);
+
+        $request->user()->update(['settings' => $validated]);
+
+        return response()->json(['message' => 'Settings updated']);
+    }
+
+    // ─── Account ───────────────────────────────────────────────────────────────
+
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(['message' => 'Account deleted']);
+    }
+
+    public function requestPasswordReset(Request $request): JsonResponse
+    {
+        return response()->json([
+            'message' => 'If an account with that email exists, a password reset link has been sent.',
+        ]);
     }
 }

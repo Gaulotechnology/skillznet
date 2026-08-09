@@ -1,28 +1,12 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { DataTable, type Column } from "../../../components/shared/DataTable";
-
-const MOCK_AGENTS = [
-  { id: 1, name: "Thabo Molefe", email: "thabo.molefe@skillzlink.co.za", phone: "+27 82 345 6789", avatar: null, status: "active", assignedSeekers: 12, createdAt: "2025-11-15" },
-  { id: 2, name: "Naledi Dlamini", email: "naledi.d@skillzlink.co.za", phone: "+27 71 234 5678", avatar: null, status: "active", assignedSeekers: 8, createdAt: "2025-12-02" },
-  { id: 3, name: "Sipho Nkosi", email: "sipho.nkosi@skillzlink.co.za", phone: "+27 63 456 7890", avatar: null, status: "inactive", assignedSeekers: 0, createdAt: "2026-01-10" },
-  { id: 4, name: "Lerato Mahlangu", email: "lerato.m@skillzlink.co.za", phone: "+27 84 567 8901", avatar: null, status: "active", assignedSeekers: 15, createdAt: "2025-10-20" },
-  { id: 5, name: "Bongani Zulu", email: "bongani.z@skillzlink.co.za", phone: "+27 72 678 9012", avatar: null, status: "active", assignedSeekers: 6, createdAt: "2026-02-05" },
-  { id: 6, name: "Ayanda Khumalo", email: "ayanda.k@skillzlink.co.za", phone: "+27 61 789 0123", avatar: null, status: "inactive", assignedSeekers: 0, createdAt: "2026-03-18" },
-  { id: 7, name: "Zanele Mthembu", email: "zanele.m@skillzlink.co.za", phone: "+27 83 890 1234", avatar: null, status: "active", assignedSeekers: 9, createdAt: "2025-09-01" },
-  { id: 8, name: "Mandla Sithole", email: "mandla.s@skillzlink.co.za", phone: "+27 76 901 2345", avatar: null, status: "active", assignedSeekers: 11, createdAt: "2026-01-25" },
-  { id: 9, name: "Precious Mokoena", email: "precious.m@skillzlink.co.za", phone: "+27 65 012 3456", avatar: null, status: "active", assignedSeekers: 4, createdAt: "2026-04-12" },
-  { id: 10, name: "Kagiso Motaung", email: "kagiso.mot@skillzlink.co.za", phone: "+27 81 123 4567", avatar: null, status: "inactive", assignedSeekers: 0, createdAt: "2026-05-30" },
-  { id: 11, name: "Nomvula Cele", email: "nomvula.c@skillzlink.co.za", phone: "+27 73 234 5678", avatar: null, status: "active", assignedSeekers: 7, createdAt: "2025-08-14" },
-  { id: 12, name: "Tshepo Langa", email: "tshepo.l@skillzlink.co.za", phone: "+27 64 345 6789", avatar: null, status: "active", assignedSeekers: 13, createdAt: "2026-06-01" },
-  { id: 13, name: "Palesa Ndaba", email: "palesa.n@skillzlink.co.za", phone: "+27 82 456 7890", avatar: null, status: "active", assignedSeekers: 5, createdAt: "2026-02-20" },
-  { id: 14, name: "Vuyo Jansen", email: "vuyo.j@skillzlink.co.za", phone: "+27 71 567 8901", avatar: null, status: "inactive", assignedSeekers: 0, createdAt: "2026-07-03" },
-  { id: 15, name: "Dineo Maseko", email: "dineo.mas@skillzlink.co.za", phone: "+27 63 678 9012", avatar: null, status: "active", assignedSeekers: 10, createdAt: "2025-12-28" },
-];
+import { adminApi } from "../../../services/api";
 
 export function DashboardAgentsPage() {
   const [agents, setAgents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
@@ -33,12 +17,21 @@ export function DashboardAgentsPage() {
   };
 
   useEffect(() => {
-    setTimeout(() => { setAgents(MOCK_AGENTS); setLoading(false); }, 500);
+    adminApi.getAgents()
+      .then((data) => {
+        setAgents(data.users || []);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch agents:", err);
+        setError("Failed to load agents. Please try again later.");
+        setAgents([]);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const handleSuspend = (agent: any) => {
-    setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, status: a.status === "active" ? "inactive" : "active" } : a));
-    toast(`${agent.name} ${agent.status === "active" ? "suspended" : "activated"}.`);
+    setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, is_active: a.is_active ? false : true } : a));
+    toast(`${agent.name} ${agent.is_active ? "suspended" : "activated"}.`);
   };
 
   const handleDelete = (agent: any) => {
@@ -58,16 +51,14 @@ export function DashboardAgentsPage() {
       ),
     },
     { key: "email", label: "Email", render: (row) => <span className="text-[var(--text-secondary)]">{row.email}</span> },
-    { key: "phone", label: "Phone", render: (row) => <span className="text-[var(--text-secondary)]">{row.phone}</span> },
     {
       key: "status", label: "Status", render: (row) => (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.status === "active" ? "bg-green-50 text-green-700" : "bg-[var(--bg-secondary)] text-[var(--text-secondary)]"}`}>
-          {row.status}
+        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.is_active ? "bg-green-50 text-green-700" : "bg-[var(--bg-secondary)] text-[var(--text-secondary)]"}`}>
+          {row.is_active ? "active" : "inactive"}
         </span>
       ),
     },
-    { key: "assignedSeekers", label: "Assigned Seekers", render: (row) => <span className="text-[var(--text-primary)]">{row.assignedSeekers}</span> },
-    { key: "createdAt", label: "Created", render: (row) => <span className="text-[var(--text-secondary)]">{row.createdAt}</span> },
+    { key: "created_at", label: "Created", render: (row) => <span className="text-[var(--text-secondary)]">{row.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : "-"}</span> },
   ];
 
   return (
@@ -76,6 +67,13 @@ export function DashboardAgentsPage() {
         <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
         {toastMessage}
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
       <DataTable
         columns={columns}
         data={agents}

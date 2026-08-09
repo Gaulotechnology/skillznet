@@ -8,6 +8,8 @@ export function ProfessionalProfilePage() {
   const [loading, setLoading] = useState(true)
   const [_error, setError] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
+  const [revealingContact, setRevealingContact] = useState(false)
+  const [revealedPhone, setRevealedPhone] = useState<string | null>(null)
   const [bookingDate, setBookingDate] = useState("")
   const [bookingTime, setBookingTime] = useState("")
   const [bookingNotes, setBookingNotes] = useState("")
@@ -84,6 +86,18 @@ export function ProfessionalProfilePage() {
     } finally {
       setSubmittingBooking(false);
     }
+  };
+
+  const handleRevealContact = async () => {
+    if (!pro) return
+    setRevealingContact(true)
+    try {
+      const res = await seekerApi.revealContact(pro.id)
+      if (res.contact_available && res.contact_number) {
+        setRevealedPhone(res.contact_number)
+      }
+    } catch {}
+    setRevealingContact(false)
   };
 
   if (loading) {
@@ -163,14 +177,24 @@ export function ProfessionalProfilePage() {
                 >
                   <i className="lnr lnr-calendar-full text-xl" /> Book Now
                 </button>
-                <a 
-                  href={`https://wa.me/${(pro.phone ?? '263770000000').replace(/[^0-9]/g, '')}?text=Hi%20${pro.name},%20I%20found%20you%20on%20SkillzLink.`} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2"
-                >
-                  <i className="fab fa-whatsapp text-xl" /> WhatsApp
-                </a>
+                {revealedPhone ? (
+                  <a 
+                    href={`https://wa.me/${revealedPhone.replace(/[^0-9]/g, '')}?text=Hi%20${pro?.name},%20I%20found%20you%20on%20SkillzLink.`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2"
+                  >
+                    <i className="fab fa-whatsapp text-xl" /> WhatsApp
+                  </a>
+                ) : (
+                  <button 
+                    onClick={handleRevealContact}
+                    disabled={revealingContact}
+                    className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {revealingContact ? "Loading..." : "Reveal Contact"} <i className="lnr lnr-phone-handset text-xl" />
+                  </button>
+                )}
               </div>
             </div>
 

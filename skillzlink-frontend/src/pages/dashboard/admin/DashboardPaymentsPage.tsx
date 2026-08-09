@@ -1,29 +1,12 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { DataTable, type Column } from "../../../components/shared/DataTable";
-
-const MOCK_PAYMENTS = [
-  { id: "TXN-001", payer: "Nomsa Khoza", payerAvatar: null, recipient: "Thabo Molefe", recipientAvatar: null, amount: 850, method: "Card", status: "Completed", date: "2026-08-08 09:15" },
-  { id: "TXN-002", payer: "David Pillay", payerAvatar: null, recipient: "Sipho Nkosi", recipientAvatar: null, amount: 1600, method: "Bank", status: "Pending", date: "2026-08-08 11:30" },
-  { id: "TXN-003", payer: "Fatima Essop", payerAvatar: null, recipient: "Lerato Mahlangu", recipientAvatar: null, amount: 450, method: "Mobile Money", status: "Completed", date: "2026-08-07 14:45" },
-  { id: "TXN-004", payer: "Johan van Wyk", payerAvatar: null, recipient: "Bongani Zulu", recipientAvatar: null, amount: 600, method: "Card", status: "Completed", date: "2026-08-07 08:20" },
-  { id: "TXN-005", payer: "Amahle Ndlovu", payerAvatar: null, recipient: "Ayanda Khumalo", recipientAvatar: null, amount: 3200, method: "Bank", status: "Completed", date: "2026-08-06 10:50" },
-  { id: "TXN-006", payer: "Pieter Botha", payerAvatar: null, recipient: "Zanele Mthembu", recipientAvatar: null, amount: 5500, method: "Card", status: "Pending", date: "2026-08-09 07:00" },
-  { id: "TXN-007", payer: "Thandiwe Miya", payerAvatar: null, recipient: "Mandla Sithole", recipientAvatar: null, amount: 350, method: "Mobile Money", status: "Refunded", date: "2026-08-05 15:30" },
-  { id: "TXN-008", payer: "Ravi Naidoo", payerAvatar: null, recipient: "Precious Mokoena", recipientAvatar: null, amount: 1200, method: "Card", status: "Completed", date: "2026-08-08 14:10" },
-  { id: "TXN-009", payer: "Grace Moyo", payerAvatar: null, recipient: "Kagiso Motaung", recipientAvatar: null, amount: 8500, method: "Bank", status: "Pending", date: "2026-08-10 12:00" },
-  { id: "TXN-010", payer: "Willem Pretorius", payerAvatar: null, recipient: "Nomvula Cele", recipientAvatar: null, amount: 2200, method: "Card", status: "Failed", date: "2026-08-04 06:30" },
-  { id: "TXN-011", payer: "Sibongile Mhlongo", payerAvatar: null, recipient: "Tshepo Langa", recipientAvatar: null, amount: 700, method: "Mobile Money", status: "Completed", date: "2026-08-08 16:20" },
-  { id: "TXN-012", payer: "Ahmed Patel", payerAvatar: null, recipient: "Palesa Ndaba", recipientAvatar: null, amount: 2400, method: "Bank", status: "Completed", date: "2026-08-03 09:45" },
-  { id: "TXN-013", payer: "Mpumi Tshabalala", payerAvatar: null, recipient: "Vuyo Jansen", recipientAvatar: null, amount: 550, method: "Card", status: "Completed", date: "2026-08-08 10:55" },
-  { id: "TXN-014", payer: "Jan Erasmus", payerAvatar: null, recipient: "Dineo Maseko", recipientAvatar: null, amount: 7800, method: "Bank", status: "Pending", date: "2026-08-11 08:00" },
-  { id: "TXN-015", payer: "Noluthando Jwara", payerAvatar: null, recipient: "Kabelo Mosia", recipientAvatar: null, amount: 4500, method: "Card", status: "Completed", date: "2026-08-02 07:30" },
-  { id: "TXN-016", payer: "Christo Venter", payerAvatar: null, recipient: "Lindiwe Shabalala", recipientAvatar: null, amount: 1800, method: "Mobile Money", status: "Completed", date: "2026-08-01 13:25" },
-];
+import { adminApi } from "../../../services/api";
 
 export function DashboardPaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
@@ -33,37 +16,46 @@ export function DashboardPaymentsPage() {
     setTimeout(() => setShowToast(false), 3500);
   };
 
-  useEffect(() => { setTimeout(() => { setPayments(MOCK_PAYMENTS); setLoading(false); }, 500); }, []);
+  useEffect(() => {
+    adminApi.getPayments()
+      .then((data) => {
+        setPayments(data.payments || []);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch payments:", err);
+        setError("Failed to load payments. Please try again later.");
+        setPayments([]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  const totalRevenue = payments.filter(p => p.status === "Completed").reduce((s, p) => s + p.amount, 0);
-  const thisMonth = payments.filter(p => p.date.startsWith("2026-08") && p.status === "Completed").reduce((s, p) => s + p.amount, 0);
-  const pendingPayouts = payments.filter(p => p.status === "Pending").reduce((s, p) => s + p.amount, 0);
-  const refunds = payments.filter(p => p.status === "Refunded").reduce((s, p) => s + p.amount, 0);
+  const totalRevenue = payments.filter(p => p.status === "Completed" || p.status === "completed").reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const thisMonth = payments.filter(p => {
+    if (p.status !== "Completed" && p.status !== "completed") return false;
+    const d = p.date || "";
+    const now = new Date().toISOString().slice(0, 7);
+    return d.startsWith(now);
+  }).reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const pendingPayouts = payments.filter(p => p.status === "Pending" || p.status === "pending").reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const refunds = payments.filter(p => p.status === "Refunded" || p.status === "refunded").reduce((s, p) => s + (Number(p.amount) || 0), 0);
 
-  const statusColor: Record<string, string> = { Completed: "bg-green-50 text-green-700", Pending: "bg-yellow-50 text-yellow-700", Failed: "bg-red-50 text-red-600", Refunded: "bg-[var(--bg-secondary)] text-[var(--text-secondary)]" };
+  const statusColor: Record<string, string> = { Completed: "bg-green-50 text-green-700", completed: "bg-green-50 text-green-700", Pending: "bg-yellow-50 text-yellow-700", pending: "bg-yellow-50 text-yellow-700", Failed: "bg-red-50 text-red-600", failed: "bg-red-50 text-red-600", Refunded: "bg-[var(--bg-secondary)] text-[var(--text-secondary)]", refunded: "bg-[var(--bg-secondary)] text-[var(--text-secondary)]" };
 
   const columns: Column<any>[] = [
     { key: "id", label: "Transaction ID", render: (row) => <span className="text-xs font-mono text-[var(--text-primary)]">{row.id}</span> },
     {
-      key: "payer", label: "Payer", render: (row) => (
+      key: "user", label: "User", render: (row) => (
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-xs font-medium text-[var(--text-secondary)]">{row.payer.charAt(0)}</div>
-          <span className="text-sm text-[var(--text-primary)]">{row.payer}</span>
+          <div className="w-6 h-6 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-xs font-medium text-[var(--text-secondary)]">{(row.user || "U").charAt(0)}</div>
+          <span className="text-sm text-[var(--text-primary)]">{row.user || "-"}</span>
         </div>
       ),
     },
-    {
-      key: "recipient", label: "Recipient", render: (row) => (
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-xs font-medium text-[var(--text-secondary)]">{row.recipient.charAt(0)}</div>
-          <span className="text-sm text-[var(--text-primary)]">{row.recipient}</span>
-        </div>
-      ),
-    },
-    { key: "amount", label: "Amount", render: (row) => <span className="text-[var(--text-primary)] font-medium">R {row.amount.toLocaleString()}</span> },
-    { key: "method", label: "Method", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.method}</span> },
-    { key: "status", label: "Status", render: (row) => <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${statusColor[row.status] || ""}`}>{row.status}</span> },
-    { key: "date", label: "Date", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.date}</span> },
+    { key: "amount", label: "Amount", render: (row) => <span className="text-[var(--text-primary)] font-medium">R {(Number(row.amount) || 0).toLocaleString()}</span> },
+    { key: "method", label: "Method", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.method || "-"}</span> },
+    { key: "status", label: "Status", render: (row) => <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${statusColor[row.status] || ""}`}>{row.status || "-"}</span> },
+    { key: "transaction", label: "Transaction", render: (row) => <span className="text-[var(--text-secondary)] text-xs font-mono">{row.transaction || "-"}</span> },
+    { key: "date", label: "Date", render: (row) => <span className="text-[var(--text-secondary)] text-xs">{row.date || "-"}</span> },
   ];
 
   return (
@@ -72,6 +64,12 @@ export function DashboardPaymentsPage() {
         <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
         {toastMessage}
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -110,7 +108,7 @@ export function DashboardPaymentsPage() {
         actions={(row) => (
           <div className="flex items-center gap-1">
             <button onClick={() => toast("View receipt coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded"><i className="lnr lnr-file-empty text-sm"></i></button>
-            {row.status === "Completed" && <button onClick={() => toast("Refund modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-orange-600 rounded"><i className="lnr lnr-undo text-sm"></i></button>}
+            {(row.status === "Completed" || row.status === "completed") && <button onClick={() => toast("Refund modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-orange-600 rounded"><i className="lnr lnr-undo text-sm"></i></button>}
           </div>
         )}
       />

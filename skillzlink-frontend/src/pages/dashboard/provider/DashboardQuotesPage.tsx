@@ -18,7 +18,7 @@ export function DashboardQuotesPage() {
       setQuotes(data.quotes);
       setStats(data.stats);
     } catch {
-      showToastMsg("Failed to load quotes", "error");
+      showToastMsg("Failed to load requests", "error");
     } finally {
       setLoading(false);
     }
@@ -36,7 +36,7 @@ export function DashboardQuotesPage() {
   const handleRespond = async (id: number, action: 'accept' | 'reject') => {
     try {
       await providerApi.respondToQuote(id, action);
-      showToastMsg(action === 'accept' ? "Quote accepted!" : "Quote rejected", "success");
+      showToastMsg(action === 'accept' ? "Request accepted!" : "Request declined", "success");
       fetchQuotes();
     } catch {
       showToastMsg("Action failed", "error");
@@ -44,9 +44,9 @@ export function DashboardQuotesPage() {
   };
 
   const statItems = [
-    { value: stats.ongoing, label: "Ongoing Services", icon: "lnr-sync", color: "text-blue-500", bg: "bg-blue-50" },
-    { value: stats.completed, label: "Completed Services", icon: "lnr-checkmark-circle", color: "text-emerald-500", bg: "bg-emerald-50" },
-    { value: stats.cancelled, label: "Cancelled Services", icon: "lnr-cross-circle", color: "text-rose-500", bg: "bg-rose-50" },
+    { value: stats.ongoing, label: "Ongoing", icon: "lnr-sync", color: "text-blue-500", bg: "bg-blue-50" },
+    { value: stats.completed, label: "Completed", icon: "lnr-checkmark-circle", color: "text-emerald-500", bg: "bg-emerald-50" },
+    { value: stats.cancelled, label: "Declined", icon: "lnr-cross-circle", color: "text-rose-500", bg: "bg-rose-50" },
   ];
 
   return (
@@ -59,8 +59,8 @@ export function DashboardQuotesPage() {
 
       <div className="p-6 md:p-8 max-w-7xl mx-auto font-['Inter',sans-serif]">
         <div className="mb-8">
-          <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tight">Manage Services</h2>
-          <p className="text-[var(--text-secondary)] mt-1 font-medium">Review and manage proposals for your active service requests.</p>
+          <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tight">Service Requests</h2>
+          <p className="text-[var(--text-secondary)] mt-1 font-medium">Review and respond to service requests from seekers.</p>
         </div>
 
         {loading ? (
@@ -72,15 +72,14 @@ export function DashboardQuotesPage() {
           
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
-            {/* Received Proposals List */}
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-6">Received Quotes</h3>
+              <h3 className="text-xl font-bold text-[var(--text-primary)] mb-6">Pending Requests</h3>
               
               {quotes.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-[var(--border-color)] p-12 text-center">
                   <i className="lnr lnr-inbox text-5xl text-[var(--text-secondary)] mb-4 block"></i>
-                  <h4 className="text-lg font-bold text-[var(--text-primary)] mb-1">No Quotes Yet</h4>
-                  <p className="text-sm text-[var(--text-secondary)]">You haven't received any quotes for your services.</p>
+                  <h4 className="text-lg font-bold text-[var(--text-primary)] mb-1">No Pending Requests</h4>
+                  <p className="text-sm text-[var(--text-secondary)]">You have no service requests awaiting your response.</p>
                 </div>
               ) : (
               <div className="space-y-4">
@@ -97,29 +96,26 @@ export function DashboardQuotesPage() {
                     
                     {/* Avatar */}
                     <div className="w-16 h-16 rounded-2xl bg-[var(--accent-color)] shrink-0 flex items-center justify-center text-white font-black text-2xl">
-                      {(quote.name || "Q").charAt(0)}
+                      {(quote.name || "C").charAt(0)}
                     </div>
                     
                     {/* Details */}
                     <div className="flex-1">
-                      <Link to="/profile" className="text-lg font-bold text-[var(--text-primary)] hover:text-[var(--accent-color)] transition-colors inline-block mb-1">
+                      <span className="text-lg font-bold text-[var(--text-primary)] inline-block mb-1">
                         {quote.name}
-                      </Link>
+                      </span>
                       
                       <div className="flex items-center gap-1.5 text-sm mb-4">
-                        <div className="flex text-amber-400">
-                          <i className="lnr lnr-star font-bold"></i>
-                        </div>
-                        <span className="font-bold text-[var(--text-primary)]">{quote.rating}</span>
-                        <span className="text-[var(--text-secondary)]">({quote.reviews} Reviews)</span>
+                        <i className="lnr lnr-user text-[var(--accent-color)]"></i>
+                        <span className="text-[var(--text-secondary)] font-medium">Client</span>
                       </div>
                       
                       <div className="flex flex-wrap gap-4 text-sm font-medium text-[var(--text-secondary)]">
                         <div className="flex items-center gap-1.5 bg-[var(--bg-secondary)] px-3 py-1.5 rounded-lg">
-                          <i className="lnr lnr-envelope text-[var(--text-secondary)]"></i> Cover Letter Included
+                          <i className="lnr lnr-clock text-[var(--text-secondary)]"></i> {quote.time || "Flexible"}
                         </div>
                         <div className="flex items-center gap-1.5 bg-[var(--bg-secondary)] px-3 py-1.5 rounded-lg">
-                          <i className="lnr lnr-paperclip text-[var(--text-secondary)]"></i> {quote.attachments || 0} Attachments
+                          <i className="lnr lnr-paperclip text-[var(--text-secondary)]"></i> {quote.attachments || 0} Files
                         </div>
                       </div>
                     </div>
@@ -128,15 +124,15 @@ export function DashboardQuotesPage() {
                     <div className="sm:text-right flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-4 border-t sm:border-t-0 sm:border-l border-[var(--border-color)] pt-4 sm:pt-0 sm:pl-6 min-w-[120px]">
                       <div>
                         <div className="text-2xl font-black text-emerald-500">{quote.amount}</div>
-                        <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">{quote.time}</div>
+                        <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Budget</div>
                       </div>
                       
                       <div className="flex flex-col gap-2">
                         <button onClick={() => handleRespond(quote.id, 'accept')} className="px-6 py-2.5 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-bold text-sm shadow-lg transition-all active:scale-95 whitespace-nowrap">
-                          Hire Now
+                          Accept
                         </button>
                         <button onClick={() => handleRespond(quote.id, 'reject')} className="px-6 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 font-bold text-sm hover:bg-rose-50 transition-all active:scale-95 whitespace-nowrap">
-                          Reject
+                          Decline
                         </button>
                       </div>
                     </div>

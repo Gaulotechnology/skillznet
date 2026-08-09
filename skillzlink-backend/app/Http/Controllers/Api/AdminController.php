@@ -11,6 +11,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Seeker;
+use App\Models\Package;
+use App\Models\Booking;
+use App\Models\ServiceEngagement;
 use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
@@ -496,6 +499,204 @@ class AdminController extends Controller
         ]);
 
         return response()->json(['message' => 'Account unlocked successfully', 'user' => $user]);
+    }
+
+    // ─── Insights ──────────────────────────────────────────────────────────────
+
+    public function insights(Request $request): JsonResponse
+    {
+        $ongoing   = ServiceEngagement::where('status', 'ongoing')->count();
+        $completed = ServiceEngagement::where('status', 'completed')->count();
+        $cancelled = ServiceEngagement::where('status', 'cancelled')->count();
+        $reposted  = ServiceEngagement::where('status', 'pending')->count();
+        $activeUsers = User::where('is_active', true)->count();
+        $totalServices = $ongoing + $completed + $cancelled;
+        $completionRate = $totalServices > 0 ? round(($completed / $totalServices) * 100) : 0;
+
+        $hiredProviders = ServiceEngagement::where('status', 'ongoing')
+            ->with('provider.user')
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(fn($s) => [
+                'id'   => $s->provider_id,
+                'name' => $s->provider->user->name ?? 'Provider',
+                'category' => $s->provider->service_category ?? '',
+            ]);
+
+        return response()->json([
+            'stats' => [
+                'ongoing'         => $ongoing,
+                'completed'       => $completed,
+                'cancelled'       => $cancelled,
+                'reposted'        => $reposted,
+                'active_users'    => $activeUsers,
+                'completion_rate' => $completionRate,
+            ],
+            'hired_providers' => $hiredProviders,
+            'chart_data' => [],
+        ]);
+    }
+
+    // ─── Packages CRUD ─────────────────────────────────────────────────────────
+
+    public function getPackages(Request $request): JsonResponse
+    {
+        return response()->json(['packages' => Package::latest()->get()]);
+    }
+
+    public function createPackage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'        => ['required', 'string', 'max:255'],
+            'price'       => ['required', 'numeric', 'min:0'],
+            'duration'    => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'features'    => ['nullable', 'array'],
+            'is_active'   => ['nullable', 'boolean'],
+        ]);
+
+        $pkg = Package::create($validated);
+
+        return response()->json(['message' => 'Package created', 'package' => $pkg], 201);
+    }
+
+    public function updatePackage(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'        => ['sometimes', 'string', 'max:255'],
+            'price'       => ['sometimes', 'numeric', 'min:0'],
+            'duration'    => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'features'    => ['nullable', 'array'],
+            'is_active'   => ['nullable', 'boolean'],
+        ]);
+
+        $pkg = Package::findOrFail($id);
+        $pkg->update($validated);
+
+        return response()->json(['message' => 'Package updated', 'package' => $pkg]);
+    }
+
+    public function deletePackage(Request $request, int $id): JsonResponse
+    {
+        Package::findOrFail($id)->delete();
+        return response()->json(['message' => 'Package deleted']);
+    }
+
+    // ─── Roles CRUD ────────────────────────────────────────────────────────────
+
+    public function getRoles(Request $request): JsonResponse
+    {
+        $roles = DB::table('roles')->orderBy('id')->get();
+        return response()->json(['roles' => $roles]);
+    }
+
+    public function createRole(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'        => ['required', 'string', 'max:255', 'unique:roles,name'],
+            'description' => ['nullable', 'string'],
+        ]);
+
+        $id = DB::table('roles')->insertGetId([
+            'name'        => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+
+        $role = DB::table('roles')->find($id);
+
+        return response()->json(['message' => 'Role created', 'role' => $role], 201);
+    }
+
+    public function updateRole(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'        => ['sometimes', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+        ]);
+
+        DB::table('roles')->where('id', $id)->update(array_merge($validated, ['updated_at' => now()]));
+        $role = DB::table('roles')->find($id);
+
+        return response()->json(['message' => 'Role updated', 'role' => $role]);
+    }
+
+    public function deleteRole(Request $request, int $id): JsonResponse
+    {
+        DB::table('roles')->where('id', $id)->delete();
+        return response()->json(['message' => 'Role deleted']);
+    }
+
+    // ─── Lists for management pages ───────────────────────────────────────────
+
+    public function getAffiliates(Request $request): JsonResponse
+    {
+        $users = User::where('role', 'affiliate')->latest()->get();
+        return response()->json(['users' => $users]);
+    }
+
+    public function getAgents(Request $request): JsonResponse
+    {
+        $users = User::where('role', 'agent')->latest()->get();
+        return response()->json(['users' => $users]);
+    }
+
+    public function getPayments(Request $request): JsonResponse
+    {
+        $payments = Payment::with('provider.user')->latest()->limit(50)->get()
+            ->map(fn($p) => [
+                'id'          => $p->id,
+                'user'        => $p->provider->user->name ?? 'N/A',
+                'amount'      => (float) $p->amount,
+                'method'      => $p->payment_method,
+                'status'      => $p->status,
+                'transaction' => $p->transaction_id,
+                'date'        => $p->created_at->toDateTimeString(),
+            ]);
+
+        return response()->json(['payments' => $payments]);
+    }
+
+    public function getAppointments(Request $request): JsonResponse
+    {
+        $appointments = Booking::with(['seeker.user', 'provider.user'])
+            ->latest()
+            ->limit(50)
+            ->get()
+            ->map(fn($b) => [
+                'id'           => $b->id,
+                'seeker'       => $b->seeker->user->name ?? 'N/A',
+                'provider'     => $b->provider->user->name ?? 'N/A',
+                'date'         => $b->booking_date,
+                'time'         => $b->start_time . ' - ' . $b->end_time,
+                'status'       => $b->status,
+                'notes'        => $b->notes,
+            ]);
+
+        return response()->json(['appointments' => $appointments]);
+    }
+
+    public function getMatchingRequests(Request $request): JsonResponse
+    {
+        $requests = ServiceEngagement::where('status', 'pending')
+            ->with(['seeker.user', 'provider.user'])
+            ->latest()
+            ->limit(50)
+            ->get()
+            ->map(fn($r) => [
+                'id'           => $r->id,
+                'seeker'       => $r->seeker->user->name ?? 'N/A',
+                'provider'     => $r->provider->user->name ?? 'N/A',
+                'title'        => $r->title,
+                'amount'       => $r->amount,
+                'status'       => $r->status,
+                'created_at'   => $r->created_at->toDateTimeString(),
+            ]);
+
+        return response()->json(['requests' => $requests]);
     }
 }
 

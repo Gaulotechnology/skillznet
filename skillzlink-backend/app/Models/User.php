@@ -23,10 +23,13 @@ class User extends Authenticatable
         'phone_number',
         'password',
         'role',
+        'referral_code',
+        'referred_by',
         'is_active',
         'failed_pin_attempts',
         'locked_until',
         'pin_changed_at',
+        'settings',
     ];
 
     protected $hidden = [
@@ -48,6 +51,7 @@ class User extends Authenticatable
             'failed_pin_attempts' => 'integer',
             'locked_until' => 'datetime',
             'pin_changed_at' => 'datetime',
+            'settings'       => 'array',
         ];
     }
 
