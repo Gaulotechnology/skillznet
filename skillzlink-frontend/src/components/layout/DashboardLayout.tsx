@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getCurrentUser, logout } from '../../services/api';
+import { LiveChatWidget } from '../common/LiveChatWidget';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -307,6 +308,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {children}
         </main>
       </div>
+      <LiveChatWidget />
     </div>
   );
 }

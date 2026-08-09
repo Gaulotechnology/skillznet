@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
-import { Link, useSearchParams } from "react-router-dom"
-import { publicApi, seekerApi } from "../services/api"
+import { Link, useSearchParams, useNavigate } from "react-router-dom"
+import { publicApi, seekerApi, getToken } from "../services/api"
 import type { PublicProvider } from "../services/api"
 
 const ITEMS_PER_PAGE = 6
@@ -57,6 +57,7 @@ const categoryIcons: Record<string, string> = {
 
 export function ProfessionalsListingPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
 
   const initialCity = searchParams.get("city") || "All"
   const initialService = searchParams.get("service") || "All"
@@ -67,6 +68,7 @@ export function ProfessionalsListingPage() {
   const [error, setError] = useState<string | null>(null)
   const [revealingId, setRevealingId] = useState<number | null>(null)
   const [revealedContacts, setRevealedContacts] = useState<Record<number, string>>({})
+  const [contactError, setContactError] = useState<string | null>(null)
 
   const [searchText, setSearchText] = useState("")
   const [categoryFilter, setCategoryFilter] = useState(initialService)
@@ -116,13 +118,33 @@ export function ProfessionalsListingPage() {
   }, [])
 
   const handleRevealContact = async (pro: PublicProvider) => {
+    setContactError(null)
+
+    // Check if user is logged in
+    const token = getToken()
+    if (!token) {
+      setContactError("Please log in as a client to reveal contact details.")
+      navigate("/login")
+      return
+    }
+
     setRevealingId(pro.id)
     try {
       const res = await seekerApi.revealContact(pro.id)
       if (res.contact_available && res.contact_number) {
         setRevealedContacts(prev => ({ ...prev, [pro.id]: res.contact_number! }))
+      } else {
+        setContactError("Contact details are not available for this professional.")
       }
-    } catch {}
+    } catch (err: any) {
+      const msg = err?.message || ""
+      if (msg.includes("401") || msg.includes("Unauthorized") || msg.includes("unauthenticated")) {
+        setContactError("Please log in as a client to reveal contact details.")
+        navigate("/login")
+      } else {
+        setContactError(msg || "Failed to reveal contact. Please try again.")
+      }
+    }
     setRevealingId(null)
   }
 
@@ -226,7 +248,7 @@ export function ProfessionalsListingPage() {
   }
 
   // Shared dropdown menu style
-  const dropdownPanel = "absolute top-full right-0 mt-2 w-56 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl shadow-xl shadow-black/5 py-2 z-30 backdrop-blur-sm"
+  const dropdownPanel = "absolute top-full right-0 mt-2 w-56 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl shadow-xl shadow-black/5 py-2 z-50 backdrop-blur-sm"
 
   const primaryChip = (active: boolean) =>
     `px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 cursor-pointer select-none border flex items-center gap-2 ${
@@ -252,9 +274,11 @@ export function ProfessionalsListingPage() {
   return (
     <div className="bg-[var(--bg-primary)] min-h-screen pb-20" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[var(--bg-secondary)] via-[var(--bg-secondary)] to-[var(--accent-light)]/20 border-b border-[var(--border-color)]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(var(--accent-rgb,99,102,241),0.08),transparent_50%)]" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+      <div className="relative z-30 bg-gradient-to-br from-[var(--bg-secondary)] via-[var(--bg-secondary)] to-[var(--accent-light)]/20 border-b border-[var(--border-color)]">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(var(--accent-rgb,99,102,241),0.08),transparent_50%)]" />
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
           <Link to="/" className="text-[var(--accent-color)] font-medium text-sm mb-3 inline-block hover:underline">
             ← Back to Home
           </Link>
@@ -322,7 +346,7 @@ export function ProfessionalsListingPage() {
       {/* Sticky Filter Bar */}
       <div className="sticky top-0 z-20 bg-[var(--bg-primary)]/80 backdrop-blur-lg border-b border-[var(--border-color)] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-3 py-3">
+          <div className="flex items-center gap-3 py-3 overflow-visible">
             {/* Category Chips - Horizontal Scroll */}
             <div className="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
               <button
@@ -482,6 +506,17 @@ export function ProfessionalsListingPage() {
             <i className="lnr lnr-warning" />
             <span>{geoError}</span>
             <button onClick={() => setGeoError(null)} className="ml-auto text-red-400 hover:text-red-600">
+              <i className="lnr lnr-cross text-xs" />
+            </button>
+          </div>
+        )}
+
+        {/* Contact/reveal error toast */}
+        {contactError && (
+          <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center gap-2">
+            <i className="lnr lnr-warning" />
+            <span>{contactError}</span>
+            <button onClick={() => setContactError(null)} className="ml-auto text-amber-500 hover:text-amber-700">
               <i className="lnr lnr-cross text-xs" />
             </button>
           </div>

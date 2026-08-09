@@ -135,7 +135,7 @@ export function HowItWorks() {
         {/* CTA */}
         <div className="mt-12 text-center">
           <Link
-            to={activeTab === "seeker" ? "/register" : "/register"}
+            to={activeTab === "seeker" ? "/nearby-professionals" : "/register"}
             className="inline-flex items-center gap-2 px-8 py-3.5 bg-[var(--accent-color)] text-white rounded-xl font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors shadow-sm"
           >
             {activeTab === "seeker" ? "Find a Professional" : "Join as a Provider"}

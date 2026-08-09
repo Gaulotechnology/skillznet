@@ -10,6 +10,7 @@ import { PlatformFeatures } from "./components/landing/PlatformFeatures"
 import { LimitlessExperience } from "./components/landing/LimitlessExperience"
 import { SkillsFooter } from "./components/landing/SkillsFooter"
 import { ApplyBannerSection } from "./pages/ApplyBannerSection"
+import { LiveChatWidget } from "./components/common/LiveChatWidget"
 import { publicApi } from "./services/api"
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
       <LimitlessExperience />
       <ApplyBannerSection />
       <SkillsFooter />
+      <LiveChatWidget />
     </>
   )
 }
