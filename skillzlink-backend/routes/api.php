@@ -12,6 +12,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['ok' => true]));
 
+// Public PIN policy (used by frontend for client-side validation)
+Route::get('/pin-policy', function () {
+    return response()->json([
+        'min_length'      => (int) \App\Models\Setting::get('pin_min_length', 4),
+        'max_attempts'    => (int) \App\Models\Setting::get('pin_max_attempts', 5),
+        'lockout_minutes' => (int) \App\Models\Setting::get('pin_lockout_minutes', 30),
+        'expiry_days'     => (int) \App\Models\Setting::get('pin_expiry_days', 0),
+    ]);
+});
+
+
 // ─── Public endpoints (no auth) ───────────────────────────────────────────────
 Route::get('/theme-settings', [PublicProviderController::class, 'themeSettings']);
 Route::get('/categories', [PublicProviderController::class, 'categories']);
