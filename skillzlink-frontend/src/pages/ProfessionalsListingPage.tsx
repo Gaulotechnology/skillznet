@@ -358,39 +358,57 @@ export function ProfessionalsListingPage() {
             )}
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-1.5 mt-10">
-                <button 
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(p => p - 1)}
-                  className="w-9 h-9 rounded-lg border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-40 transition-colors"
-                >
-                  <i className="lnr lnr-chevron-left text-xs" />
-                </button>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-9 h-9 rounded-lg font-medium text-sm transition-all ${
-                      currentPage === page 
-                        ? 'bg-[var(--accent-color)] text-white' 
-                        : 'border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
-                    }`}
+            {totalPages > 1 && (() => {
+              const visiblePages: (number | "...")[] = [];
+              if (totalPages <= 5) {
+                for (let i = 1; i <= totalPages; i++) visiblePages.push(i);
+              } else {
+                visiblePages.push(1);
+                if (currentPage > 3) visiblePages.push("...");
+                const start = Math.max(2, currentPage - 1);
+                const end = Math.min(totalPages - 1, currentPage + 1);
+                for (let i = start; i <= end; i++) visiblePages.push(i);
+                if (currentPage < totalPages - 2) visiblePages.push("...");
+                visiblePages.push(totalPages);
+              }
+              return (
+                <div className="flex flex-wrap items-center justify-center gap-1.5 mt-10">
+                  <button 
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => p - 1)}
+                    className="w-9 h-9 rounded-lg border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-40 transition-colors shrink-0"
                   >
-                    {page}
+                    <i className="lnr lnr-chevron-left text-xs" />
                   </button>
-                ))}
+                  
+                  {visiblePages.map((page, i) =>
+                    page === "..." ? (
+                      <span key={`ellipsis-${i}`} className="w-9 h-9 flex items-center justify-center text-sm text-[var(--text-secondary)] shrink-0">...</span>
+                    ) : (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-9 h-9 rounded-lg font-medium text-sm transition-all shrink-0 ${
+                          currentPage === page 
+                            ? 'bg-[var(--accent-color)] text-white' 
+                            : 'border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
 
-                <button 
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(p => p + 1)}
-                  className="w-9 h-9 rounded-lg border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-40 transition-colors"
-                >
-                  <i className="lnr lnr-chevron-right text-xs" />
-                </button>
-              </div>
-            )}
+                  <button 
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                    className="w-9 h-9 rounded-lg border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] disabled:opacity-40 transition-colors shrink-0"
+                  >
+                    <i className="lnr lnr-chevron-right text-xs" />
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

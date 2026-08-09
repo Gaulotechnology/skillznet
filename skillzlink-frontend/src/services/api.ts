@@ -214,7 +214,7 @@ export const publicApi = {
     fetchJson<{ slots: string[] }>(`${API_BASE_URL}/providers/${id}/slots?date=${date}`),
     
   getProviderRegistrationFields: (category_slug: string) => 
-    fetchJson<{ fields: RegistrationField[] }>(`${API_BASE_URL}/fields/provider/${category_slug}`),
+    fetchJson<{ fields: RegistrationField[] }>(`${API_BASE_URL}/registration-fields?category=${encodeURIComponent(category_slug)}`),
 }
 
 
@@ -503,6 +503,9 @@ export const adminApi = {
   getPayments: () => fetchJson<{ payments: any[] }>(`${API_BASE_URL}/admin/payments`),
   getAppointments: () => fetchJson<{ appointments: any[] }>(`${API_BASE_URL}/admin/appointments`),
   getMatchingRequests: () => fetchJson<{ requests: any[] }>(`${API_BASE_URL}/admin/matching`),
+
+  getSmsLogs: () => fetchJson<{ logs: any[] }>(`${API_BASE_URL}/admin/sms-logs`),
+  getCommLogs: () => fetchJson<{ logs: any[] }>(`${API_BASE_URL}/admin/comm-logs`),
 }
 
 // ─── Affiliate endpoints (auth required) ─────────────────────────────────────
@@ -545,10 +548,6 @@ export const accountApi = {
     fetchJson<{ message: string }>(`${API_BASE_URL}/auth/password-reset`, { method: "POST" }),
   submitSupportTicket: (payload: { category: string; description: string }) =>
     fetchJson<{ message: string; ticket_id: number }>(`${API_BASE_URL}/support/tickets`, {
-      method: "POST", body: JSON.stringify(payload),
-    }),
-  saveExperience: (payload: { title: string; description: string }) =>
-    fetchJson<{ message: string }>(`${API_BASE_URL}/account/experience`, {
       method: "POST", body: JSON.stringify(payload),
     }),
 }

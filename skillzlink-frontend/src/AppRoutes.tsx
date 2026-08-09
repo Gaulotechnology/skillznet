@@ -49,7 +49,6 @@ import { DashboardPackagesPage } from './pages/dashboard/admin/DashboardPackages
 import { DashboardUsersPage } from './pages/dashboard/admin/DashboardUsersPage';
 import { DashboardProfessionalsPage } from './pages/dashboard/admin/DashboardProfessionalsPage';
 import { DashboardSeekersPage } from './pages/dashboard/admin/DashboardSeekersPage';
-import { DashboardConversationsPage } from './pages/dashboard/admin/DashboardConversationsPage';
 import { DashboardInsightsPage } from './pages/dashboard/admin/DashboardInsightsPage';
 import { DashboardRolesPage } from './pages/dashboard/admin/DashboardRolesPage';
 import { DashboardEmployeesPage } from './pages/dashboard/admin/DashboardEmployeesPage';
@@ -202,7 +201,6 @@ export function AppRoutes() {
       <Route path="/dashboard/admin/users" element={<DashboardUsersPage />} />
       <Route path="/dashboard/admin/professionals" element={<DashboardProfessionalsPage />} />
       <Route path="/dashboard/admin/seekers" element={<DashboardSeekersPage />} />
-      <Route path="/dashboard/admin/conversations" element={<DashboardConversationsPage />} />
       <Route path="/dashboard/admin/theme-settings" element={<DashboardThemeSettingsPage />} />
       <Route path="/dashboard/admin/form-builder" element={<DashboardFormBuilderPage />} />
       <Route path="/dashboard/admin/api-logs" element={<DashboardApiLogsPage />} />

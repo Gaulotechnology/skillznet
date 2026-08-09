@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { DataTable, type Column } from "../../../components/shared/DataTable";
-
-const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:18080/api";
+import { adminApi } from "../../../services/api";
 
 export function DashboardCommLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -10,10 +9,7 @@ export function DashboardCommLogsPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("skillzlink_token");
-    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
-    fetch(`${API}/admin/comm-logs`, { headers })
-      .then((r) => r.json())
+    adminApi.getCommLogs()
       .then((data) => {
         setLogs(data.logs || []);
         setLoading(false);
