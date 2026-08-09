@@ -74,6 +74,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::put('/users/{id}', [AdminController::class, 'updateUser']);
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
         Route::post('/users/{id}/impersonate', [AdminController::class, 'impersonateUser']);
+        Route::post('/users/{id}/unlock', [AdminController::class, 'unlockUser']);
 
         Route::get('/categories', [AdminController::class, 'categories']);
         Route::post('/categories', [AdminController::class, 'storeCategory']);

@@ -394,6 +394,10 @@ export const adminApi = {
     fetchJson<{ token: string; user: { name: string; role: string } }>(`${API_BASE_URL}/admin/users/${id}/impersonate`, {
       method: "POST"
     }),
+  unlockUser: (id: number) =>
+    fetchJson<{ message: string; user: any }>(`${API_BASE_URL}/admin/users/${id}/unlock`, {
+      method: "POST"
+    }),
 
   getCategories: () => fetchJson<{ categories: any[] }>(`${API_BASE_URL}/admin/categories`),
   createCategory: (payload: any) =>

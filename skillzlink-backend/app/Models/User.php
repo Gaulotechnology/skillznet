@@ -24,6 +24,9 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'failed_pin_attempts',
+        'locked_until',
+        'pin_changed_at',
     ];
 
     protected $hidden = [
@@ -42,6 +45,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'failed_pin_attempts' => 'integer',
+            'locked_until' => 'datetime',
+            'pin_changed_at' => 'datetime',
         ];
     }
 

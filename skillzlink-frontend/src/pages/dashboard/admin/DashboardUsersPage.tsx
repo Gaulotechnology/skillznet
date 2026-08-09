@@ -125,12 +125,22 @@ export function DashboardUsersPage() {
     {
       key: "is_active",
       label: "Status",
-      render: () => (
-        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-        </span>
-      ),
-      exportValue: () => "Active",
+      render: (user) => {
+        const isLocked = user.locked_until && new Date(user.locked_until) > new Date();
+        if (isLocked) {
+          return (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> Locked
+            </span>
+          );
+        }
+        return (
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+          </span>
+        );
+      },
+      exportValue: (user) => user.locked_until && new Date(user.locked_until) > new Date() ? "Locked" : "Active",
     },
     {
       key: "created_at",
@@ -212,6 +222,23 @@ export function DashboardUsersPage() {
               >
                 <i className="lnr lnr-enter text-sm"></i>
               </button>
+              {user.locked_until && new Date(user.locked_until) > new Date() && (
+                <button
+                  onClick={async () => {
+                    try {
+                      await adminApi.unlockUser(user.id);
+                      showNotification(`${user.name}'s account has been unlocked.`);
+                      fetchUsers();
+                    } catch {
+                      showNotification("Failed to unlock account.", "error");
+                    }
+                  }}
+                  title="Unlock Account"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-amber-600 hover:bg-amber-50 transition-colors"
+                >
+                  <i className="lnr lnr-lock-open text-sm"></i>
+                </button>
+              )}
               <button title="Suspend User" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors">
                 <i className="lnr lnr-ban text-sm"></i>
               </button>

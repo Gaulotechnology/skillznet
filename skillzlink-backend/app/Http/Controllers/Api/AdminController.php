@@ -480,4 +480,22 @@ class AdminController extends Controller
 
         return response()->json(['message' => 'Permissions synchronized successfully']);
     }
+
+    // ─── PIN Policy: Unlock account ───────────────────────────────────────────
+
+    public function unlockUser(Request $request, int $id): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $user = User::findOrFail($id);
+        $user->update([
+            'failed_pin_attempts' => 0,
+            'locked_until'        => null,
+        ]);
+
+        return response()->json(['message' => 'Account unlocked successfully', 'user' => $user]);
+    }
 }
+

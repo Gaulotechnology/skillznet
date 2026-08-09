@@ -110,6 +110,11 @@ export function DashboardThemeSettingsPage() {
     twoFactor: false, sessionTimeout: "30", maxLoginAttempts: "5",
     passwordMinLength: "8", requireSpecialChars: true, forcePasswordReset: "90",
     ipWhitelist: "", enableRateLimiting: true, rateLimit: "60",
+    // PIN Policy (enforced on backend)
+    pin_min_length: "4",
+    pin_max_attempts: "5",
+    pin_lockout_minutes: "30",
+    pin_expiry_days: "0",
   });
   const [affiliate, setAffiliate] = useState({
     enabled: false, commissionType: "Percentage", commissionRate: "10",
@@ -354,6 +359,72 @@ export function DashboardThemeSettingsPage() {
               <Toggle checked={security.requireSpecialChars} onChange={v => setSecurity(s => ({ ...s, requireSpecialChars: v }))} label="Require Special Characters in Password" />
               <Toggle checked={security.enableRateLimiting} onChange={v => setSecurity(s => ({ ...s, enableRateLimiting: v }))} label="Enable Rate Limiting" />
             </div>
+
+            {/* PIN Policy */}
+            <div className="pt-8 border-t border-[var(--border-color)]">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-[var(--accent-light)] flex items-center justify-center">
+                  <i className="lnr lnr-lock text-[var(--accent-color)] text-base"></i>
+                </div>
+                <div>
+                  <h4 className="text-base font-semibold text-[var(--text-primary)]">PIN Policy</h4>
+                  <p className="text-sm text-[var(--text-secondary)]">Rules enforced on every login and PIN reset. Changes apply immediately to all users.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Field
+                  label="Minimum PIN Length"
+                  hint="Accepted range: 4–8 digits. Default is 4."
+                >
+                  <Input
+                    value={security.pin_min_length}
+                    onChange={v => setSecurity(s => ({ ...s, pin_min_length: String(Math.min(8, Math.max(4, parseInt(v) || 4))) }))}
+                    type="number"
+                    placeholder="4"
+                  />
+                </Field>
+                <Field
+                  label="Max Failed PIN Attempts"
+                  hint="Account will be locked after this many consecutive wrong PINs."
+                >
+                  <Input
+                    value={security.pin_max_attempts}
+                    onChange={v => setSecurity(s => ({ ...s, pin_max_attempts: String(Math.min(10, Math.max(1, parseInt(v) || 5))) }))}
+                    type="number"
+                    placeholder="5"
+                  />
+                </Field>
+                <Field
+                  label="Lockout Duration (minutes)"
+                  hint="How long a locked account remains locked. Admins can lift this manually."
+                >
+                  <Input
+                    value={security.pin_lockout_minutes}
+                    onChange={v => setSecurity(s => ({ ...s, pin_lockout_minutes: String(Math.max(1, parseInt(v) || 30) ) }))}
+                    type="number"
+                    placeholder="30"
+                  />
+                </Field>
+                <Field
+                  label="PIN Expiry (days)"
+                  hint="Users must reset their PIN after this many days. Set to 0 to disable expiry."
+                >
+                  <Input
+                    value={security.pin_expiry_days}
+                    onChange={v => setSecurity(s => ({ ...s, pin_expiry_days: String(Math.max(0, parseInt(v) || 0)) }))}
+                    type="number"
+                    placeholder="0 (never)"
+                  />
+                </Field>
+              </div>
+              <div className="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+                <i className="lnr lnr-warning text-amber-600 mt-0.5 flex-shrink-0"></i>
+                <p className="text-sm text-amber-800">
+                  <strong>Admin override:</strong> Locked users appear with a 🔒 status in the Users table. You can unlock them individually using the unlock button in their row.
+                </p>
+              </div>
+            </div>
+
             <div className="pt-8 border-t border-[var(--border-color)] mt-8">
               <button onClick={() => handleSave("security", security)} className="px-8 py-3.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors">Save Changes</button>
             </div>
