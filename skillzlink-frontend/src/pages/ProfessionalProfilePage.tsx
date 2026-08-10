@@ -178,14 +178,22 @@ export function ProfessionalProfilePage() {
                   <i className="lnr lnr-calendar-full text-xl" /> Book Now
                 </button>
                 {revealedPhone ? (
-                  <a 
-                    href={`https://wa.me/${revealedPhone.replace(/[^0-9]/g, '')}?text=Hi%20${pro?.name},%20I%20found%20you%20on%20SkillzLink.`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2"
-                  >
-                    <i className="fab fa-whatsapp text-xl" /> WhatsApp
-                  </a>
+                  <>
+                    <a 
+                      href={`https://wa.me/${revealedPhone.replace(/[^0-9]/g, '')}?text=Hi%20${pro?.name},%20I%20found%20you%20on%20SkillzLink.`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2"
+                    >
+                      <i className="fab fa-whatsapp text-xl" /> WhatsApp
+                    </a>
+                    <a 
+                      href={`tel:${revealedPhone.replace(/[^0-9+]/g, '')}`}
+                      className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <i className="lnr lnr-phone-handset text-xl" /> Call
+                    </a>
+                  </>
                 ) : (
                   <button 
                     onClick={handleRevealContact}

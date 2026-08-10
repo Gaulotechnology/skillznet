@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useSearchParams, useNavigate } from "react-router-dom"
-import { publicApi, seekerApi, getToken } from "../services/api"
+import { publicApi, isLoggedIn } from "../services/api"
 import type { PublicProvider } from "../services/api"
+
+function normalizePhone(phone?: string): string {
+  if (!phone) return ""
+  return phone.replace(/[^0-9+]/g, "")
+}
 
 const ITEMS_PER_PAGE = 6
 const zimbabweCities = [
@@ -67,8 +72,6 @@ export function ProfessionalsListingPage() {
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [revealingId, setRevealingId] = useState<number | null>(null)
-  const [revealedContacts, setRevealedContacts] = useState<Record<number, string>>({})
   const [contactError, setContactError] = useState<string | null>(null)
 
   const [searchText, setSearchText] = useState(initialSearch)
@@ -117,37 +120,6 @@ export function ProfessionalsListingPage() {
       setLoading(false)
     })
   }, [])
-
-  const handleRevealContact = async (pro: PublicProvider) => {
-    setContactError(null)
-
-    // Check if user is logged in
-    const token = getToken()
-    if (!token) {
-      setContactError("Please log in as a client to reveal contact details.")
-      navigate("/login")
-      return
-    }
-
-    setRevealingId(pro.id)
-    try {
-      const res = await seekerApi.revealContact(pro.id)
-      if (res.contact_available && res.contact_number) {
-        setRevealedContacts(prev => ({ ...prev, [pro.id]: res.contact_number! }))
-      } else {
-        setContactError("Contact details are not available for this professional.")
-      }
-    } catch (err: any) {
-      const msg = err?.message || ""
-      if (msg.includes("401") || msg.includes("Unauthorized") || msg.includes("unauthenticated")) {
-        setContactError("Please log in as a client to reveal contact details.")
-        navigate("/login")
-      } else {
-        setContactError(msg || "Failed to reveal contact. Please try again.")
-      }
-    }
-    setRevealingId(null)
-  }
 
   const handleNearMe = () => {
     if (!navigator.geolocation) {
@@ -614,29 +586,34 @@ export function ProfessionalsListingPage() {
                       <span className="font-medium">${pro.rate || "15"}/hr</span>
                     </div>
                     
-                    {revealedContacts[pro.id] ? (
-                      <a 
-                        href={`https://wa.me/${revealedContacts[pro.id].replace(/[^0-9]/g, '')}?text=Hi ${pro.name}, I found your profile on SkillzLink.`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors"
-                        title="Chat on WhatsApp"
-                      >
-                        <i className="fab fa-whatsapp text-lg" />
-                      </a>
-                    ) : (
-                      <button
-                        onClick={() => handleRevealContact(pro)}
-                        disabled={revealingId === pro.id}
-                        className="w-9 h-9 rounded-lg bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center hover:bg-[var(--accent-color)] hover:text-white transition-colors disabled:opacity-50"
-                        title="Reveal Contact"
-                      >
-                        {revealingId === pro.id ? (
-                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        ) : (
+                    {isLoggedIn() && pro.phone ? (
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`https://wa.me/${normalizePhone(pro.phone).replace(/^\+/, "")}?text=Hi ${encodeURIComponent(pro.name)}, I found your profile on SkillzLink.`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors"
+                          title="Chat on WhatsApp"
+                        >
+                          <i className="fab fa-whatsapp text-lg" />
+                        </a>
+                        <a
+                          href={`tel:${normalizePhone(pro.phone)}`}
+                          className="w-9 h-9 rounded-lg bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center hover:bg-[var(--accent-color)] hover:text-white transition-colors"
+                          title="Call"
+                        >
                           <i className="lnr lnr-phone-handset text-lg" />
-                        )}
-                      </button>
+                        </a>
+                      </div>
+                    ) : isLoggedIn() ? (
+                      <span className="text-xs text-[var(--text-secondary)]">No contact available</span>
+                    ) : (
+                      <Link
+                        to="/login"
+                        className="px-3 py-1.5 rounded-lg bg-[var(--accent-color)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+                      >
+                        Login to contact
+                      </Link>
                     )}
                   </div>
                 </div>
