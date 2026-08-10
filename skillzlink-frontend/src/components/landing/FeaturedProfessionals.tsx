@@ -127,19 +127,44 @@ export function FeaturedProfessionals() {
                   </div>
                 </div>
 
-                {/* Location & Experience */}
+                {/* Location, Experience, Completed */}
                 <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
                   <span className="flex items-center gap-1">
                     <i className="lnr lnr-map-marker text-gray-400" />
                     {loggedIn ? (pro.location || "Zimbabwe") : extractCity(pro.location || "Zimbabwe")}
                   </span>
-                  {loggedIn && pro.years_of_experience != null && (
-                    <span className="flex items-center gap-1">
+                </div>
+                <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                  {pro.years_of_experience != null && (
+                    <span className="flex items-center gap-1 font-medium text-gray-700">
                       <i className="lnr lnr-briefcase text-gray-400" />
-                      {pro.years_of_experience} yr{pro.years_of_experience !== 1 ? "s" : ""}
+                      {pro.years_of_experience} yr{pro.years_of_experience !== 1 ? "s" : ""} exp
+                    </span>
+                  )}
+                  {pro.completed_services != null && pro.completed_services > 0 && (
+                    <span className="flex items-center gap-1 font-medium text-gray-700">
+                      <i className="lnr lnr-checkmark-circle text-green-500" />
+                      {pro.completed_services} jobs done
                     </span>
                   )}
                 </div>
+
+                {/* Skills */}
+                {pro.skills && pro.skills.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {pro.skills.slice(0, 3).map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-[10px] font-medium"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                    {pro.skills.length > 3 && (
+                      <span className="text-[10px] text-gray-400 font-medium">+{pro.skills.length - 3}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* Badges */}
                 <div className="flex flex-wrap gap-1.5">
@@ -155,11 +180,6 @@ export function FeaturedProfessionals() {
                       FEATURED
                     </span>
                   )}
-                  {pro.level && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-semibold">
-                      {pro.level}
-                    </span>
-                  )}
                 </div>
               </div>
 
@@ -169,6 +189,7 @@ export function FeaturedProfessionals() {
                   <span className="flex items-center gap-1">
                     <i className="lnr lnr-star text-amber-400 text-xs" />
                     <span className="font-semibold text-gray-900">{pro.rating || "5.0"}</span>
+                    <span className="text-gray-400 text-xs">({pro.reviews || 0})</span>
                   </span>
                   {loggedIn && (
                     <>
