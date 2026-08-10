@@ -61,6 +61,7 @@ export function ProfessionalsListingPage() {
 
   const initialCity = searchParams.get("city") || "All"
   const initialService = searchParams.get("service") || "All"
+  const initialSearch = searchParams.get("q") || ""
 
   const [professionals, setProfessionals] = useState<PublicProvider[]>([])
   const [categories, setCategories] = useState<any[]>([])
@@ -70,7 +71,7 @@ export function ProfessionalsListingPage() {
   const [revealedContacts, setRevealedContacts] = useState<Record<number, string>>({})
   const [contactError, setContactError] = useState<string | null>(null)
 
-  const [searchText, setSearchText] = useState("")
+  const [searchText, setSearchText] = useState(initialSearch)
   const [categoryFilter, setCategoryFilter] = useState(initialService)
   const [cityFilter, setCityFilter] = useState(initialCity)
   const [experienceFilter, setExperienceFilter] = useState("All")
