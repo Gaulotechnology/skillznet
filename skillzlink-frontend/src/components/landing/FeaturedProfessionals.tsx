@@ -1,13 +1,24 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { publicApi, seekerApi } from "../../services/api"
+import { publicApi, seekerApi, isLoggedIn } from "../../services/api"
 import type { PublicProvider } from "../../services/api"
+
+function extractCity(location: string): string {
+  const parts = location.split(",")
+  return parts[parts.length - 1]?.trim() || location
+}
+
+function maskFullName(name: string): string {
+  const parts = name.trim().split(" ")
+  return parts[0] + " " + (parts[1] ? parts[1][0] + "." : "")
+}
 
 export function FeaturedProfessionals() {
   const [professionals, setProfessionals] = useState<PublicProvider[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [revealedContacts, setRevealedContacts] = useState<Record<number, string>>({})
+  const loggedIn = isLoggedIn()
 
   useEffect(() => {
     publicApi.listProviders({})
@@ -101,7 +112,7 @@ export function FeaturedProfessionals() {
                         to={`/professional-profile/${pro.id}`}
                         className="font-semibold text-gray-900 text-sm truncate hover:text-[var(--accent-color)] transition-colors"
                       >
-                        {pro.name}
+                        {loggedIn ? pro.name : maskFullName(pro.name)}
                       </Link>
                       {pro.id_verified && (
                         <i
@@ -120,9 +131,9 @@ export function FeaturedProfessionals() {
                 <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
                   <span className="flex items-center gap-1">
                     <i className="lnr lnr-map-marker text-gray-400" />
-                    {pro.location || "Zimbabwe"}
+                    {loggedIn ? (pro.location || "Zimbabwe") : extractCity(pro.location || "Zimbabwe")}
                   </span>
-                  {pro.years_of_experience != null && (
+                  {loggedIn && pro.years_of_experience != null && (
                     <span className="flex items-center gap-1">
                       <i className="lnr lnr-briefcase text-gray-400" />
                       {pro.years_of_experience} yr{pro.years_of_experience !== 1 ? "s" : ""}
@@ -159,13 +170,24 @@ export function FeaturedProfessionals() {
                     <i className="lnr lnr-star text-amber-400 text-xs" />
                     <span className="font-semibold text-gray-900">{pro.rating || "5.0"}</span>
                   </span>
-                  <span className="text-gray-300">|</span>
-                  <span className="font-medium text-gray-700 text-xs">
-                    ${pro.rate || "15"}/hr
-                  </span>
+                  {loggedIn && (
+                    <>
+                      <span className="text-gray-300">|</span>
+                      <span className="font-medium text-gray-700 text-xs">
+                        ${pro.rate || "15"}/hr
+                      </span>
+                    </>
+                  )}
                 </div>
 
-                {revealedContacts[pro.id] ? (
+                {!loggedIn ? (
+                  <Link
+                    to="/login"
+                    className="px-3 py-1.5 rounded-lg bg-[var(--accent-color)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+                  >
+                    Login to view
+                  </Link>
+                ) : revealedContacts[pro.id] ? (
                   <a
                     href={`https://wa.me/${revealedContacts[pro.id].replace(/[^0-9]/g, "")}?text=Hi ${pro.name}, I found your profile on SkillzLink.`}
                     target="_blank"
