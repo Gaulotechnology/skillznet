@@ -206,35 +206,37 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/appointments', [AdminController::class, 'getAppointments']);
         Route::get('/matching', [AdminController::class, 'getMatchingRequests']);
 
-        // Admin settings (accessible by both admin and super_admin)
+        // Admin settings & logs (accessible by both admin and super_admin)
         Route::get('/settings', [AdminController::class, 'getSettings']);
         Route::post('/settings', [AdminController::class, 'updateSettings']);
+        Route::get('/sms-logs', [AdminController::class, 'smsLogs']);
+        Route::get('/comm-logs', [AdminController::class, 'commLogs']);
 
         // Super admin only routes
         Route::middleware('role:super_admin')->group(function (): void {
             Route::get('/theme-settings', [AdminController::class, 'themeSettings']);
             Route::post('/theme-settings', [AdminController::class, 'updateThemeSettings']);
             Route::get('/api-logs', [AdminController::class, 'apiLogs']);
-            Route::get('/sms-logs', [AdminController::class, 'smsLogs']);
-            Route::get('/comm-logs', [AdminController::class, 'commLogs']);
         });
     });
 
-    // ─── Live Chat & RAG AI (admin only) ─────────────────────────────────
+    // ─── Live Chat & RAG AI ─────────────────────────────────────────────────
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/chat/admin/sessions', [ChatController::class, 'adminSessions']);
         Route::get('/chat/admin/messages', [ChatController::class, 'adminMessages']);
         Route::post('/chat/admin/reply', [ChatController::class, 'adminReply']);
 
-        // Admin chat panel
-        Route::get('/admin/chat/sessions', [AdminChatController::class, 'sessions']);
-        Route::get('/admin/chat/messages', [AdminChatController::class, 'messages']);
-        Route::post('/admin/chat/reply', [AdminChatController::class, 'reply']);
-        Route::get('/admin/chat/lhc-login', [AdminChatController::class, 'lhcLogin']);
-
         // RAG management
         Route::post('/rag/build', [RagController::class, 'buildIndex']);
         Route::get('/rag/status', [RagController::class, 'status']);
+    });
+
+    // ─── Admin Chat Panel ──────────────────────────────────────────────────
+    Route::prefix('admin')->middleware('role:admin,super_admin')->group(function (): void {
+        Route::get('/chat/sessions', [AdminChatController::class, 'sessions']);
+        Route::get('/chat/messages', [AdminChatController::class, 'messages']);
+        Route::post('/chat/reply', [AdminChatController::class, 'reply']);
+        Route::get('/chat/lhc-login', [AdminChatController::class, 'lhcLogin']);
     });
 
 });

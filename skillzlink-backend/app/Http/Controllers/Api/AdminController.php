@@ -424,7 +424,16 @@ class AdminController extends Controller
             $query->where('status_code', '>=', 400);
         }
 
-        $logs = $query->limit(200)->get();
+        $logs = $query->limit(200)->get()->map(fn ($log) => [
+            'id'       => $log->id,
+            'from'     => $log->fromUser->name ?? 'Unknown',
+            'to'       => $log->toUser->name ?? 'Unknown',
+            'channel'  => $log->channel,
+            'subject'  => $log->subject,
+            'preview'  => $log->preview,
+            'status'   => $log->status,
+            'sent_at'  => $log->sent_at?->toISOString(),
+        ])->values();
         return response()->json(['logs' => $logs]);
     }
 
