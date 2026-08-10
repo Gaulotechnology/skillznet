@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 
 const features = [
   {
-    icon: "lnr lnr-shield",
+    icon: "lnr lnr-checkmark-circle",
     title: "Verified Professionals",
     description: "All providers undergo identity verification. Look for the verified badge on profiles to know you're hiring a trusted expert.",
   },
