@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
  * LHC (Live Helper Chat) Integration Service
  *
- * Handles REST API calls to LHC, auto-login token generation,
- * admin user sync, and bot webhook processing.
+ * Handles auto-login token generation, admin user sync,
+ * and bot webhook processing.
  *
  * All methods gracefully handle the case where LHC is not yet installed.
  */
@@ -21,7 +22,7 @@ class LhcService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim(env('LHC_BASE_URL', config('app.url') . '/lhc'), '/');
+        $this->baseUrl = rtrim(env('LHC_BASE_URL', 'http://lhc:8080'), '/');
         $this->apiKey = env('LHC_API_KEY', '');
 
         // Check if LHC settings file exists (indicates installation)
@@ -37,146 +38,113 @@ class LhcService
     // ─── Authentication & Auto-Login ──────────────────────────────────────────
 
     /**
-     * Generate an auto-login URL for an admin to access LHC directly.
-     * This bypasses the LHC login form using a time-limited token.
+     * Generate an auto-login URL for admin access to LHC.
+     * Uses the autologinuser endpoint which validates via a pre-configured hash.
      */
     public function generateAutoLoginUrl(int $userId, string $username, string $email = ''): ?string
     {
         if (!$this->available) return null;
 
-        try {
-            // First, ensure the user exists in LHC
-            $lhcUserId = $this->syncUser($userId, $username, $email);
+        $hash = $this->getAutologinHash($userId);
+        if (!$hash) return null;
 
-            if (!$lhcUserId) return null;
-
-            // Generate auto-login token via LHC REST API
-            $response = Http::get($this->baseUrl . '/restapi/generateautologin.php', [
-                'user_id' => $lhcUserId,
-                'secret_hash' => $this->apiKey,
-            ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $token = $data['token'] ?? $data['hash'] ?? null;
-
-                if ($token) {
-                    return $this->baseUrl . '/site_admin/user/autologin/' . $token;
-                }
-            }
-
-            // Fallback: login by token approach
-            $loginResponse = Http::post($this->baseUrl . '/restapi/loginbytoken.php', [
-                'username' => $username,
-                'secret_hash' => $this->apiKey,
-            ]);
-
-            if ($loginResponse->successful()) {
-                $data = $loginResponse->json();
-                $token = $data['token'] ?? $data['hash'] ?? null;
-                if ($token) {
-                    return $this->baseUrl . '/site_admin/user/autologin/' . $token;
-                }
-            }
-
-        } catch (\Exception $e) {
-            Log::warning('LHC auto-login failed: ' . $e->getMessage());
-        }
-
-        // If auto-login fails, return the standard LHC login URL
-        return $this->baseUrl . '/site_admin/';
+        return $this->baseUrl . '/site_admin/user/autologinuser/' . $hash;
     }
-
-    // ─── User Sync ────────────────────────────────────────────────────────────
 
     /**
-     * Sync a Laravel admin user to LHC.
-     * Creates the user if they don't exist, returns the LHC user ID.
+     * Get the autologin hash for a user from LHC's config.
      */
-    public function syncUser(int $laravelUserId, string $username, string $email = ''): ?int
-    {
-        if (!$this->available) return null;
-
-        try {
-            // Check if user already exists in LHC by username
-            $existing = $this->getLhcUserByUsername($username);
-            if ($existing) {
-                return $existing['id'];
-            }
-
-            // Create LHC user via REST API
-            $response = Http::post($this->baseUrl . '/restapi/user.php', [
-                'secret_hash' => $this->apiKey,
-                'username' => $username,
-                'password' => $this->generateLhcPassword($laravelUserId, $username),
-                'email' => $email ?: ($username . '@skillzlink.local'),
-                'name' => $username,
-                'surname' => 'Admin',
-                'all_departments' => 1,
-                'skype' => '',
-                'xmpp' => '',
-                'job_title' => 'Administrator',
-                'disabled' => 0,
-                'hide_online' => 0,
-                'visible_departments' => '',
-                'exclude_departments' => '',
-                'max_chats' => 0,
-                'departments_ids' => [],
-            ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                return $data['id'] ?? null;
-            }
-
-            Log::warning('LHC user creation failed: ' . $response->body());
-        } catch (\Exception $e) {
-            Log::warning('LHC user sync failed: ' . $e->getMessage());
-        }
-
-        return null;
-    }
-
-    private function getLhcUserByUsername(string $username): ?array
+    private function getAutologinHash(int $userId): ?string
     {
         try {
-            $response = Http::get($this->baseUrl . '/restapi/user.php', [
-                'secret_hash' => $this->apiKey,
-                'username' => $username,
-            ]);
+            $row = \DB::connection('mysql')
+                ->table('lh_chat_config')
+                ->where('identifier', 'autologin_data')
+                ->value('value');
 
-            if ($response->successful()) {
-                $data = $response->json();
-                if (!empty($data['id'])) {
-                    return $data;
+            if (!$row) return null;
+
+            $data = @unserialize($row, ['allowed_classes' => false]);
+            if (!is_array($data) || !isset($data['autologin_options'])) return null;
+
+            foreach ($data['autologin_options'] as $option) {
+                if (isset($option['user_id']) && (int)$option['user_id'] === $userId) {
+                    return $option['secret_hash'] ?? null;
                 }
             }
-        } catch (\Exception $e) {}
 
-        return null;
-    }
-
-    private function generateLhcPassword(int $userId, string $username): string
-    {
-        return substr(hash('sha256', 'skillzlink_lhc_' . $userId . '_' . $username . '_' . config('app.key')), 0, 32);
+            // Fallback: return first available hash
+            return $data['autologin_options'][0]['secret_hash'] ?? null;
+        } catch (\Exception $e) {
+            Log::warning('LHC autologin hash lookup failed: ' . $e->getMessage());
+            return null;
+        }
     }
 
     // ─── Bot Webhook Processing ───────────────────────────────────────────────
 
     /**
-     * Send a bot response back to an LHC chat.
-     * This is called by our webhook handler after processing a visitor message.
+     * Look up a chat hash from the LHC database by chat ID.
+     * The backend shares the same MySQL database as LHC.
+     */
+    public function getChatHash(int $chatId): ?string
+    {
+        try {
+            return \DB::connection('mysql')
+                ->table('lh_chat')
+                ->where('id', $chatId)
+                ->value('hash');
+        } catch (\Exception $e) {
+            Log::warning('LHC chat hash lookup failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Post a message back to an LHC chat via REST API (appears as a visitor/bot message).
+     * Uses the chat hash for authentication.
+     */
+    public function postMessageToChat(int $chatId, string $message): bool
+    {
+        if (!$this->available) return false;
+
+        $hash = $this->getChatHash($chatId);
+        if (!$hash) {
+            Log::warning("LHC: Cannot post message, hash not found for chat $chatId");
+            return false;
+        }
+
+        try {
+            $response = Http::asForm()->post($this->baseUrl . '/restapi/addmsguser', [
+                'chat_id' => $chatId,
+                'hash' => $hash,
+                'msg' => $message,
+            ]);
+
+            if (!$response->successful()) {
+                Log::warning("LHC addmsguser failed: " . $response->body());
+            }
+
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::warning('LHC post message failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Send a bot response back to an LHC chat (admin-side).
      */
     public function sendBotMessage(int $chatId, string $message): bool
     {
         if (!$this->available) return false;
 
         try {
-            $response = Http::post($this->baseUrl . '/restapi/addmsgadmin.php', [
-                'secret_hash' => $this->apiKey,
-                'chat_id' => $chatId,
-                'msg' => $message,
-            ]);
+            $response = Http::withBasicAuth('admin', $this->apiKey)
+                ->post($this->baseUrl . '/restapi/addmsgadmin', [
+                    'chat_id' => $chatId,
+                    'msg' => $message,
+                ]);
 
             return $response->successful();
         } catch (\Exception $e) {
@@ -193,11 +161,11 @@ class LhcService
         if (!$this->available) return false;
 
         try {
-            $response = Http::post($this->baseUrl . '/restapi/transferchat.php', [
-                'secret_hash' => $this->apiKey,
-                'chat_id' => $chatId,
-                'department_id' => $departmentId,
-            ]);
+            $response = Http::withBasicAuth('admin', $this->apiKey)
+                ->post($this->baseUrl . '/restapi/transferchat', [
+                    'chat_id' => $chatId,
+                    'department_id' => $departmentId,
+                ]);
 
             return $response->successful();
         } catch (\Exception $e) {
@@ -214,11 +182,11 @@ class LhcService
         if (!$this->available) return [];
 
         try {
-            $response = Http::get($this->baseUrl . '/restapi/fetchchatmessages.php', [
-                'secret_hash' => $this->apiKey,
-                'chat_id' => $chatId,
-                'last_msg_id' => $lastMsgId,
-            ]);
+            $response = Http::withBasicAuth('admin', $this->apiKey)
+                ->get($this->baseUrl . '/restapi/fetchchatmessages', [
+                    'chat_id' => $chatId,
+                    'last_msg_id' => $lastMsgId,
+                ]);
 
             if ($response->successful()) {
                 return $response->json()['messages'] ?? [];

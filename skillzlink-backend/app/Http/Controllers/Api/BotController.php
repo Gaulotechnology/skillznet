@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessAIQuery;
 use App\Services\LhcService;
 use App\Services\RagService;
 use Illuminate\Http\JsonResponse;
@@ -11,13 +12,11 @@ use Illuminate\Http\Request;
 /**
  * Bot webhook endpoint — called by LHC's Generic Bot or any external bot system.
  *
- * Flow: Visitor message → LHC Bot → POST /api/bot/webhook → Laravel processes → Response
+ * Flow: Visitor message → LHC Bot → POST /api/bot/webhook → Laravel processes
  *
- * Laravel handles:
- *  - Quick bot rules for common topics
- *  - RAG AI knowledge base queries
- *  - DeepSeek LLM (when configured)
- *  - Escalation flag for human handoff
+ * Fast path (quick rules): returns response immediately
+ * Async path (AI/RAG): returns "Let me check..." immediately, dispatches job,
+ *                      job posts response back via LHC /restapi/addmsguser
  */
 class BotController extends Controller
 {
@@ -34,7 +33,7 @@ class BotController extends Controller
         $chatId = $validated['chat_id'] ?? null;
         $visitorName = $validated['visitor_name'] ?? 'Visitor';
 
-        // ── Step 1: Bot quick rules ──────────────────────────────────────
+        // ── Step 1: Bot quick rules (FAST — returns immediately) ───────────
         $botReply = $this->processBotRules($question);
 
         if ($botReply && !$botReply['fallback']) {
@@ -43,23 +42,27 @@ class BotController extends Controller
             ]);
         }
 
-        // ── Step 2: RAG AI knowledge base ─────────────────────────────────
-        try {
-            $ragResult = $rag->query($question, 3);
-            if ($ragResult['answer'] && $ragResult['mode'] !== 'fallback') {
-                return $this->respond(
-                    $ragResult['answer'],
-                    false,
-                    ['mode' => $ragResult['mode'], 'sources' => $ragResult['sources'] ?? []]
-                );
-            }
-        } catch (\Exception $e) {
-            // RAG failed, continue to fallback
+        // ── Step 2: AI / RAG (ASYNC — returns immediately, processes in background) ──
+        if ($chatId) {
+            // Fire-and-forget background AI processing
+            $cmd = sprintf(
+                'php %s/artisan skillzlink:ai-response %s %d > /dev/null 2>&1 &',
+                base_path(),
+                escapeshellarg($question),
+                $chatId
+            );
+            exec($cmd);
+
+            return $this->respond(
+                "Let me check that for you... I'll get back with an answer shortly.",
+                false,
+                ['mode' => 'ai_processing']
+            );
         }
 
-        // ── Step 3: Escalate to human ─────────────────────────────────────
+        // ── Step 3: No chat ID — fallback ──────────────────────────────────
         return $this->respond(
-            "I couldn't find a specific answer to your question. A member of our team will get back to you shortly. In the meantime, you can browse professionals at /nearby-professionals.",
+            "I couldn't find a specific answer to your question. A member of our team will get back to you shortly.",
             true
         );
     }
@@ -76,6 +79,22 @@ class BotController extends Controller
         if (preg_match('/^(hi|hello|hey|good morning|good afternoon|good evening|yo|sup)\b/', $msg)) {
             return [
                 'text' => "Hello! 👋 I'm the SkillzLink assistant. I can help you find professionals, become a provider, learn about pricing, or answer any questions. What can I help with?",
+                'escalate' => false,
+                'fallback' => false,
+                'quickReplies' => [
+                    '🔍 Find a Professional',
+                    '📝 Become a Provider',
+                    '💰 Pricing & Cost',
+                    '📖 How It Works',
+                    '💬 Chat with a human',
+                ],
+            ];
+        }
+
+        // Chat with AI — direct handler so it never goes quiet
+        if (preg_match('/\bchat with ai\b|\bchat.?gpt\b|\bai assist\b|\bask ai\b/i', $msg)) {
+            return [
+                'text' => "🤖 You're now chatting with the SkillzLink AI assistant! Ask me anything about our platform — finding professionals, becoming a provider, pricing, safety, how it works, or any other question you have.",
                 'escalate' => false,
                 'fallback' => false,
                 'quickReplies' => [

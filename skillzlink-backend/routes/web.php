@@ -20,18 +20,6 @@ Route::post('/api/rag/ask', [RagController::class, 'ask']);
 // Bot webhook — called by LHC or external bots
 Route::post('/api/bot/webhook', [BotController::class, 'webhook']);
 
-// Live Helper Chat — serve all LHC requests through its own index.php
-Route::any('/lhc/{any?}', function ($any = null) {
-    $lhcPath = public_path('lhc');
-    chdir($lhcPath);
-
-    $_SERVER['SCRIPT_NAME'] = '/lhc/index.php';
-    $_SERVER['SCRIPT_FILENAME'] = $lhcPath . '/index.php';
-
-    require $lhcPath . '/index.php';
-    exit;
-})->where('any', '.*');
-
 Route::prefix('webhooks/whatsapp')->group(function (): void {
     Route::post('/', [WhatsAppWebhookController::class, 'handle']);
     Route::get('/', [WhatsAppWebhookController::class, 'verify']);

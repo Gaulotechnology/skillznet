@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\AffiliateController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\PaynowController;
 use App\Http\Controllers\Api\RagController;
+use App\Http\Controllers\Api\BotController;
 use App\Http\Controllers\Api\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -221,6 +222,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
     });
 
     // ─── Live Chat & RAG AI ─────────────────────────────────────────────────
+    // Public bot webhook (called by LHC Generic Bot REST API)
+    Route::post('/bot/webhook', [BotController::class, 'webhook']);
+    // Public RAG AI ask (for LHC bot and frontend)
+    Route::post('/rag/ask', [RagController::class, 'ask']);
+
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/chat/admin/sessions', [ChatController::class, 'adminSessions']);
         Route::get('/chat/admin/messages', [ChatController::class, 'adminMessages']);

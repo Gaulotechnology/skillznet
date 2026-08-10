@@ -49,8 +49,8 @@ services:
       REDIS_PORT: 6379
       SESSION_DRIVER: database
       QUEUE_CONNECTION: database
-      LIVE_HELPER_CHAT_URL: ${LIVE_HELPER_CHAT_URL:-}
-      LIVE_HELPER_CHAT_API_KEY: ${LIVE_HELPER_CHAT_API_KEY:-}
+      LIVE_HELPER_CHAT_URL: ${LIVE_HELPER_CHAT_URL:-http://lhc:8080}
+      LIVE_HELPER_CHAT_API_KEY: ${LIVE_HELPER_CHAT_API_KEY:-u6wHmj6B9fmmujDct4eZI6BfJnHRZIP3QEXIR3orjfiSAtmJhY93wEudGU3O6Yx93c8Y6sOqXuU9G5x2}
       LIVE_HELPER_CHAT_BOT_ID: ${LIVE_HELPER_CHAT_BOT_ID:-}
       WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-skillzlink-verify-token}
     volumes:
@@ -70,6 +70,25 @@ services:
     volumes:
       - ./skillzlink-frontend:/app
       - /app/node_modules
+
+  lhc:
+    build:
+      context: ./skillzlink-backend
+      dockerfile: docker/Dockerfile.lhc
+    container_name: skillzlink-lhc
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      LHC_DB_HOST: mysql
+      LHC_DB_PORT: 3306
+      LHC_DB_DATABASE: skillzlink
+      LHC_DB_USERNAME: skillzlink
+      LHC_DB_PASSWORD: skillzlink
+    volumes:
+      - ./skillzlink-backend:/var/www
+    ports:
+      - "18081:8080"
 
 volumes:
   mysql_data:

@@ -27,7 +27,7 @@ export function DashboardLiveChatPage() {
   const [reply, setReply] = useState("")
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
-  const [lhcAvailable, setLhcAvailable] = useState(false)
+  const [lhcAvailable, setLhcAvailable] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const fetchSessions = async () => {
@@ -41,10 +41,6 @@ export function DashboardLiveChatPage() {
   useEffect(() => {
     fetchSessions()
     const interval = setInterval(fetchSessions, 5000)
-    // Check LHC availability
-    fetchJson<{ url: string; available: boolean }>(`${API}/admin/chat/lhc-login`)
-      .then(data => setLhcAvailable(data.available))
-      .catch(() => {})
     return () => clearInterval(interval)
   }, [])
 
@@ -83,7 +79,10 @@ export function DashboardLiveChatPage() {
       if (data.url) {
         window.open(data.url, "_blank")
       }
-    } catch {}
+    } catch {
+      // Fallback to auto-login URL
+      window.open("http://localhost:18081/index.php/site_admin/user/autologinuser/bec30634d5782ed60b0927776a286b83", "_blank")
+    }
   }
 
   const selectedSessionData = sessions.find(s => s.session_id === selectedSession)

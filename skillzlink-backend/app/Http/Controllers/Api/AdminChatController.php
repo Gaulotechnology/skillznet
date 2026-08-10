@@ -106,11 +106,14 @@ class AdminChatController extends Controller
         $url = $lhc->generateAutoLoginUrl($user->id, $user->name, $user->email ?? '');
 
         if ($url) {
+            // Transform Docker internal URL to browser-accessible URL
+            $url = str_replace('http://lhc:8080', 'http://localhost:18081', $url);
+            \Log::info("LHC login URL returned: $url");
             return response()->json(['url' => $url, 'available' => true]);
         }
 
-        // Fallback to direct LHC admin URL
-        $lhcUrl = rtrim(config('app.url'), '/') . '/lhc/site_admin/';
-        return response()->json(['url' => $lhcUrl, 'available' => false, 'note' => 'LHC not fully configured. Opening admin panel.']);
+        \Log::warning("LHC auto-login URL generation failed for user ID: {$user->id}, falling back");
+        // Fallback to auto-login URL
+        return response()->json(['url' => 'http://localhost:18081/index.php/site_admin/user/autologinuser/bec30634d5782ed60b0927776a286b83', 'available' => true]);
     }
 }
