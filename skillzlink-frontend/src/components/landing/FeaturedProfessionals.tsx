@@ -13,6 +13,11 @@ function maskFullName(name: string): string {
   return parts[0] + " " + (parts[1] ? parts[1][0] + "." : "")
 }
 
+function normalizePhone(phone?: string): string {
+  if (!phone) return ""
+  return phone.replace(/[^0-9+]/g, "")
+}
+
 export function FeaturedProfessionals() {
   const [professionals, setProfessionals] = useState<PublicProvider[]>([])
   const [loading, setLoading] = useState(true)
@@ -155,6 +160,41 @@ export function FeaturedProfessionals() {
                     <span className="text-xs text-gray-400">Login to see rate</span>
                   )}
                 </p>
+
+                {/* Contact actions */}
+                <div className="flex items-center gap-2 mt-2">
+                  {loggedIn && pro.phone ? (
+                    <>
+                      <a
+                        href={`tel:${normalizePhone(pro.phone)}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-[var(--accent-color)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+                      >
+                        <i className="lnr lnr-phone-handset text-xs" />
+                        Call
+                      </a>
+                      <a
+                        href={`https://wa.me/${normalizePhone(pro.phone).replace(/^\+/, "")}?text=Hi ${encodeURIComponent(pro.name)}, I found your profile on SkillzLink.`}
+                        onClick={(e) => e.stopPropagation()}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-green-500 text-white text-xs font-medium hover:bg-green-600 transition-colors"
+                      >
+                        <i className="fab fa-whatsapp text-xs" />
+                        WhatsApp
+                      </a>
+                    </>
+                  ) : (
+                    <Link
+                      to="/login"
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg border border-[var(--accent-color)] text-[var(--accent-color)] text-xs font-medium hover:bg-[var(--accent-light)] transition-colors"
+                    >
+                      <i className="lnr lnr-lock text-xs" />
+                      Login to contact
+                    </Link>
+                  )}
+                </div>
               </div>
             </Link>
           ))}
