@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { publicApi, seekerApi, isLoggedIn } from "../../services/api"
+import { publicApi, isLoggedIn } from "../../services/api"
 import type { PublicProvider } from "../../services/api"
 
 function extractCity(location: string): string {
@@ -17,7 +17,6 @@ export function FeaturedProfessionals() {
   const [professionals, setProfessionals] = useState<PublicProvider[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [revealedContacts, setRevealedContacts] = useState<Record<number, string>>({})
   const loggedIn = isLoggedIn()
 
   useEffect(() => {
@@ -36,17 +35,6 @@ export function FeaturedProfessionals() {
       .finally(() => setLoading(false))
   }, [])
 
-  const handleReveal = async (id: number) => {
-    try {
-      const res = await seekerApi.revealContact(id)
-      if (res.contact_available && res.contact_number) {
-        setRevealedContacts((prev) => ({ ...prev, [id]: res.contact_number! }))
-      }
-    } catch {
-      // silently fail
-    }
-  }
-
   if (loading) {
     return (
       <section className="bg-gray-50 py-16">
@@ -55,12 +43,13 @@ export function FeaturedProfessionals() {
             <h2 className="text-2xl font-semibold text-gray-900">Top Professionals Near You</h2>
             <p className="text-gray-500 text-sm mt-1">Loading trusted providers...</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="bg-white rounded-xl p-5 border border-gray-200 animate-pulse">
-                <div className="w-12 h-12 rounded-xl bg-gray-100 mb-3" />
-                <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
-                <div className="h-3 bg-gray-100 rounded w-1/2" />
+              <div key={n} className="animate-pulse">
+                <div className="aspect-[4/3] rounded-xl bg-gray-200 mb-3" />
+                <div className="h-3 bg-gray-200 rounded w-2/3 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-1" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
               </div>
             ))}
           </div>
@@ -92,150 +81,82 @@ export function FeaturedProfessionals() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {professionals.map((pro) => (
-            <div
+            <Link
               key={pro.id}
-              className="bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all duration-200 group overflow-hidden"
+              to={`/professional-profile/${pro.id}`}
+              className="group cursor-pointer"
             >
-              {/* Top section */}
-              <div className="p-5">
-                <div className="flex items-start gap-3 mb-3">
-                  <img
-                    src={pro.image || "https://via.placeholder.com/150"}
-                    alt={pro.name}
-                    className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-1">
-                      <Link
-                        to={`/professional-profile/${pro.id}`}
-                        className="font-semibold text-gray-900 text-sm truncate hover:text-[var(--accent-color)] transition-colors"
-                      >
-                        {loggedIn ? pro.name : maskFullName(pro.name)}
-                      </Link>
-                      {pro.id_verified && (
-                        <i
-                          className="lnr lnr-checkmark-circle text-blue-500 flex-shrink-0 mt-0.5"
-                          title="Identity Verified"
-                        />
-                      )}
-                    </div>
-                    <p className="text-xs text-[var(--accent-color)] font-medium truncate">
-                      {pro.service_category || "General Services"}
-                    </p>
-                  </div>
+              {/* Image section */}
+              <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3">
+                <img
+                  src={pro.image || "https://via.placeholder.com/400x300"}
+                  alt={pro.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                {/* Rating overlay */}
+                <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 shadow-sm">
+                  <i className="lnr lnr-star text-amber-500 text-xs" />
+                  <span className="text-xs font-semibold text-gray-900">{pro.rating || "5.0"}</span>
                 </div>
-
-                {/* Location, Experience, Completed */}
-                <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
-                  <span className="flex items-center gap-1">
-                    <i className="lnr lnr-map-marker text-gray-400" />
-                    {loggedIn ? (pro.location || "Zimbabwe") : extractCity(pro.location || "Zimbabwe")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
-                  {pro.years_of_experience != null && (
-                    <span className="flex items-center gap-1 font-medium text-gray-700">
-                      <i className="lnr lnr-briefcase text-gray-400" />
-                      {pro.years_of_experience} yr{pro.years_of_experience !== 1 ? "s" : ""} exp
-                    </span>
-                  )}
-                  {pro.completed_services != null && pro.completed_services > 0 && (
-                    <span className="flex items-center gap-1 font-medium text-gray-700">
-                      <i className="lnr lnr-checkmark-circle text-green-500" />
-                      {pro.completed_services} jobs done
-                    </span>
-                  )}
-                </div>
-
-                {/* Trust & highlight tags */}
-                <div className="flex flex-wrap gap-1.5">
+                {/* Badges overlay */}
+                <div className="absolute top-3 left-3 flex flex-col gap-1">
                   {pro.premium_badge && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-semibold">
-                      <i className="lnr lnr-diamond text-[10px]" />
+                    <span className="px-2 py-0.5 rounded-md bg-amber-500 text-white text-[10px] font-semibold shadow-sm">
                       PREMIUM
                     </span>
                   )}
                   {pro.featured && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[10px] font-semibold">
-                      <i className="lnr lnr-star text-[10px]" />
+                    <span className="px-2 py-0.5 rounded-md bg-purple-600 text-white text-[10px] font-semibold shadow-sm">
                       FEATURED
                     </span>
                   )}
+                </div>
+              </div>
+
+              {/* Info section - Airbnb style */}
+              <div className="px-0.5">
+                <p className="text-xs font-medium text-gray-500 mb-0.5">
+                  {pro.service_category || "General Services"}
+                </p>
+                <p className="text-sm font-semibold text-gray-900 truncate">
+                  {loggedIn ? pro.name : maskFullName(pro.name)}
                   {pro.id_verified && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-semibold">
-                      <i className="lnr lnr-checkmark-circle text-[10px]" />
-                      Verified
-                    </span>
+                    <i className="lnr lnr-checkmark-circle text-blue-500 inline-block ml-1 text-xs" title="Verified" />
+                  )}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {loggedIn ? (pro.location || "Zimbabwe") : extractCity(pro.location || "Zimbabwe")}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {pro.years_of_experience != null && (
+                    <span>{pro.years_of_experience} yrs exp</span>
+                  )}
+                  {pro.years_of_experience != null && pro.completed_services != null && pro.completed_services > 0 && (
+                    <span className="mx-1.5">·</span>
+                  )}
+                  {pro.completed_services != null && pro.completed_services > 0 && (
+                    <span>{pro.completed_services} jobs</span>
+                  )}
+                  {((pro.years_of_experience != null || (pro.completed_services != null && pro.completed_services > 0)) && pro.response_time) && (
+                    <span className="mx-1.5">·</span>
                   )}
                   {pro.response_time && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-50 text-green-700 text-[10px] font-semibold">
-                      <i className="lnr lnr-clock text-[10px]" />
-                      Responds {pro.response_time}
-                    </span>
+                    <span>responds in {pro.response_time}</span>
                   )}
-                  {pro.success_rate != null && pro.success_rate > 0 && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
-                      <i className="lnr lnr-thumbs-up text-[10px]" />
-                      {pro.success_rate}% success
+                </p>
+                <p className="text-sm mt-1.5">
+                  {loggedIn ? (
+                    <span className="font-semibold text-gray-900">
+                      ${pro.rate || "15"}<span className="text-xs font-normal text-gray-500">/hr</span>
                     </span>
+                  ) : (
+                    <span className="text-xs text-gray-400">Login to see rate</span>
                   )}
-                  {pro.rating >= 4.5 && pro.reviews >= 10 && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold">
-                      <i className="lnr lnr-star text-[10px]" />
-                      Top Rated
-                    </span>
-                  )}
-                </div>
+                </p>
               </div>
-
-              {/* Bottom bar */}
-              <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between bg-gray-50/50">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="flex items-center gap-1">
-                    <i className="lnr lnr-star text-amber-400 text-xs" />
-                    <span className="font-semibold text-gray-900">{pro.rating || "5.0"}</span>
-                    <span className="text-gray-400 text-xs">({pro.reviews || 0})</span>
-                  </span>
-                  {loggedIn && (
-                    <>
-                      <span className="text-gray-300">|</span>
-                      <span className="font-medium text-gray-700 text-xs">
-                        ${pro.rate || "15"}/hr
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                {!loggedIn ? (
-                  <Link
-                    to="/login"
-                    className="px-3 py-1.5 rounded-lg bg-[var(--accent-color)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
-                  >
-                    Login to view
-                  </Link>
-                ) : revealedContacts[pro.id] ? (
-                  <a
-                    href={`https://wa.me/${revealedContacts[pro.id].replace(/[^0-9]/g, "")}?text=Hi ${pro.name}, I found your profile on SkillzLink.`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors"
-                    title="Chat on WhatsApp"
-                  >
-                    <i className="fab fa-whatsapp text-sm" />
-                  </a>
-                ) : (
-                  <button
-                    onClick={() => handleReveal(pro.id)}
-                    className="w-8 h-8 rounded-lg bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center hover:bg-[var(--accent-color)] hover:text-white transition-colors"
-                    title="Reveal Contact"
-                  >
-                    <i className="lnr lnr-phone-handset text-sm" />
-                  </button>
-                )}
-              </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
