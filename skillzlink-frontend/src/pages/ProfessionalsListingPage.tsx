@@ -8,6 +8,16 @@ function normalizePhone(phone?: string): string {
   return phone.replace(/[^0-9+]/g, "")
 }
 
+function extractCity(location: string): string {
+  const parts = location.split(",")
+  return parts[parts.length - 1]?.trim() || location
+}
+
+function maskFullName(name: string): string {
+  const parts = name.trim().split(" ")
+  return parts[0] + " " + (parts[1] ? parts[1][0] + "." : "")
+}
+
 const ITEMS_PER_PAGE = 6
 const zimbabweCities = [
   "Harare", "Bulawayo", "Mutare", "Gweru", "Kwekwe",
@@ -555,7 +565,7 @@ export function ProfessionalsListingPage() {
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-semibold text-[var(--text-primary)] truncate">
                           <Link to={`/professional-profile/${pro.id}`} className="hover:text-[var(--accent-color)] transition-colors">
-                            {pro.name}
+                            {isLoggedIn() ? pro.name : maskFullName(pro.name)}
                           </Link>
                         </h3>
                         {pro.id_verified && (
@@ -566,9 +576,17 @@ export function ProfessionalsListingPage() {
                         {pro.service_category || "General Services"}
                       </p>
                       <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] mt-1.5">
-                        <span className="flex items-center gap-1"><i className="lnr lnr-map-marker" /> {pro.location || "Zimbabwe"}</span>
+                        <span className="flex items-center gap-1"><i className="lnr lnr-map-marker" /> {isLoggedIn() ? (pro.location || "Zimbabwe") : extractCity(pro.location || "Zimbabwe")}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] mt-1">
                         {(pro as any).years_of_experience != null && (
-                          <span className="flex items-center gap-1"><i className="lnr lnr-briefcase" /> {(pro as any).years_of_experience} yr{(pro as any).years_of_experience !== 1 ? 's' : ''} exp</span>
+                          <span>{(pro as any).years_of_experience} yrs exp</span>
+                        )}
+                        {pro.completed_services != null && pro.completed_services > 0 && (
+                          <span>{pro.completed_services} jobs</span>
+                        )}
+                        {pro.response_time && (
+                          <span>responds in {pro.response_time}</span>
                         )}
                       </div>
                     </div>
@@ -580,10 +598,14 @@ export function ProfessionalsListingPage() {
                     <div className="flex gap-4 text-sm text-[var(--text-primary)]">
                       <span className="flex items-center gap-1">
                         <i className="lnr lnr-star text-amber-400" />
-                        <span className="font-medium">5.0</span>
+                        <span className="font-medium">{pro.rating || "5.0"}</span>
                         <span className="text-[var(--text-secondary)] text-xs">({pro.success_rate || 98}%)</span>
                       </span>
-                      <span className="font-medium">${pro.rate || "15"}/hr</span>
+                      {isLoggedIn() ? (
+                        <span className="font-medium">${pro.rate || "15"}/hr</span>
+                      ) : (
+                        <span className="text-xs text-[var(--text-secondary)]">Login to see rate</span>
+                      )}
                     </div>
                     
                     {isLoggedIn() && pro.phone ? (
@@ -606,7 +628,7 @@ export function ProfessionalsListingPage() {
                         </a>
                       </div>
                     ) : isLoggedIn() ? (
-                      <span className="text-xs text-[var(--text-secondary)]">No contact available</span>
+                      <span className="text-xs text-[var(--text-secondary)]">No contact</span>
                     ) : (
                       <Link
                         to="/login"
