@@ -589,6 +589,35 @@ export function ProfessionalsListingPage() {
                           <span>responds in {pro.response_time}</span>
                         )}
                       </div>
+
+                      {/* Trust tags */}
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {pro.premium_badge && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-semibold">
+                            <i className="lnr lnr-diamond text-[10px]" /> PREMIUM
+                          </span>
+                        )}
+                        {pro.featured && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[10px] font-semibold">
+                            <i className="lnr lnr-star text-[10px]" /> FEATURED
+                          </span>
+                        )}
+                        {pro.id_verified && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-semibold">
+                            <i className="lnr lnr-checkmark-circle text-[10px]" /> Verified
+                          </span>
+                        )}
+                        {pro.success_rate != null && pro.success_rate > 0 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
+                            <i className="lnr lnr-thumbs-up text-[10px]" /> {pro.success_rate}% success
+                          </span>
+                        )}
+                        {pro.rating >= 4.5 && pro.reviews >= 10 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold">
+                            <i className="lnr lnr-star text-[10px]" /> Top Rated
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
