@@ -27,6 +27,7 @@ export function DashboardLiveChatPage() {
   const [reply, setReply] = useState("")
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [lhcAvailable, setLhcAvailable] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const fetchSessions = async () => {
@@ -40,6 +41,10 @@ export function DashboardLiveChatPage() {
   useEffect(() => {
     fetchSessions()
     const interval = setInterval(fetchSessions, 5000)
+    // Check LHC availability
+    fetchJson<{ url: string; available: boolean }>(`${API}/admin/chat/lhc-login`)
+      .then(data => setLhcAvailable(data.available))
+      .catch(() => {})
     return () => clearInterval(interval)
   }, [])
 
@@ -91,13 +96,15 @@ export function DashboardLiveChatPage() {
             <h1 className="text-2xl font-bold text-[var(--text-primary)]">Live Chat</h1>
             <p className="text-sm text-[var(--text-secondary)] mt-1">Manage visitor conversations in real-time</p>
           </div>
-          <button
-            onClick={handleLhcLogin}
-            className="px-4 py-2.5 rounded-xl bg-[var(--accent-color)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <i className="lnr lnr-exit-up mr-2" />
-            Open LHC Panel
-          </button>
+          {lhcAvailable && (
+            <button
+              onClick={handleLhcLogin}
+              className="px-4 py-2.5 rounded-xl bg-[var(--accent-color)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <i className="lnr lnr-exit-up mr-2" />
+              Open LHC Panel
+            </button>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6" style={{ minHeight: "70vh" }}>
