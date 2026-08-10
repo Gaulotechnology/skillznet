@@ -270,7 +270,7 @@ class AdminController extends Controller
 
     public function getSettings(Request $request): JsonResponse
     {
-        $sections = ['general', 'email', 'payment', 'security', 'affiliate', 'agent', 'social', 'subscriptions'];
+        $sections = ['general', 'email', 'payment', 'paynow', 'security', 'affiliate', 'agent', 'social', 'subscriptions'];
         $all = [];
         foreach ($sections as $section) {
             $all[$section] = \App\Models\Setting::getSection($section);

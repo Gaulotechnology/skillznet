@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\AdminChatController;
 use App\Http\Controllers\Api\AgentController;
 use App\Http\Controllers\Api\AffiliateController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\PaynowController;
 use App\Http\Controllers\Api\RagController;
 use App\Http\Controllers\Api\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,10 @@ Route::get('/careers', function () {
         'jobs' => \App\Models\JobPosting::where('is_active', true)->get()
     ]);
 });
+
+// ─── PayNow callbacks (public — called by PayNow servers) ──────────────────
+Route::post('/paynow/status', [PaynowController::class, 'status']);
+Route::get('/paynow/return', [PaynowController::class, 'return']);
 
 
 Route::prefix('auth')->group(function (): void {
@@ -89,6 +94,10 @@ Route::middleware('auth:sanctum')->group(function (): void {
         // Placeholder: store ticket in DB for future implementation
         return response()->json(['message' => 'Ticket received', 'ticket_id' => rand(1000, 9999)]);
     });
+
+    // ─── PayNow payments ───────────────────────────────────────────────────
+    Route::post('/paynow/initiate', [PaynowController::class, 'initiate']);
+    Route::get('/paynow/check', [PaynowController::class, 'check']);
 
     Route::prefix('provider')->middleware('role:provider')->group(function (): void {
         Route::get('/profile', [ProviderController::class, 'profile']);
