@@ -126,115 +126,105 @@ export function ProfessionalProfilePage() {
   const reviewsList = pro.client_reviews ?? []
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-20">
-      {/* Profile Header Banner */}
-      <div className="h-64 bg-slate-900 relative overflow-hidden">
-        {/* Subtle background patterns */}
-        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-rose-500/20 rounded-full blur-3xl" />
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl" />
-      </div>
-
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl -mt-24 relative z-10">
+    <div className="bg-white min-h-screen pb-20">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl pt-8">
         
-        {/* Top Profile Card */}
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 md:p-10 mb-8 flex flex-col md:flex-row gap-8 items-start">
+        {/* Top Profile Card - Airbnb style */}
+        <div className="mb-8">
           
-          {/* Avatar */}
-          <div className="relative shrink-0 mx-auto md:mx-0 -mt-20 md:-mt-24">
-            <div className="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-white shadow-lg overflow-hidden bg-slate-200">
-              <img src={pro.image} alt={pro.name} className="w-full h-full object-cover" />
+          {/* Avatar + Name row */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 mb-6">
+            <div className="relative shrink-0">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-200">
+                <img src={pro.image} alt={pro.name} className="w-full h-full object-cover" />
+              </div>
+              {pro.id_verified && (
+                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm" title="ID Verified">
+                  <i className="lnr lnr-checkmark-circle text-blue-500 text-lg" />
+                </div>
+              )}
             </div>
-            {pro.id_verified && (
-              <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 bg-white rounded-full p-1 shadow-md" title="ID Verified">
-                <i className="lnr lnr-checkmark-circle text-blue-500 text-xl md:text-3xl bg-white rounded-full" />
-              </div>
-            )}
-          </div>
-
-          {/* Profile Info */}
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-              <div>
-                <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                  <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900">{pro.name}</h1>
-                  {pro.premium_badge && (
-                    <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-lg uppercase tracking-wider flex items-center gap-1">
-                      <i className="lnr lnr-star" /> Premium
-                    </span>
-                  )}
-                </div>
-                <p className="text-xl text-rose-500 font-semibold mb-4">{pro.service_category} Expert</p>
-                
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-3 text-slate-600 font-medium text-sm md:text-base">
-                  <span className="flex items-center gap-2"><i className="lnr lnr-map-marker text-lg" /> {pro.location || "Zimbabwe"}</span>
-                  <span className="flex items-center gap-2"><i className="lnr lnr-tag text-lg" /> {pro.rate || "$15/hr"}</span>
-                  <span className="flex items-center gap-2 text-amber-500"><i className="lnr lnr-star text-lg" /> {pro.rating}/5 ({pro.reviews} reviews)</span>
-                  <span className="flex items-center gap-2"><i className="lnr lnr-calendar-full text-lg" /> Member since {pro.member_since || 'Aug 2023'}</span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-6 md:mt-0">
-                <button 
-                  onClick={() => setShowBookingModal(true)}
-                  className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/30 flex items-center justify-center gap-2"
-                >
-                  <i className="lnr lnr-calendar-full text-xl" /> Book Now
-                </button>
-                {isLoggedIn() ? (
-                  (revealedPhone || pro.phone) ? (
-                    <>
-                      <a 
-                        href={`https://wa.me/${normalizePhone(revealedPhone || pro.phone).replace(/^\+/, "")}?text=Hi%20${encodeURIComponent(pro.name)},%20I%20found%20you%20on%20SkillzLink.`} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2"
-                      >
-                        <i className="fab fa-whatsapp text-xl" /> WhatsApp
-                      </a>
-                      <a 
-                        href={`tel:${normalizePhone(revealedPhone || pro.phone)}`}
-                        className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2"
-                      >
-                        <i className="lnr lnr-phone-handset text-xl" /> Call
-                      </a>
-                    </>
-                  ) : (
-                    <button 
-                      onClick={handleRevealContact}
-                      disabled={revealingContact}
-                      className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      {revealingContact ? "Loading..." : "Reveal Contact"} <i className="lnr lnr-phone-handset text-xl" />
-                    </button>
-                  )
-                ) : (
-                  <Link
-                    to="/login"
-                    className="flex-1 md:flex-none px-6 py-3 rounded-xl border-2 border-[var(--accent-color)] text-[var(--accent-color)] font-bold transition-all hover:bg-[var(--accent-color)] hover:text-white flex items-center justify-center gap-2"
-                  >
-                    <i className="lnr lnr-lock text-xl" /> Login to contact
-                  </Link>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <h1 className="text-2xl font-semibold text-gray-900">{pro.name}</h1>
+                {pro.premium_badge && (
+                  <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[11px] font-bold rounded-md flex items-center gap-1">
+                    <i className="lnr lnr-diamond text-[10px]" /> Premium
+                  </span>
                 )}
               </div>
+              <p className="text-gray-500 text-sm">{pro.service_category || "General Services"}</p>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-gray-500">
+                <span className="flex items-center gap-1"><i className="lnr lnr-map-marker text-xs" /> {pro.location || "Zimbabwe"}</span>
+                <span className="flex items-center gap-1"><i className="lnr lnr-star text-amber-500 text-xs" /> {pro.rating} <span className="text-gray-400">({pro.reviews} reviews)</span></span>
+                <span>{pro.member_since || 'Aug 2023'}</span>
+              </div>
             </div>
+          </div>
 
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-slate-100">
-              <div>
-                <div className="text-2xl md:text-3xl font-extrabold text-slate-900">{pro.completed_services ?? 0}</div>
-                <div className="text-sm font-medium text-slate-500 uppercase tracking-wider mt-1">Completed</div>
-              </div>
-              <div>
-                <div className="text-2xl md:text-3xl font-extrabold text-slate-900">{pro.success_rate ?? 100}%</div>
-                <div className="text-sm font-medium text-slate-500 uppercase tracking-wider mt-1">Success</div>
-              </div>
-              <div>
-                <div className="text-2xl md:text-3xl font-extrabold text-slate-900">{pro.response_time ?? '2h'}</div>
-                <div className="text-sm font-medium text-slate-500 uppercase tracking-wider mt-1">Response Time</div>
-              </div>
+          {/* Stats row */}
+          <div className="flex items-center gap-6 py-4 border-t border-b border-gray-100 mb-6">
+            <div>
+              <span className="text-lg font-semibold text-gray-900">{pro.completed_services ?? 0}</span>
+              <span className="text-xs text-gray-500 ml-1">jobs completed</span>
             </div>
+            <div>
+              <span className="text-lg font-semibold text-gray-900">{pro.success_rate ?? 100}%</span>
+              <span className="text-xs text-gray-500 ml-1">success rate</span>
+            </div>
+            <div>
+              <span className="text-lg font-semibold text-gray-900">{pro.response_time ?? '2h'}</span>
+              <span className="text-xs text-gray-500 ml-1">response time</span>
+            </div>
+            <div>
+              <span className="text-lg font-semibold text-gray-900">${pro.rate || "15"}</span>
+              <span className="text-xs text-gray-500 ml-1">/hr</span>
+            </div>
+          </div>
+
+          {/* Action buttons - clean, spaced, no overlap */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button 
+              onClick={() => setShowBookingModal(true)}
+              className="px-6 py-3 rounded-xl bg-gray-900 hover:bg-gray-800 text-white text-sm font-semibold transition-colors flex items-center gap-2"
+            >
+              <i className="lnr lnr-calendar-full" /> Book Appointment
+            </button>
+            {isLoggedIn() ? (
+              (revealedPhone || pro.phone) ? (
+                <>
+                  <a 
+                    href={`https://wa.me/${normalizePhone(revealedPhone || pro.phone).replace(/^\+/, "")}?text=Hi%20${encodeURIComponent(pro.name)},%20I%20found%20you%20on%20SkillzLink.`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition-colors flex items-center gap-2"
+                  >
+                    <i className="fab fa-whatsapp" /> WhatsApp
+                  </a>
+                  <a 
+                    href={`tel:${normalizePhone(revealedPhone || pro.phone)}`}
+                    className="px-6 py-3 rounded-xl border border-gray-300 hover:border-gray-900 text-gray-700 hover:text-gray-900 text-sm font-semibold transition-colors flex items-center gap-2"
+                  >
+                    <i className="lnr lnr-phone-handset" /> Call
+                  </a>
+                </>
+              ) : (
+                <button 
+                  onClick={handleRevealContact}
+                  disabled={revealingContact}
+                  className="px-6 py-3 rounded-xl border border-gray-300 hover:border-gray-900 text-gray-700 text-sm font-semibold transition-colors flex items-center gap-2 disabled:opacity-50"
+                >
+                  <i className="lnr lnr-phone-handset" /> {revealingContact ? "Loading..." : "Reveal Contact"}
+                </button>
+              )
+            ) : (
+              <Link
+                to="/login"
+                className="px-6 py-3 rounded-xl border border-gray-300 hover:border-gray-900 text-gray-700 text-sm font-semibold transition-colors flex items-center gap-2"
+              >
+                <i className="lnr lnr-lock" /> Login to contact
+              </Link>
+            )}
           </div>
         </div>
 
@@ -245,28 +235,24 @@ export function ProfessionalProfilePage() {
           <div className="lg:col-span-2 space-y-8">
             
             {/* About Section */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                <i className="lnr lnr-user text-rose-500" /> About {pro.name.split(' ')[0]}
-              </h2>
-              <p className="text-slate-600 leading-relaxed text-lg">
+            <div className="pb-8 border-b border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">About {pro.name.split(' ')[0]}</h2>
+              <p className="text-gray-600 leading-relaxed">
                 {pro.description}
               </p>
             </div>
 
             {/* Dynamic Details Section */}
             {pro.dynamic_data && typeof pro.dynamic_data === 'object' && Object.keys(pro.dynamic_data).length > 0 && (
-              <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-                <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <i className="lnr lnr-magic-wand text-rose-500" /> Professional Details
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="pb-8 border-b border-gray-100">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Professional Details</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {Object.entries(pro.dynamic_data).map(([key, value]) => (
-                    <div key={key} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col gap-1">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    <div key={key} className="flex flex-col gap-0.5">
+                      <span className="text-xs text-gray-400 uppercase tracking-wider">
                         {key.replace(/_/g, ' ')}
                       </span>
-                      <span className="text-slate-800 font-medium">
+                      <span className="text-gray-800 text-sm">
                         {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
                       </span>
                     </div>
@@ -276,148 +262,120 @@ export function ProfessionalProfilePage() {
             )}
 
             {/* Services Section */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                <i className="lnr lnr-layers text-rose-500" /> Services & Pricing
-              </h2>
+            <div className="pb-8 border-b border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Services & Pricing</h2>
               {servicesList.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {servicesList.map((serv, i) => (
-                    <div key={i} className="flex justify-between items-start p-4 rounded-2xl border border-slate-100 hover:border-rose-200 hover:bg-rose-50/50 transition-colors group">
+                    <div key={i} className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-bold text-slate-800 text-lg group-hover:text-rose-600 transition-colors">{serv.name}</h4>
-                        <p className="text-slate-500 text-sm mt-1">{serv.description}</p>
+                        <h4 className="font-medium text-gray-900">{serv.name}</h4>
+                        <p className="text-gray-500 text-sm mt-0.5">{serv.description}</p>
                       </div>
-                      <div className="text-rose-500 font-extrabold text-xl shrink-0 ml-4">
+                      <div className="font-semibold text-gray-900 shrink-0 ml-4">
                         ${serv.price.toFixed(2)}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-slate-400 font-medium">No services listed yet.</div>
+                <p className="text-gray-400 text-sm">No services listed yet.</p>
               )}
             </div>
 
             {/* Experience Section */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                <i className="lnr lnr-briefcase text-rose-500" /> Experience
-              </h2>
+            <div className="pb-8 border-b border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Experience</h2>
               {experienceList.length > 0 ? (
-                <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                <div className="space-y-5">
                   {experienceList.map((exp, i) => (
-                    <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-100 group-hover:bg-rose-500 text-slate-500 group-hover:text-white shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm transition-colors z-10">
-                        <i className="lnr lnr-star text-sm" />
+                    <div key={i} className="flex gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                        <i className="lnr lnr-briefcase text-gray-500 text-sm" />
                       </div>
-                      <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-slate-100 shadow-sm bg-white">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-bold text-slate-800 text-lg">{exp.title}</h4>
-                        </div>
-                        <div className="text-sm text-slate-500 font-medium mb-3 flex items-center gap-2">
-                          <i className="lnr lnr-apartment" /> {exp.company} • {exp.date}
-                        </div>
-                        <p className="text-slate-600 text-sm">{exp.desc}</p>
+                      <div>
+                        <h4 className="font-medium text-gray-900">{exp.title}</h4>
+                        <p className="text-sm text-gray-500">{exp.company} · {exp.date}</p>
+                        <p className="text-sm text-gray-600 mt-1">{exp.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-slate-400 font-medium">No experience details provided yet.</div>
+                <p className="text-gray-400 text-sm">No experience details provided yet.</p>
               )}
             </div>
 
             {/* Portfolio Section */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                <i className="lnr lnr-picture text-rose-500" /> Past Work
-              </h2>
+            <div className="pb-8 border-b border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Past Work</h2>
               {portfoliosList.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {portfoliosList.map((port, i) => (
-                    <div key={i} className="group rounded-2xl overflow-hidden border border-slate-100 hover:shadow-lg transition-all">
+                    <div key={i} className="rounded-xl overflow-hidden border border-gray-100">
                       <div className="aspect-[4/3] overflow-hidden">
-                        <img src={port.image_url} alt={port.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={port.image_url} alt={port.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                       </div>
-                      <div className="p-4 bg-white">
-                        <h4 className="font-bold text-slate-800">{port.title}</h4>
-                        <p className="text-slate-500 text-sm mt-1">{port.description}</p>
+                      <div className="p-4">
+                        <h4 className="font-medium text-gray-900">{port.title}</h4>
+                        <p className="text-gray-500 text-sm mt-0.5">{port.description}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-slate-400 font-medium">No portfolio items provided yet.</div>
+                <p className="text-gray-400 text-sm">No portfolio items yet.</p>
               )}
             </div>
 
             {/* Reviews Section */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                <i className="lnr lnr-bubble text-rose-500" /> Seeker Reviews
-              </h2>
+            <div className="pb-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Reviews</h2>
               {reviewsList.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {reviewsList.map((review, i) => (
-                    <div key={i} className="p-6 rounded-2xl bg-slate-50 border border-slate-100">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="font-bold text-slate-800">{review.reviewer_name}</h4>
-                          <span className="text-xs font-medium text-slate-500">{review.date}</span>
+                    <div key={i} className="pb-4 border-b border-gray-50 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-500">
+                          {review.reviewer_name?.[0] || '?'}
                         </div>
-                        <div className="flex text-amber-400 gap-1 text-sm">
-                          {[...Array(5)].map((_, idx) => (
-                            <i key={idx} className={idx < review.rating ? "fa fa-star" : "far fa-star"} />
-                          ))}
+                        <div>
+                          <h4 className="font-medium text-gray-900 text-sm">{review.reviewer_name}</h4>
+                          <div className="flex text-amber-400 gap-0.5 text-xs">
+                            {[...Array(5)].map((_, idx) => (
+                              <i key={idx} className={idx < review.rating ? "fa fa-star" : "far fa-star"} />
+                            ))}
+                          </div>
                         </div>
                       </div>
-                      <p className="text-slate-600 italic">"{review.comment}"</p>
+                      <p className="text-gray-600 text-sm">"{review.comment}"</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-slate-400 font-medium">No reviews yet.</div>
+                <p className="text-gray-400 text-sm">No reviews yet.</p>
               )}
             </div>
 
           </div>
 
           {/* Right Column - Sidebar Widgets */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             
             {/* Skills Widget */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-              <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                <i className="lnr lnr-magic-wand text-rose-500" /> Skills
-              </h3>
+            <div className="border border-gray-200 rounded-xl p-6">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">Skills</h3>
               {skillsList.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {skillsList.map((skill, i) => (
-                    <span key={i} className="px-4 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-700 font-medium rounded-xl text-sm transition-colors cursor-default">
+                    <span key={i} className="px-3 py-1.5 bg-gray-50 text-gray-600 text-sm rounded-lg">
                       {skill}
                     </span>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-4 text-slate-400 font-medium text-sm">No skills added yet.</div>
+                <p className="text-gray-400 text-sm">No skills added yet.</p>
               )}
-            </div>
-
-            {/* Share Widget */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-              <h3 className="text-xl font-bold text-slate-900 mb-6">Share Profile</h3>
-              <div className="flex flex-col gap-3">
-                <button className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-100 hover:bg-[#25D366]/10 hover:border-[#25D366] hover:text-[#25D366] text-slate-700 font-medium transition-colors">
-                  <i className="fab fa-whatsapp text-lg" /> Share on WhatsApp
-                </button>
-                <button className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-100 hover:bg-[#1DA1F2]/10 hover:border-[#1DA1F2] hover:text-[#1DA1F2] text-slate-700 font-medium transition-colors">
-                  <i className="fab fa-twitter text-lg" /> Share on Twitter
-                </button>
-                <button className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-100 hover:bg-[#1877F2]/10 hover:border-[#1877F2] hover:text-[#1877F2] text-slate-700 font-medium transition-colors">
-                  <i className="fab fa-facebook-f text-lg" /> Share on Facebook
-                </button>
-              </div>
             </div>
 
           </div>
