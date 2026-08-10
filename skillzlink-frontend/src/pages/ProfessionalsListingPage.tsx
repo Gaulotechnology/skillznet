@@ -552,122 +552,120 @@ export function ProfessionalsListingPage() {
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-5">
+            <div className="grid md:grid-cols-2 gap-6">
               {paginatedProfessionals.map(pro => (
-                <div key={pro.id} className="bg-[var(--bg-primary)] rounded-xl p-5 border border-[var(--border-color)] hover:shadow-md transition-shadow group">
-                  <div className="flex items-start gap-4">
+                <Link
+                  key={pro.id}
+                  to={`/professional-profile/${pro.id}`}
+                  className="group flex gap-4 cursor-pointer"
+                >
+                  {/* Image - Airbnb style */}
+                  <div className="relative w-40 h-36 shrink-0 rounded-xl overflow-hidden">
                     <img 
-                      src={pro.image || "https://via.placeholder.com/150"} 
+                      src={pro.image || "https://via.placeholder.com/400x300"} 
                       alt={pro.name} 
-                      className="w-16 h-16 rounded-xl object-cover shrink-0 border border-[var(--border-color)]"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-[var(--text-primary)] truncate">
-                          <Link to={`/professional-profile/${pro.id}`} className="hover:text-[var(--accent-color)] transition-colors">
-                            {isLoggedIn() ? pro.name : maskFullName(pro.name)}
-                          </Link>
-                        </h3>
-                        {pro.id_verified && (
-                          <i className="lnr lnr-checkmark-circle text-blue-500 flex-shrink-0" title="Verified" />
-                        )}
-                      </div>
-                      <p className="text-sm text-[var(--accent-color)] font-medium truncate">
-                        {pro.service_category || "General Services"}
-                      </p>
-                      <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] mt-1.5">
-                        <span className="flex items-center gap-1"><i className="lnr lnr-map-marker" /> {isLoggedIn() ? (pro.location || "Zimbabwe") : extractCity(pro.location || "Zimbabwe")}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] mt-1">
-                        {(pro as any).years_of_experience != null && (
-                          <span>{(pro as any).years_of_experience} yrs exp</span>
-                        )}
-                        {pro.completed_services != null && pro.completed_services > 0 && (
-                          <span>{pro.completed_services} jobs</span>
-                        )}
-                        {pro.response_time && (
-                          <span>responds in {pro.response_time}</span>
-                        )}
-                      </div>
-
-                      {/* Trust tags */}
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {pro.premium_badge && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-semibold">
-                            <i className="lnr lnr-diamond text-[10px]" /> PREMIUM
-                          </span>
-                        )}
-                        {pro.featured && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[10px] font-semibold">
-                            <i className="lnr lnr-star text-[10px]" /> FEATURED
-                          </span>
-                        )}
-                        {pro.id_verified && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-semibold">
-                            <i className="lnr lnr-checkmark-circle text-[10px]" /> Verified
-                          </span>
-                        )}
-                        {pro.success_rate != null && pro.success_rate > 0 && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
-                            <i className="lnr lnr-thumbs-up text-[10px]" /> {pro.success_rate}% success
-                          </span>
-                        )}
-                        {pro.rating >= 4.5 && pro.reviews >= 10 && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold">
-                            <i className="lnr lnr-star text-[10px]" /> Top Rated
-                          </span>
-                        )}
-                      </div>
+                    <div className="absolute top-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg px-1.5 py-0.5 shadow-sm">
+                      <i className="lnr lnr-star text-amber-500 text-[10px]" />
+                      <span className="text-[11px] font-semibold text-gray-900">{pro.rating || "5.0"}</span>
                     </div>
                   </div>
 
-                  <div className="h-px bg-[var(--border-color)] my-4" />
+                  {/* Info section */}
+                  <div className="flex-1 min-w-0 py-0.5">
+                    <p className="text-xs text-gray-500 font-medium">
+                      {pro.service_category || "General Services"}
+                    </p>
+                    <p className="text-sm font-semibold text-gray-900 mt-0.5 truncate">
+                      {isLoggedIn() ? pro.name : maskFullName(pro.name)}
+                      {pro.id_verified && (
+                        <i className="lnr lnr-checkmark-circle text-blue-500 inline-block ml-1 text-xs" title="Verified" />
+                      )}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {isLoggedIn() ? (pro.location || "Zimbabwe") : extractCity(pro.location || "Zimbabwe")}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {(pro as any).years_of_experience != null && (
+                        <span>{(pro as any).years_of_experience} yrs exp</span>
+                      )}
+                      {pro.completed_services != null && pro.completed_services > 0 && (
+                        <span className="mx-1">·</span>
+                      )}
+                      {pro.completed_services != null && pro.completed_services > 0 && (
+                        <span>{pro.completed_services} jobs</span>
+                      )}
+                      {pro.response_time && (
+                        <span className="mx-1">·</span>
+                      )}
+                      {pro.response_time && (
+                        <span>responds in {pro.response_time}</span>
+                      )}
+                    </p>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-4 text-sm text-[var(--text-primary)]">
-                      <span className="flex items-center gap-1">
-                        <i className="lnr lnr-star text-amber-400" />
-                        <span className="font-medium">{pro.rating || "5.0"}</span>
-                        <span className="text-[var(--text-secondary)] text-xs">({pro.success_rate || 98}%)</span>
-                      </span>
-                      {isLoggedIn() ? (
-                        <span className="font-medium">{pro.rate || "$15/hr"}</span>
-                      ) : (
-                        <span className="text-xs text-[var(--text-secondary)]">Login to see rate</span>
+                    {/* Trust tags */}
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {pro.premium_badge && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px] font-semibold">
+                          PREMIUM
+                        </span>
+                      )}
+                      {pro.featured && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-700 text-[10px] font-semibold">
+                          FEATURED
+                        </span>
+                      )}
+                      {pro.success_rate != null && pro.success_rate > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-600 text-[10px] font-medium">
+                          {pro.success_rate}% success
+                        </span>
                       )}
                     </div>
-                    
-                    {isLoggedIn() && pro.phone ? (
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={`https://wa.me/${normalizePhone(pro.phone).replace(/^\+/, "")}?text=Hi ${encodeURIComponent(pro.name)}, I found your profile on SkillzLink.`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors"
-                          title="Chat on WhatsApp"
+
+                    {/* Price + Actions */}
+                    <div className="flex items-center justify-between mt-2">
+                      {isLoggedIn() ? (
+                        <span className="text-sm font-semibold text-gray-900">{pro.rate || "$15/hr"}</span>
+                      ) : (
+                        <span className="text-xs text-gray-400">Login to see rate</span>
+                      )}
+                      
+                      {isLoggedIn() && pro.phone ? (
+                        <div className="flex items-center gap-1.5" onClick={e => e.preventDefault()}>
+                          <a
+                            href={`https://wa.me/${normalizePhone(pro.phone).replace(/^\+/, "")}?text=Hi ${encodeURIComponent(pro.name)}, I found your profile on SkillzLink.`}
+                            onClick={e => e.stopPropagation()}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-8 h-8 rounded-lg bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-colors"
+                            title="WhatsApp"
+                          >
+                            <i className="fab fa-whatsapp text-sm" />
+                          </a>
+                          <a
+                            href={`tel:${normalizePhone(pro.phone)}`}
+                            onClick={e => e.stopPropagation()}
+                            className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-900 hover:text-white transition-colors"
+                            title="Call"
+                          >
+                            <i className="lnr lnr-phone-handset text-sm" />
+                          </a>
+                        </div>
+                      ) : isLoggedIn() ? (
+                        <span className="text-[10px] text-gray-400">No contact</span>
+                      ) : (
+                        <Link
+                          to="/login"
+                          onClick={e => e.stopPropagation()}
+                          className="text-xs font-medium text-gray-900 underline hover:no-underline"
                         >
-                          <i className="fab fa-whatsapp text-lg" />
-                        </a>
-                        <a
-                          href={`tel:${normalizePhone(pro.phone)}`}
-                          className="w-9 h-9 rounded-lg bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center hover:bg-[var(--accent-color)] hover:text-white transition-colors"
-                          title="Call"
-                        >
-                          <i className="lnr lnr-phone-handset text-lg" />
-                        </a>
-                      </div>
-                    ) : isLoggedIn() ? (
-                      <span className="text-xs text-[var(--text-secondary)]">No contact</span>
-                    ) : (
-                      <Link
-                        to="/login"
-                        className="px-3 py-1.5 rounded-lg bg-[var(--accent-color)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
-                      >
-                        Login to contact
-                      </Link>
-                    )}
+                          Login to contact
+                        </Link>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
