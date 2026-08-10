@@ -59,7 +59,7 @@ const sortOptions = [
 
 const categoryIcons: Record<string, string> = {
   "Plumber": "lnr lnr-droplet",
-  "Electrician": "lnr lnr-bolt",
+  "Electrician": "lnr lnr-power-switch",
   "Cleaner": "lnr lnr-broom",
   "Tutor": "lnr lnr-book",
   "Mechanic": "lnr lnr-cog",

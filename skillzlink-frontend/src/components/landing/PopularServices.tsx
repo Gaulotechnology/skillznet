@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 
 const services = [
   { name: "Plumbing", icon: "lnr-drop", slug: "plumbing", description: "Leak repairs, pipe installations, and emergency plumbing services." },
-  { name: "Electrical", icon: "lnr-bolt", slug: "electrical", description: "Wiring, fault finding, and certified electrical repairs." },
+  { name: "Electrical", icon: "lnr-power-switch", slug: "electrical", description: "Wiring, fault finding, and certified electrical repairs." },
   { name: "Cleaning", icon: "lnr-magic-wand", slug: "cleaning", description: "Home and office cleaning professionals near you." },
   { name: "Tutoring", icon: "lnr-graduation-hat", slug: "tutoring", description: "Qualified tutors for school subjects and exam support." },
   { name: "Carpentry", icon: "lnr-construction", slug: "carpentry", description: "Custom furniture, fittings, and wood repairs." },
