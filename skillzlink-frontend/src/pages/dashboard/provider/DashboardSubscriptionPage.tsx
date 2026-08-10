@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
-import { providerApi } from "../../../services/api";
+import { providerApi, paynowApi } from "../../../services/api";
 import { DataTable, type Column } from "../../../components/shared/DataTable";
 
 const PLANS = [
@@ -9,6 +9,7 @@ const PLANS = [
     title: "Premium Monthly",
     price: "$10",
     period: "/month",
+    amount: 10,
     features: [
       "Priority listing in search results",
       "ID Verified badge on profile",
@@ -21,6 +22,7 @@ const PLANS = [
     title: "Premium Quarterly",
     price: "$25",
     period: "/3 months",
+    amount: 25,
     badge: "Best Value",
     features: [
       "Everything in Monthly",
@@ -31,12 +33,20 @@ const PLANS = [
   },
 ];
 
+const PAYMENT_METHODS = [
+  { value: "paynow", label: "PayNow (EcoCash, Visa, Mastercard)", icon: "lnr-credit-card" },
+  { value: "ecocash", label: "EcoCash", icon: "lnr-smartphone" },
+  { value: "onemoney", label: "OneMoney", icon: "lnr-smartphone" },
+  { value: "innbucks", label: "InnBucks", icon: "lnr-smartphone" },
+  { value: "card", label: "Credit/Debit Card", icon: "lnr-credit-card" },
+];
+
 export function DashboardSubscriptionPage() {
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState("ecocash");
+  const [paymentMethod, setPaymentMethod] = useState("paynow");
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,8 +60,27 @@ export function DashboardSubscriptionPage() {
   const handleSubscribe = async (planId: string) => {
     setSubscribing(true); setError(null); setSuccess(null);
     try {
-      await providerApi.subscribe(planId as "monthly" | "quarterly", paymentMethod);
-      setSuccess(`Successfully upgraded to ${planId === 'monthly' ? 'Premium Monthly' : 'Premium Quarterly'}!`);
+      const plan = PLANS.find(p => p.id === planId);
+      const tier = planId as "monthly" | "quarterly";
+      const description = `${plan?.title || 'Premium'} Subscription`;
+
+      if (paymentMethod === "paynow") {
+        // Initiate PayNow payment flow
+        const res = await paynowApi.initiate(plan?.amount || 10, description);
+        if (res.redirect_url) {
+          // Redirect user to PayNow checkout
+          window.location.href = res.redirect_url;
+          return;
+        } else {
+          setError("Could not initiate PayNow payment. Please try another method.");
+          setSubscribing(false);
+          return;
+        }
+      }
+
+      // Other payment methods
+      await providerApi.subscribe(tier, paymentMethod);
+      setSuccess(`Successfully upgraded to ${plan?.title || 'Premium'}!`);
       const fresh = await providerApi.getSubscription();
       setSubscription(fresh);
     } catch (err: any) {
@@ -60,6 +89,24 @@ export function DashboardSubscriptionPage() {
       setSubscribing(false); setSelectedPlan(null);
     }
   };
+
+  // Check for PayNow return from redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("reference");
+    if (ref) {
+      paynowApi.check(ref).then(res => {
+        if (res.status === "completed") {
+          setSuccess("Payment successful! Your subscription has been activated.");
+          providerApi.getSubscription().then(setSubscription);
+        } else if (res.status === "failed") {
+          setError("Payment failed or was cancelled. Please try again.");
+        }
+        // Clean URL
+        window.history.replaceState({}, "", window.location.pathname);
+      }).catch(() => {});
+    }
+  }, []);
 
   const isActive = (planId: string) => {
     if (!subscription?.tier) return false;
@@ -188,10 +235,9 @@ export function DashboardSubscriptionPage() {
                       <div className="mb-3">
                         <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Payment Method</label>
                         <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-xl px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors">
-                          <option value="ecocash">EcoCash</option>
-                          <option value="onemoney">OneMoney</option>
-                          <option value="innbucks">InnBucks</option>
-                          <option value="card">Credit/Debit Card</option>
+                          {PAYMENT_METHODS.map(m => (
+                            <option key={m.value} value={m.value}>{m.label}</option>
+                          ))}
                         </select>
                       </div>
                       <div className="flex gap-2">

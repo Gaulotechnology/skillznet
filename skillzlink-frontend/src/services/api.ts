@@ -551,3 +551,20 @@ export const accountApi = {
       method: "POST", body: JSON.stringify(payload),
     }),
 }
+
+// ─── PayNow API ─────────────────────────────────────────────────────────────
+
+export const paynowApi = {
+  /** Initiate a PayNow payment. Returns redirect URL to PayNow checkout. */
+  initiate: (amount: number, description: string, packageId?: number) =>
+    fetchJson<{ message: string; redirect_url: string; reference: string }>(
+      `${API_BASE_URL}/paynow/initiate`,
+      { method: "POST", body: JSON.stringify({ amount, description, package_id: packageId }) }
+    ),
+
+  /** Check payment status by reference. */
+  check: (reference: string) =>
+    fetchJson<{ reference: string; status: string; amount: number }>(
+      `${API_BASE_URL}/paynow/check?reference=${encodeURIComponent(reference)}`
+    ),
+}

@@ -60,6 +60,7 @@ const tabs = [
   { id: "general", label: "General", icon: "lnr-cog" },
   { id: "email", label: "Email", icon: "lnr-envelope" },
   { id: "payment", label: "Payment", icon: "lnr-diamond" },
+  { id: "paynow", label: "PayNow", icon: "lnr-credit-card" },
   { id: "security", label: "Security", icon: "lnr-lock" },
   { id: "affiliate", label: "Affiliate", icon: "lnr-users" },
   { id: "agent", label: "Agent", icon: "lnr-laptop" },
@@ -106,6 +107,11 @@ export function DashboardThemeSettingsPage() {
     payfastMerchantId: "", payfastMerchantKey: "", payfastPassphrase: "",
     paystackPublicKey: "", paystackSecretKey: "", sandboxMode: true, commissionRate: "10",
   });
+  const [paynow, setPaynow] = useState({
+    active: false, mode: "sandbox",
+    integration_id: "", integration_key: "", auth_email: "",
+    result_url: "", return_url: "",
+  });
   const [security, setSecurity] = useState({
     twoFactor: false, sessionTimeout: "30", maxLoginAttempts: "5",
     passwordMinLength: "8", requireSpecialChars: true, forcePasswordReset: "90",
@@ -143,6 +149,7 @@ export function DashboardThemeSettingsPage() {
           if (data.general) setGeneral(prev => ({ ...prev, ...data.general }));
           if (data.email) setEmail(prev => ({ ...prev, ...data.email }));
           if (data.payment) setPayment(prev => ({ ...prev, ...data.payment }));
+          if (data.paynow) setPaynow(prev => ({ ...prev, ...data.paynow }));
           if (data.security) setSecurity(prev => ({ ...prev, ...data.security }));
           if (data.affiliate) setAffiliate(prev => ({ ...prev, ...data.affiliate }));
           if (data.agent) setAgent(prev => ({ ...prev, ...data.agent }));
@@ -338,6 +345,43 @@ export function DashboardThemeSettingsPage() {
             </div>
             <div className="pt-8 border-t border-[var(--border-color)] mt-8">
               <button onClick={() => handleSave("payment", payment)} className="px-8 py-3.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors">Save Changes</button>
+            </div>
+          </div>
+        );
+
+      case "paynow":
+        return (
+          <div className="space-y-8">
+            <h3 className="text-xl font-semibold text-[var(--text-primary)] pb-4 border-b border-[var(--border-color)]">PayNow Zimbabwe Configuration</h3>
+            <p className="text-sm text-[var(--text-secondary)] -mt-4">Get your credentials from <a href="https://www.paynow.co.zw" target="_blank" rel="noreferrer" className="text-[var(--accent-color)] underline">paynow.co.zw</a> merchant portal.</p>
+            <div className="flex items-center gap-4 mb-2">
+              <Toggle checked={paynow.active} onChange={v => setPaynow(s => ({ ...s, active: v }))} label="Enable PayNow" />
+            </div>
+            {paynow.active && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Field label="Mode">
+                    <Select value={paynow.mode} onChange={v => setPaynow(s => ({ ...s, mode: v }))} options={[
+                      { value: "sandbox", label: "Sandbox (Testing)" },
+                      { value: "live", label: "Live (Production)" },
+                    ]} />
+                  </Field>
+                  <Field label="Integration ID"><Input value={paynow.integration_id} onChange={v => setPaynow(s => ({ ...s, integration_id: v }))} placeholder="12345" /></Field>
+                  <Field label="Integration Key"><Input value={paynow.integration_key} onChange={v => setPaynow(s => ({ ...s, integration_key: v }))} type="password" placeholder="a1b2c3d4-..." /></Field>
+                  <Field label="Auth Email"><Input value={paynow.auth_email} onChange={v => setPaynow(s => ({ ...s, auth_email: v }))} type="email" placeholder="merchant@example.com" /></Field>
+                  <Field label="Result URL">
+                    <Input value={paynow.result_url} onChange={v => setPaynow(s => ({ ...s, result_url: v }))} placeholder={window.location.origin + "/api/paynow/status"} />
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-1">PayNow sends payment confirmation to this URL.</p>
+                  </Field>
+                  <Field label="Return URL">
+                    <Input value={paynow.return_url} onChange={v => setPaynow(s => ({ ...s, return_url: v }))} placeholder={window.location.origin + "/api/paynow/return"} />
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-1">User is redirected here after payment.</p>
+                  </Field>
+                </div>
+              </>
+            )}
+            <div className="pt-8 border-t border-[var(--border-color)] mt-8">
+              <button onClick={() => handleSave("paynow", paynow)} className="px-8 py-3.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors">Save PayNow Settings</button>
             </div>
           </div>
         );
