@@ -177,8 +177,7 @@ export function ProfessionalProfilePage() {
               <span className="text-xs text-gray-500 ml-1">response time</span>
             </div>
             <div>
-              <span className="text-lg font-semibold text-gray-900">${pro.rate || "15"}</span>
-              <span className="text-xs text-gray-500 ml-1">/hr</span>
+              <span className="text-lg font-semibold text-gray-900">{pro.rate || "$15/hr"}</span>
             </div>
           </div>
 

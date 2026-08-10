@@ -154,7 +154,7 @@ export function FeaturedProfessionals() {
                 <p className="text-sm mt-1.5">
                   {loggedIn ? (
                     <span className="font-semibold text-gray-900">
-                      ${pro.rate || "15"}<span className="text-xs font-normal text-gray-500">/hr</span>
+                      {pro.rate || "$15/hr"}
                     </span>
                   ) : (
                     <span className="text-xs text-gray-400">Login to see rate</span>

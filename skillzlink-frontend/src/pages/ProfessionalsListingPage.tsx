@@ -631,7 +631,7 @@ export function ProfessionalsListingPage() {
                         <span className="text-[var(--text-secondary)] text-xs">({pro.success_rate || 98}%)</span>
                       </span>
                       {isLoggedIn() ? (
-                        <span className="font-medium">${pro.rate || "15"}/hr</span>
+                        <span className="font-medium">{pro.rate || "$15/hr"}</span>
                       ) : (
                         <span className="text-xs text-[var(--text-secondary)]">Login to see rate</span>
                       )}
