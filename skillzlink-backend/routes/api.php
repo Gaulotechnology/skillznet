@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\PublicProviderController;
 use App\Http\Controllers\Api\SeekerController;
 use App\Http\Controllers\Api\AgentController;
 use App\Http\Controllers\Api\AffiliateController;
+use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\RagController;
 use App\Http\Controllers\Api\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -204,6 +206,19 @@ Route::middleware('auth:sanctum')->group(function (): void {
             Route::get('/sms-logs', [AdminController::class, 'smsLogs']);
             Route::get('/comm-logs', [AdminController::class, 'commLogs']);
         });
+    });
+
+    // ─── Live Chat ───────────────────────────────────────────────────────
+    // Public chat and RAG routes are in web.php to avoid global api auth
+
+    // ─── RAG AI (admin only) ─────────────────────────────────────────────
+    Route::middleware('auth:sanctum')->group(function (): void {
+        Route::get('/chat/admin/sessions', [ChatController::class, 'adminSessions']);
+        Route::get('/chat/admin/messages', [ChatController::class, 'adminMessages']);
+        Route::post('/chat/admin/reply', [ChatController::class, 'adminReply']);
+
+        Route::post('/rag/build', [RagController::class, 'buildIndex']);
+        Route::get('/rag/status', [RagController::class, 'status']);
     });
 
 });

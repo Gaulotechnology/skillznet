@@ -63,7 +63,7 @@ const providerSteps = [
 ]
 
 const trustItems = [
-  { icon: "lnr lnr-shield", title: "ID Verified Professionals", desc: "Every provider is verified with their National ID before being listed." },
+  { icon: "fas fa-id-card", title: "ID Verified Professionals", desc: "Every provider is verified with their National ID before being listed." },
   { icon: "lnr lnr-history", title: "Real Reviews", desc: "Ratings and reviews come from real clients who have actually hired the professional." },
   { icon: "fab fa-whatsapp", title: "WhatsApp First", desc: "No app to download. Communicate, share media, and negotiate all on WhatsApp." },
   { icon: "lnr lnr-map-marker", title: "Local to You", desc: "Find professionals in your city — Harare, Bulawayo, Mutare, and across Zimbabwe." },

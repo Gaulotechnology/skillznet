@@ -13,6 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'lhc/*',
+            'api/chat/*',
+            'api/rag/*',
+        ]);
         $middleware->api(append: [
             \App\Http\Middleware\LogApiRequests::class,
         ]);
