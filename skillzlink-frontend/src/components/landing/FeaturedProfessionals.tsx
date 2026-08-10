@@ -149,24 +149,7 @@ export function FeaturedProfessionals() {
                   )}
                 </div>
 
-                {/* Skills */}
-                {pro.skills && pro.skills.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {pro.skills.slice(0, 3).map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-[10px] font-medium"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                    {pro.skills.length > 3 && (
-                      <span className="text-[10px] text-gray-400 font-medium">+{pro.skills.length - 3}</span>
-                    )}
-                  </div>
-                )}
-
-                {/* Badges */}
+                {/* Trust & highlight tags */}
                 <div className="flex flex-wrap gap-1.5">
                   {pro.premium_badge && (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-semibold">
@@ -178,6 +161,30 @@ export function FeaturedProfessionals() {
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[10px] font-semibold">
                       <i className="lnr lnr-star text-[10px]" />
                       FEATURED
+                    </span>
+                  )}
+                  {pro.id_verified && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-semibold">
+                      <i className="lnr lnr-checkmark-circle text-[10px]" />
+                      Verified
+                    </span>
+                  )}
+                  {pro.response_time && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-50 text-green-700 text-[10px] font-semibold">
+                      <i className="lnr lnr-clock text-[10px]" />
+                      Responds {pro.response_time}
+                    </span>
+                  )}
+                  {pro.success_rate != null && pro.success_rate > 0 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
+                      <i className="lnr lnr-thumbs-up text-[10px]" />
+                      {pro.success_rate}% success
+                    </span>
+                  )}
+                  {pro.rating >= 4.5 && pro.reviews >= 10 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold">
+                      <i className="lnr lnr-star text-[10px]" />
+                      Top Rated
                     </span>
                   )}
                 </div>
