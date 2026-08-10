@@ -36,6 +36,22 @@ function App() {
           const varName = keyMap[key] || `--${key.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/_/g, '-')}`;
           document.documentElement.style.setProperty(varName, value as string);
         });
+
+        // Apply site name as document title
+        if (res.settings.siteName) {
+          document.title = res.settings.siteName as string;
+        }
+
+        // Apply favicon
+        if (res.settings.faviconUrl) {
+          let link = document.querySelector("link[rel='icon']") as HTMLLinkElement | null;
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+          }
+          link.href = res.settings.faviconUrl as string;
+        }
       }
     }).catch(console.error);
   }, []);

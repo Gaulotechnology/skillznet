@@ -206,12 +206,14 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/appointments', [AdminController::class, 'getAppointments']);
         Route::get('/matching', [AdminController::class, 'getMatchingRequests']);
 
+        // Admin settings (accessible by both admin and super_admin)
+        Route::get('/settings', [AdminController::class, 'getSettings']);
+        Route::post('/settings', [AdminController::class, 'updateSettings']);
+
         // Super admin only routes
         Route::middleware('role:super_admin')->group(function (): void {
             Route::get('/theme-settings', [AdminController::class, 'themeSettings']);
             Route::post('/theme-settings', [AdminController::class, 'updateThemeSettings']);
-            Route::get('/settings', [AdminController::class, 'getSettings']);
-            Route::post('/settings', [AdminController::class, 'updateSettings']);
             Route::get('/api-logs', [AdminController::class, 'apiLogs']);
             Route::get('/sms-logs', [AdminController::class, 'smsLogs']);
             Route::get('/comm-logs', [AdminController::class, 'commLogs']);

@@ -287,6 +287,29 @@ class AdminController extends Controller
             \App\Models\Setting::set($key, is_array($value) ? json_encode($value) : (string) $value, $section);
         }
 
+        // Sync theme-related fields to ThemeSetting so public endpoint picks them up
+        if ($section === 'general') {
+            $themeKeys = [
+                'siteName', 'faviconUrl', 'accentColor', 'accentHover', 'accentLight',
+                'textPrimary', 'textSecondary', 'bgPrimary', 'bgSecondary', 'borderColor',
+            ];
+            foreach ($themeKeys as $key) {
+                if (array_key_exists($key, $data)) {
+                    \App\Models\ThemeSetting::updateOrCreate(
+                        ['key' => $key],
+                        ['value' => is_array($data[$key]) ? json_encode($data[$key]) : (string) $data[$key]]
+                    );
+                }
+            }
+            // Also set document title
+            if (array_key_exists('siteName', $data)) {
+                \App\Models\ThemeSetting::updateOrCreate(
+                    ['key' => 'siteName'],
+                    ['value' => (string) $data['siteName']]
+                );
+            }
+        }
+
         return response()->json(['message' => 'Settings updated successfully.']);
     }
 

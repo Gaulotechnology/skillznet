@@ -269,17 +269,45 @@ export function DashboardThemeSettingsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Background</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Accent Light</label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={general.accentLight} onChange={e => setGeneral(s => ({ ...s, accentLight: e.target.value }))} className="w-10 h-10 rounded border border-[var(--border-color)] cursor-pointer" />
+                    <input type="text" value={general.accentLight} onChange={e => setGeneral(s => ({ ...s, accentLight: e.target.value }))} className="flex-1 bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs font-mono outline-none focus:border-[var(--accent-color)]" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Primary BG</label>
                   <div className="flex items-center gap-2">
                     <input type="color" value={general.bgPrimary} onChange={e => setGeneral(s => ({ ...s, bgPrimary: e.target.value }))} className="w-10 h-10 rounded border border-[var(--border-color)] cursor-pointer" />
                     <input type="text" value={general.bgPrimary} onChange={e => setGeneral(s => ({ ...s, bgPrimary: e.target.value }))} className="flex-1 bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs font-mono outline-none focus:border-[var(--accent-color)]" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Text Color</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Secondary BG</label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={general.bgSecondary} onChange={e => setGeneral(s => ({ ...s, bgSecondary: e.target.value }))} className="w-10 h-10 rounded border border-[var(--border-color)] cursor-pointer" />
+                    <input type="text" value={general.bgSecondary} onChange={e => setGeneral(s => ({ ...s, bgSecondary: e.target.value }))} className="flex-1 bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs font-mono outline-none focus:border-[var(--accent-color)]" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Text Primary</label>
                   <div className="flex items-center gap-2">
                     <input type="color" value={general.textPrimary} onChange={e => setGeneral(s => ({ ...s, textPrimary: e.target.value }))} className="w-10 h-10 rounded border border-[var(--border-color)] cursor-pointer" />
                     <input type="text" value={general.textPrimary} onChange={e => setGeneral(s => ({ ...s, textPrimary: e.target.value }))} className="flex-1 bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs font-mono outline-none focus:border-[var(--accent-color)]" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Text Secondary</label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={general.textSecondary} onChange={e => setGeneral(s => ({ ...s, textSecondary: e.target.value }))} className="w-10 h-10 rounded border border-[var(--border-color)] cursor-pointer" />
+                    <input type="text" value={general.textSecondary} onChange={e => setGeneral(s => ({ ...s, textSecondary: e.target.value }))} className="flex-1 bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs font-mono outline-none focus:border-[var(--accent-color)]" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Border Color</label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={general.borderColor} onChange={e => setGeneral(s => ({ ...s, borderColor: e.target.value }))} className="w-10 h-10 rounded border border-[var(--border-color)] cursor-pointer" />
+                    <input type="text" value={general.borderColor} onChange={e => setGeneral(s => ({ ...s, borderColor: e.target.value }))} className="flex-1 bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg px-3 py-2.5 text-xs font-mono outline-none focus:border-[var(--accent-color)]" />
                   </div>
                 </div>
               </div>
