@@ -1,6 +1,11 @@
-import { useParams } from "react-router-dom"
+import { useParams, Link } from "react-router-dom"
 import { useState, useEffect } from "react"
-import { publicApi, seekerApi, type PublicProvider } from "../services/api"
+import { publicApi, seekerApi, isLoggedIn, type PublicProvider } from "../services/api"
+
+function normalizePhone(phone?: string): string {
+  if (!phone) return ""
+  return phone.replace(/[^0-9+]/g, "")
+}
 
 export function ProfessionalProfilePage() {
   const { id } = useParams()
@@ -177,31 +182,40 @@ export function ProfessionalProfilePage() {
                 >
                   <i className="lnr lnr-calendar-full text-xl" /> Book Now
                 </button>
-                {revealedPhone ? (
-                  <>
-                    <a 
-                      href={`https://wa.me/${revealedPhone.replace(/[^0-9]/g, '')}?text=Hi%20${pro?.name},%20I%20found%20you%20on%20SkillzLink.`} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2"
+                {isLoggedIn() ? (
+                  (revealedPhone || pro.phone) ? (
+                    <>
+                      <a 
+                        href={`https://wa.me/${normalizePhone(revealedPhone || pro.phone).replace(/^\+/, "")}?text=Hi%20${encodeURIComponent(pro.name)},%20I%20found%20you%20on%20SkillzLink.`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-green-500/30 flex items-center justify-center gap-2"
+                      >
+                        <i className="fab fa-whatsapp text-xl" /> WhatsApp
+                      </a>
+                      <a 
+                        href={`tel:${normalizePhone(revealedPhone || pro.phone)}`}
+                        className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2"
+                      >
+                        <i className="lnr lnr-phone-handset text-xl" /> Call
+                      </a>
+                    </>
+                  ) : (
+                    <button 
+                      onClick={handleRevealContact}
+                      disabled={revealingContact}
+                      className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      <i className="fab fa-whatsapp text-xl" /> WhatsApp
-                    </a>
-                    <a 
-                      href={`tel:${revealedPhone.replace(/[^0-9+]/g, '')}`}
-                      className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2"
-                    >
-                      <i className="lnr lnr-phone-handset text-xl" /> Call
-                    </a>
-                  </>
+                      {revealingContact ? "Loading..." : "Reveal Contact"} <i className="lnr lnr-phone-handset text-xl" />
+                    </button>
+                  )
                 ) : (
-                  <button 
-                    onClick={handleRevealContact}
-                    disabled={revealingContact}
-                    className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-bold transition-all hover:-translate-y-1 hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                  <Link
+                    to="/login"
+                    className="flex-1 md:flex-none px-6 py-3 rounded-xl border-2 border-[var(--accent-color)] text-[var(--accent-color)] font-bold transition-all hover:bg-[var(--accent-color)] hover:text-white flex items-center justify-center gap-2"
                   >
-                    {revealingContact ? "Loading..." : "Reveal Contact"} <i className="lnr lnr-phone-handset text-xl" />
-                  </button>
+                    <i className="lnr lnr-lock text-xl" /> Login to contact
+                  </Link>
                 )}
               </div>
             </div>
