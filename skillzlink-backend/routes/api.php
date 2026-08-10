@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\ProviderController;
 use App\Http\Controllers\Api\PublicProviderController;
 use App\Http\Controllers\Api\SeekerController;
+use App\Http\Controllers\Api\AdminChatController;
 use App\Http\Controllers\Api\AgentController;
 use App\Http\Controllers\Api\AffiliateController;
 use App\Http\Controllers\Api\ChatController;
@@ -208,15 +209,19 @@ Route::middleware('auth:sanctum')->group(function (): void {
         });
     });
 
-    // ─── Live Chat ───────────────────────────────────────────────────────
-    // Public chat and RAG routes are in web.php to avoid global api auth
-
-    // ─── RAG AI (admin only) ─────────────────────────────────────────────
+    // ─── Live Chat & RAG AI (admin only) ─────────────────────────────────
     Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/chat/admin/sessions', [ChatController::class, 'adminSessions']);
         Route::get('/chat/admin/messages', [ChatController::class, 'adminMessages']);
         Route::post('/chat/admin/reply', [ChatController::class, 'adminReply']);
 
+        // Admin chat panel
+        Route::get('/admin/chat/sessions', [AdminChatController::class, 'sessions']);
+        Route::get('/admin/chat/messages', [AdminChatController::class, 'messages']);
+        Route::post('/admin/chat/reply', [AdminChatController::class, 'reply']);
+        Route::get('/admin/chat/lhc-login', [AdminChatController::class, 'lhcLogin']);
+
+        // RAG management
         Route::post('/rag/build', [RagController::class, 'buildIndex']);
         Route::get('/rag/status', [RagController::class, 'status']);
     });

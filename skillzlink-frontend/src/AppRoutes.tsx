@@ -62,6 +62,7 @@ import { DashboardAppointmentsPage } from './pages/dashboard/admin/DashboardAppo
 import { DashboardPaymentsPage } from './pages/dashboard/admin/DashboardPaymentsPage';
 import { DashboardSmsLogsPage } from './pages/dashboard/admin/DashboardSmsLogsPage';
 import { DashboardCommLogsPage } from './pages/dashboard/admin/DashboardCommLogsPage';
+import { DashboardLiveChatPage } from './pages/dashboard/admin/DashboardLiveChatPage';
 
 import { DashboardAgentOverviewPage } from './pages/dashboard/agent/DashboardAgentOverviewPage';
 import { DashboardAgentReferralsPage } from './pages/dashboard/agent/DashboardAgentReferralsPage';
@@ -219,6 +220,7 @@ export function AppRoutes() {
       <Route path="/dashboard/admin/payments" element={<DashboardPaymentsPage />} />
       <Route path="/dashboard/admin/sms-logs" element={<DashboardSmsLogsPage />} />
       <Route path="/dashboard/admin/comm-logs" element={<DashboardCommLogsPage />} />
+      <Route path="/dashboard/admin/live-chat" element={<DashboardLiveChatPage />} />
       <Route path="/dashboard/packages" element={<DashboardPackagesPage />} />
 
       <Route path="*" element={withLayout(<NotFoundPage />)} />

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\BotController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\RagController;
 use App\Http\Controllers\Api\WhatsAppWebhookController;
@@ -15,6 +16,9 @@ Route::get('/api/chat/poll', [ChatController::class, 'poll']);
 
 // RAG AI — public knowledge base query
 Route::post('/api/rag/ask', [RagController::class, 'ask']);
+
+// Bot webhook — called by LHC or external bots
+Route::post('/api/bot/webhook', [BotController::class, 'webhook']);
 
 // Live Helper Chat — serve all LHC requests through its own index.php
 Route::any('/lhc/{any?}', function ($any = null) {

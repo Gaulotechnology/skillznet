@@ -45,6 +45,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       items: [
         { to: '/dashboard/admin/overview',       icon: 'lnr lnr-pie-chart',       label: 'Overview' },
         { to: '/dashboard/admin/conversations',  icon: 'lnr lnr-bubble',          label: 'Conversations' },
+        { to: '/dashboard/admin/live-chat',      icon: 'lnr lnr-phone-handset',   label: 'Live Chat' },
       ]
     },
     {

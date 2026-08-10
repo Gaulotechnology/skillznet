@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'lhc/*',
             'api/chat/*',
             'api/rag/*',
+            'api/bot/*',
         ]);
         $middleware->api(append: [
             \App\Http\Middleware\LogApiRequests::class,
