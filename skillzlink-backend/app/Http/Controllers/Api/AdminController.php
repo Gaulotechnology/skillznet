@@ -310,6 +310,19 @@ class AdminController extends Controller
             }
         }
 
+        // Sync social/contact fields to ThemeSetting for footer display
+        if ($section === 'social') {
+            $socialKeys = ['phone', 'whatsapp', 'email', 'address', 'facebook', 'twitter', 'instagram', 'linkedin', 'youtube', 'tiktok'];
+            foreach ($socialKeys as $key) {
+                if (array_key_exists($key, $data)) {
+                    \App\Models\ThemeSetting::updateOrCreate(
+                        ['key' => $key],
+                        ['value' => is_array($data[$key]) ? json_encode($data[$key]) : (string) $data[$key]]
+                    );
+                }
+            }
+        }
+
         return response()->json(['message' => 'Settings updated successfully.']);
     }
 

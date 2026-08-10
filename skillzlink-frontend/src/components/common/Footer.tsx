@@ -1,6 +1,16 @@
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { publicApi } from "../../services/api"
 
 export function Footer() {
+  const [contact, setContact] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    publicApi.getThemeSettings().then(res => {
+      if (res.settings) setContact(res.settings)
+    }).catch(() => {})
+  }, [])
+
   return (
     <footer className="bg-[var(--bg-secondary)] border-t border-[var(--border-color)] pt-16 pb-8" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div className="max-w-7xl mx-auto px-6">
@@ -8,7 +18,7 @@ export function Footer() {
         {/* Top Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           
-          {/* Brand & Description */}
+          {/* Brand & Contact */}
           <div className="lg:col-span-2 pr-0 lg:pr-8">
             <Link to="/" className="flex items-center gap-2.5 mb-5">
               <div className="w-9 h-9 rounded-lg bg-[var(--accent-color)] flex items-center justify-center">
@@ -16,29 +26,61 @@ export function Footer() {
               </div>
               <span className="font-extrabold text-xl text-[var(--text-primary)] tracking-tight">SkillzLink</span>
             </Link>
-            <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-6 max-w-sm">
+            <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4 max-w-sm">
               SkillzLink connects you with trusted, verified local professionals across
               Zimbabwe. From plumbers to tutors, find the right expert near you — fast,
               secure, and integrated with WhatsApp.
             </p>
             
+            {/* Contact info */}
+            <div className="space-y-2 mb-5">
+              {contact.phone && (
+                <a href={`tel:${contact.phone.replace(/[^0-9+]/g, '')}`} className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-colors">
+                  <i className="lnr lnr-phone-handset text-xs" /> {contact.phone}
+                </a>
+              )}
+              {contact.whatsapp && (
+                <a href={`https://wa.me/${contact.whatsapp.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-green-600 transition-colors">
+                  <i className="fab fa-whatsapp text-xs" /> {contact.whatsapp}
+                </a>
+              )}
+              {contact.email && (
+                <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-colors">
+                  <i className="lnr lnr-envelope text-xs" /> {contact.email}
+                </a>
+              )}
+              {contact.address && (
+                <span className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                  <i className="lnr lnr-map-marker text-xs" /> {contact.address}
+                </span>
+              )}
+            </div>
+
             {/* Social Icons */}
             <div className="flex items-center gap-2">
               {[
-                { icon: 'fa-facebook-f', label: 'Facebook' },
-                { icon: 'fa-twitter', label: 'Twitter' },
-                { icon: 'fa-instagram', label: 'Instagram' },
-                { icon: 'fa-youtube', label: 'YouTube' }
-              ].map((social, idx) => (
-                <a 
-                  key={idx} 
-                  href="#/" 
-                  aria-label={social.label}
-                  className="w-9 h-9 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent-color)] hover:text-white hover:border-[var(--accent-color)] transition-colors"
-                >
-                  <i className={`fab ${social.icon} text-sm`} />
-                </a>
-              ))}
+                { icon: 'fa-facebook-f', label: 'Facebook', key: 'facebook' },
+                { icon: 'fa-twitter', label: 'Twitter', key: 'twitter' },
+                { icon: 'fa-instagram', label: 'Instagram', key: 'instagram' },
+                { icon: 'fa-youtube', label: 'YouTube', key: 'youtube' }
+              ].map(({ icon, label, key }) => {
+                const url = contact[key]
+                return url ? (
+                  <a 
+                    key={key} 
+                    href={url} 
+                    target="_blank" rel="noreferrer"
+                    aria-label={label}
+                    className="w-9 h-9 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--accent-color)] hover:text-white hover:border-[var(--accent-color)] transition-colors"
+                  >
+                    <i className={`fab ${icon} text-sm`} />
+                  </a>
+                ) : (
+                  <span key={key} className="w-9 h-9 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-center text-[var(--text-secondary)]/30 cursor-default">
+                    <i className={`fab ${icon} text-sm`} />
+                  </span>
+                )
+              })}
             </div>
           </div>
 
