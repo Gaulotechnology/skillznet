@@ -28,7 +28,7 @@ services:
       context: ./skillzlink-backend
       dockerfile: Dockerfile
     container_name: skillzlink-backend
-    command: sh -lc "php artisan serve --host=0.0.0.0 --port=8000"
+    command: sh -lc "php artisan serve --host=0.0.0.0 --port=8000 & php artisan queue:work database --sleep=3 --tries=3 & wait"
     depends_on:
       mysql:
         condition: service_healthy
@@ -53,8 +53,9 @@ services:
       LIVE_HELPER_CHAT_API_KEY: ${LIVE_HELPER_CHAT_API_KEY:-u6wHmj6B9fmmujDct4eZI6BfJnHRZIP3QEXIR3orjfiSAtmJhY93wEudGU3O6Yx93c8Y6sOqXuU9G5x2}
       LIVE_HELPER_CHAT_BOT_ID: ${LIVE_HELPER_CHAT_BOT_ID:-}
       LHC_BASE_URL: ${LHC_BASE_URL:-http://lhc:8080}
-      LHC_API_KEY: ${LHC_API_KEY:-u6wHmj6B9fmmujDct4eZI6BfJnHRZIP3QEXIR3orjfiSAtmJhY93wEudGU3O6Yx93c8Y6sOqXuU9G5x2}
+      LHC_API_KEY: ${LHC_API_KEY:-sk1llzl1nk_lhc_ap1_k3y_2026}
       LHC_PUBLIC_URL: ${LHC_PUBLIC_URL:-http://localhost:18081}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-sk-43d6b9651e114e24b8569af9b7569a4c}
       WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-skillzlink-verify-token}
     volumes:
       - ./skillzlink-backend:/var/www
