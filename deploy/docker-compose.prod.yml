@@ -62,6 +62,8 @@ services:
       LIVE_HELPER_CHAT_URL: http://lhc:8080
       LIVE_HELPER_CHAT_API_KEY: ${LHC_API_KEY}
       LIVE_HELPER_CHAT_BOT_ID: ${LHC_BOT_ID:-1}
+      LHC_BASE_URL: ${LHC_BASE_URL:-http://lhc:8080}
+      LHC_API_KEY: ${LHC_API_KEY}
       LHC_PUBLIC_URL: ${LHC_PUBLIC_URL:-http://62.238.107.93/lhc}
     ports:
       - "127.0.0.1:8000:80"
