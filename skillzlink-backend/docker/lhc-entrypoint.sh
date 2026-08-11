@@ -48,8 +48,9 @@ echo "[lhc-entrypoint] Settings generated."
 # Start bot worker in background (processes pending bot messages every 3 seconds)
 echo "[lhc-entrypoint] Starting bot worker..."
 (
+  cd /var/www/public/lhc
   while true; do
-    php -d display_errors=0 -d error_reporting=0 /var/www/public/lhc/cron.php -s site_admin -c cron/bot > /dev/null 2>&1
+    php -d display_errors=0 -d error_reporting=0 cron.php -s site_admin -c cron/bot > /dev/null 2>&1
     sleep 3
   done
 ) &
