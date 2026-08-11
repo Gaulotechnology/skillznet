@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom"
 import type { ReactNode } from "react"
 import App from "./App"
 import { MainLayout } from "./layouts/MainLayout"
+import { ProtectedRoute } from "./components/common/ProtectedRoute"
 import { InfoPage } from "./pages/InfoPage"
 import { LoginPage } from "./pages/LoginPage"
 import { RegisterPage } from "./pages/RegisterPage"
@@ -150,78 +151,78 @@ export function AppRoutes() {
       <Route path="/articles-classic" element={withLayout(<ArticleClassicPage />)} />
       <Route path="/service/:id" element={withLayout(<ServiceSinglePage />)} />
 
-      {/* ─── Shared Dashboard Routes ─────────────────────────────────────── */}
+      {/* ─── Protected Dashboard Routes ─────────────────────────────────────── */}
       <Route path="/dashboard/admin" element={<Navigate to="/dashboard/admin/overview" replace />} />
       <Route path="/dashboard/provider" element={<Navigate to="/dashboard/provider/overview" replace />} />
       <Route path="/dashboard/seeker" element={<Navigate to="/dashboard/seeker/overview" replace />} />
       <Route path="/dashboard/agent" element={<Navigate to="/dashboard/agent/overview" replace />} />
       <Route path="/dashboard/affiliate" element={<Navigate to="/dashboard/affiliate/overview" replace />} />
 
-      <Route path="/dashboard-profile" element={<DashboardProfilePage />} />
-      <Route path="/dashboard/profile" element={<DashboardProfilePage />} />
-      <Route path="/dashboard/settings" element={<DashboardAccountSettingsPage />} />
-      <Route path="/dashboard/help" element={<DashboardHelpSupportPage />} />
-      <Route path="/dashboard/help-support" element={<DashboardHelpSupportPage />} />
-      <Route path="/dashboard/messages" element={<SeekerMessagesPage />} />
-      <Route path="/dashboard/saved" element={<SeekerSavedItemsPage />} />
+      <Route path="/dashboard-profile" element={<ProtectedRoute><DashboardProfilePage /></ProtectedRoute>} />
+      <Route path="/dashboard/profile" element={<ProtectedRoute><DashboardProfilePage /></ProtectedRoute>} />
+      <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardAccountSettingsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/help" element={<ProtectedRoute><DashboardHelpSupportPage /></ProtectedRoute>} />
+      <Route path="/dashboard/help-support" element={<ProtectedRoute><DashboardHelpSupportPage /></ProtectedRoute>} />
+      <Route path="/dashboard/messages" element={<ProtectedRoute><SeekerMessagesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/saved" element={<ProtectedRoute><SeekerSavedItemsPage /></ProtectedRoute>} />
 
       {/* Dashboard: Seekers (using MainLayout and inner SeekerLayout) */}
-      <Route path="/dashboard/seeker/overview" element={withLayout(<DashboardSeekerOverviewPage />)} />
-      <Route path="/dashboard/seeker/bookings" element={withLayout(<DashboardMyBookingsPage />)} />
-      <Route path="/dashboard/seeker/manage-requests" element={withLayout(<DashboardManageRequestsPage />)} />
-      <Route path="/dashboard/seeker/post-request" element={withLayout(<DashboardPostRequestPage />)} />
-      <Route path="/dashboard/seeker/billing" element={withLayout(<DashboardBillingPage />)} />
-      <Route path="/dashboard/seeker/reviews" element={withLayout(<DashboardReviewsPage />)} />
-      <Route path="/dashboard/seeker/messages" element={withLayout(<SeekerMessagesPage />)} />
-      <Route path="/dashboard/seeker/settings" element={withLayout(<SeekerSettingsPage />)} />
-      <Route path="/dashboard/seeker/saved" element={withLayout(<SeekerSavedItemsPage />)} />
+      <Route path="/dashboard/seeker/overview" element={<ProtectedRoute>{withLayout(<DashboardSeekerOverviewPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/bookings" element={<ProtectedRoute>{withLayout(<DashboardMyBookingsPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/manage-requests" element={<ProtectedRoute>{withLayout(<DashboardManageRequestsPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/post-request" element={<ProtectedRoute>{withLayout(<DashboardPostRequestPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/billing" element={<ProtectedRoute>{withLayout(<DashboardBillingPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/reviews" element={<ProtectedRoute>{withLayout(<DashboardReviewsPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/messages" element={<ProtectedRoute>{withLayout(<SeekerMessagesPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/settings" element={<ProtectedRoute>{withLayout(<SeekerSettingsPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/saved" element={<ProtectedRoute>{withLayout(<SeekerSavedItemsPage />)}</ProtectedRoute>} />
 
       {/* ─── Provider Dashboard Routes ────────────────────────────────────── */}
-      <Route path="/dashboard/provider/overview" element={<DashboardProviderOverviewPage />} />
-      <Route path="/dashboard/insights" element={<DashboardInsightsUserPage />} />
-      <Route path="/dashboard/insights-user" element={<DashboardInsightsUserPage />} />
-      <Route path="/dashboard/subscription" element={<DashboardSubscriptionPage />} />
-      <Route path="/dashboard/ongoing-service" element={<DashboardOngoingServicePage />} />
-      <Route path="/dashboard/ongoing-single/:id" element={<DashboardOngoingServiceSinglePage />} />
-      <Route path="/dashboard/completed-services" element={<DashboardCompleteServicesPage />} />
-      <Route path="/dashboard/cancelled-services" element={<DashboardCancelServicesPage />} />
-      <Route path="/dashboard/quotes" element={<DashboardQuotesPage />} />
-      <Route path="/dashboard/provider/availability" element={<DashboardAvailabilityPage />} />
-      <Route path="/dashboard/provider/bookings" element={<DashboardBookingsPage />} />
-      <Route path="/dashboard/provider/messages" element={<DashboardProviderMessagesPage />} />
+      <Route path="/dashboard/provider/overview" element={<ProtectedRoute><DashboardProviderOverviewPage /></ProtectedRoute>} />
+      <Route path="/dashboard/insights" element={<ProtectedRoute><DashboardInsightsUserPage /></ProtectedRoute>} />
+      <Route path="/dashboard/insights-user" element={<ProtectedRoute><DashboardInsightsUserPage /></ProtectedRoute>} />
+      <Route path="/dashboard/subscription" element={<ProtectedRoute><DashboardSubscriptionPage /></ProtectedRoute>} />
+      <Route path="/dashboard/ongoing-service" element={<ProtectedRoute><DashboardOngoingServicePage /></ProtectedRoute>} />
+      <Route path="/dashboard/ongoing-single/:id" element={<ProtectedRoute><DashboardOngoingServiceSinglePage /></ProtectedRoute>} />
+      <Route path="/dashboard/completed-services" element={<ProtectedRoute><DashboardCompleteServicesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/cancelled-services" element={<ProtectedRoute><DashboardCancelServicesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/quotes" element={<ProtectedRoute><DashboardQuotesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/provider/availability" element={<ProtectedRoute><DashboardAvailabilityPage /></ProtectedRoute>} />
+      <Route path="/dashboard/provider/bookings" element={<ProtectedRoute><DashboardBookingsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/provider/messages" element={<ProtectedRoute><DashboardProviderMessagesPage /></ProtectedRoute>} />
 
       {/* ─── Admin Dashboard Routes ───────────────────────────────────────── */}
-      <Route path="/dashboard/agent/overview" element={<DashboardAgentOverviewPage />} />
-      <Route path="/dashboard/agent/referrals" element={<DashboardAgentReferralsPage />} />
-      <Route path="/dashboard/agent/commissions" element={<DashboardAgentCommissionsPage />} />
+      <Route path="/dashboard/agent/overview" element={<ProtectedRoute><DashboardAgentOverviewPage /></ProtectedRoute>} />
+      <Route path="/dashboard/agent/referrals" element={<ProtectedRoute><DashboardAgentReferralsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/agent/commissions" element={<ProtectedRoute><DashboardAgentCommissionsPage /></ProtectedRoute>} />
       
-      <Route path="/dashboard/affiliate/overview" element={<DashboardAffiliateOverviewPage />} />
-      <Route path="/dashboard/affiliate/links" element={<DashboardAffiliateLinksPage />} />
-      <Route path="/dashboard/affiliate/payouts" element={<DashboardAffiliatePayoutsPage />} />
-      <Route path="/dashboard/admin/overview" element={<DashboardAdminOverviewPage />} />
-      <Route path="/dashboard/admin/users" element={<DashboardUsersPage />} />
-      <Route path="/dashboard/admin/professionals" element={<DashboardProfessionalsPage />} />
-      <Route path="/dashboard/admin/seekers" element={<DashboardSeekersPage />} />
-      <Route path="/dashboard/admin/theme-settings" element={<DashboardThemeSettingsPage />} />
-      <Route path="/dashboard/admin/form-builder" element={<DashboardFormBuilderPage />} />
-      <Route path="/dashboard/admin/api-logs" element={<DashboardApiLogsPage />} />
-      <Route path="/dashboard/admin/categories" element={<DashboardCategoryPage />} />
-      <Route path="/dashboard/admin/knowledge-base" element={<DashboardKnowledgeBasePage />} />
-      <Route path="/dashboard/admin/insights" element={<DashboardInsightsPage />} />
-      <Route path="/dashboard/admin/packages" element={<DashboardPackagesPage />} />
-      <Route path="/dashboard/admin/roles" element={<DashboardRolesPage />} />
-      <Route path="/dashboard/admin/employees" element={<DashboardEmployeesPage />} />
-      <Route path="/dashboard/admin/conversations" element={<DashboardAdminConversationsPage />} />
-      <Route path="/dashboard/admin/agents" element={<DashboardAgentsPage />} />
-      <Route path="/dashboard/admin/affiliates" element={<DashboardAffiliatesPage />} />
-      <Route path="/dashboard/admin/matching" element={<DashboardMatchingPage />} />
-      <Route path="/dashboard/admin/invitations" element={<DashboardInvitationsPage />} />
-      <Route path="/dashboard/admin/appointments" element={<DashboardAppointmentsPage />} />
-      <Route path="/dashboard/admin/payments" element={<DashboardPaymentsPage />} />
-      <Route path="/dashboard/admin/sms-logs" element={<DashboardSmsLogsPage />} />
-      <Route path="/dashboard/admin/comm-logs" element={<DashboardCommLogsPage />} />
-      <Route path="/dashboard/admin/live-chat" element={<DashboardLiveChatPage />} />
-      <Route path="/dashboard/packages" element={<DashboardPackagesPage />} />
+      <Route path="/dashboard/affiliate/overview" element={<ProtectedRoute><DashboardAffiliateOverviewPage /></ProtectedRoute>} />
+      <Route path="/dashboard/affiliate/links" element={<ProtectedRoute><DashboardAffiliateLinksPage /></ProtectedRoute>} />
+      <Route path="/dashboard/affiliate/payouts" element={<ProtectedRoute><DashboardAffiliatePayoutsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/overview" element={<ProtectedRoute><DashboardAdminOverviewPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/users" element={<ProtectedRoute><DashboardUsersPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/professionals" element={<ProtectedRoute><DashboardProfessionalsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/seekers" element={<ProtectedRoute><DashboardSeekersPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/theme-settings" element={<ProtectedRoute><DashboardThemeSettingsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/form-builder" element={<ProtectedRoute><DashboardFormBuilderPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/api-logs" element={<ProtectedRoute><DashboardApiLogsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/categories" element={<ProtectedRoute><DashboardCategoryPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/knowledge-base" element={<ProtectedRoute><DashboardKnowledgeBasePage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/insights" element={<ProtectedRoute><DashboardInsightsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/packages" element={<ProtectedRoute><DashboardPackagesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/roles" element={<ProtectedRoute><DashboardRolesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/employees" element={<ProtectedRoute><DashboardEmployeesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/conversations" element={<ProtectedRoute><DashboardAdminConversationsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/agents" element={<ProtectedRoute><DashboardAgentsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/affiliates" element={<ProtectedRoute><DashboardAffiliatesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/matching" element={<ProtectedRoute><DashboardMatchingPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/invitations" element={<ProtectedRoute><DashboardInvitationsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/appointments" element={<ProtectedRoute><DashboardAppointmentsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/payments" element={<ProtectedRoute><DashboardPaymentsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/sms-logs" element={<ProtectedRoute><DashboardSmsLogsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/comm-logs" element={<ProtectedRoute><DashboardCommLogsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/live-chat" element={<ProtectedRoute><DashboardLiveChatPage /></ProtectedRoute>} />
+      <Route path="/dashboard/packages" element={<ProtectedRoute><DashboardPackagesPage /></ProtectedRoute>} />
 
       <Route path="*" element={withLayout(<NotFoundPage />)} />
     </Routes>

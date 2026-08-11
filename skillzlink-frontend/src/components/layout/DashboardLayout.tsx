@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getCurrentUser, logout } from '../../services/api';
+import { getCurrentUser, isLoggedIn, logout } from '../../services/api';
 import { LiveChatWidget } from '../common/LiveChatWidget';
 
 interface DashboardLayoutProps {
@@ -25,6 +25,21 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const user = getCurrentUser();
   const role = user?.role || localStorage.getItem('role') || 'seeker';
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate('/login', { replace: true });
+      return;
+    }
+    const onAuthChange = () => {
+      if (!isLoggedIn()) {
+        navigate('/login', { replace: true });
+      }
+    };
+    window.addEventListener('auth_change', onAuthChange);
+    return () => window.removeEventListener('auth_change', onAuthChange);
+  }, [navigate]);
 
   const isImpersonating = !!localStorage.getItem('skillzlink_prev_token');
 
