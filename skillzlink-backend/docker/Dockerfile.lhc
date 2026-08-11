@@ -13,12 +13,12 @@ WORKDIR /var/www
 COPY . /var/www
 
 # Create required cache/var directories with proper permissions
-RUN mkdir -p skillzlink-backend/public/lhc/cache skillzlink-backend/public/lhc/cache/cacheconfig skillzlink-backend/public/lhc/cache/compiledtemplates skillzlink-backend/public/lhc/cache/translations skillzlink-backend/public/lhc/cache/userinfo \
-    skillzlink-backend/public/lhc/var/storage skillzlink-backend/public/lhc/var/userphoto skillzlink-backend/public/lhc/var/tmpfiles \
-    && chmod -R 777 skillzlink-backend/public/lhc/cache skillzlink-backend/public/lhc/var
+RUN mkdir -p public/lhc/cache public/lhc/cache/cacheconfig public/lhc/cache/compiledtemplates public/lhc/cache/translations public/lhc/cache/userinfo \
+    public/lhc/var/storage public/lhc/var/userphoto public/lhc/var/tmpfiles \
+    && chmod -R 777 public/lhc/cache public/lhc/var
 
 # Copy settings template if settings.ini.php doesn't exist
-RUN test -f skillzlink-backend/public/lhc/settings/settings.ini.php || cp skillzlink-backend/public/lhc/settings/settings.ini.dist.php skillzlink-backend/public/lhc/settings/settings.ini.php
+RUN test -f public/lhc/settings/settings.ini.php || cp public/lhc/settings/settings.ini.dist.php public/lhc/settings/settings.ini.php
 
 # Use PHP built-in server with error suppression
-CMD ["php", "-d", "display_errors=0", "-d", "error_reporting=0", "-S", "0.0.0.0:8080", "skillzlink-backend/docker/lhc-router.php"]
+CMD ["php", "-d", "display_errors=0", "-d", "error_reporting=0", "-S", "0.0.0.0:8080", "docker/lhc-router.php"]
