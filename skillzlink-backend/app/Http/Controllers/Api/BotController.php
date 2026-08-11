@@ -92,7 +92,7 @@ class BotController extends Controller
         }
 
         // Chat with AI — direct handler so it never goes quiet
-        if (preg_match('/\bchat with ai\b|\bchat.?gpt\b|\bai assist\b|\bask ai\b/i', $msg)) {
+        if (preg_match('/chat with ai\b|\bchat.?gpt\b|\bai assist\b|\bask ai\b/i', $msg)) {
             return [
                 'text' => "🤖 You're now chatting with the SkillzLink AI assistant! Ask me anything about our platform — finding professionals, becoming a provider, pricing, safety, how it works, or any other question you have.",
                 'escalate' => false,
