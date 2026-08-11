@@ -45,5 +45,16 @@ sed -i "s/'debug_view' => .*/'debug_view' => ${DEBUG_OUTPUT},/" "$SETTINGS_FILE"
 
 echo "[lhc-entrypoint] Settings generated."
 
+# Start bot worker in background (processes pending bot messages every 3 seconds)
+echo "[lhc-entrypoint] Starting bot worker..."
+(
+  while true; do
+    php -d display_errors=0 -d error_reporting=0 /var/www/public/lhc/cron.php -s site_admin -c cron/bot > /dev/null 2>&1
+    sleep 3
+  done
+) &
+BOT_PID=$!
+echo "[lhc-entrypoint] Bot worker started (PID: $BOT_PID)"
+
 # Start PHP built-in server
 exec php -d display_errors=0 -d error_reporting=0 -S 0.0.0.0:8080 /var/www/docker/lhc-router.php
