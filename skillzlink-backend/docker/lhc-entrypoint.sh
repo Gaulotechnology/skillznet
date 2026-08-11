@@ -14,34 +14,34 @@ DB_NAME="${LHC_DB_DATABASE:-skillzlink}"
 DB_USER="${LHC_DB_USERNAME:-skillzlink}"
 DB_PASS="${LHC_DB_PASSWORD:-skillzlink}"
 DB_PREFIX="${LHC_DB_PREFIX:-lh_}"
-
 SITE_TITLE="${LHC_SITE_TITLE:-SkillzLink Live Chat}"
 SITE_ADDRESS="${LHC_SITE_ADDRESS:-}"
 DEBUG_OUTPUT="${LHC_DEBUG:-false}"
-DEBUG_VIEW="${LHC_DEBUG:-false}"
 
 echo "[lhc-entrypoint] Generating settings.ini.php from env vars..."
 echo "  DB: ${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
-# Generate from dist, replacing the db section
 cp "$DIST_FILE" "$SETTINGS_FILE"
 
-# Replace DB credentials
-sed -i "s/'host' => '.*'/'host' => '${DB_HOST}'/" "$SETTINGS_FILE"
-sed -i "s/'port' => [0-9]*/'port' => ${DB_PORT}/" "$SETTINGS_FILE"
-sed -i "s/'database_name' => '.*'/'database_name' => '${DB_NAME}'/" "$SETTINGS_FILE"
-sed -i "s/'database_user' => '.*'/'database_user' => '${DB_USER}'/" "$SETTINGS_FILE"
-sed -i "s/'database_password' => '.*'/'database_password' => '${DB_PASS}'/" "$SETTINGS_FILE"
-sed -i "s/'prefix' => '.*'/'prefix' => '${DB_PREFIX}'/" "$SETTINGS_FILE"
-sed -i "s/'user' => '.*'/'user' => '${DB_USER}'/" "$SETTINGS_FILE"
-sed -i "s/'password' => '.*'/'password' => '${DB_PASS}'/" "$SETTINGS_FILE"
-sed -i "s/'database' => '.*'/'database' => '${DB_NAME}'/" "$SETTINGS_FILE"
+# Replace DB credentials — only in the 'db' => array section
+# The 'user' => and 'password' => below 'db' => are the short aliases
+sed -i "/'db' =>/,/'cache' =>/ {
+    s/'host' => '.*'/'host' => '${DB_HOST}'/
+    s/'port' => [0-9]*/'port' => ${DB_PORT}/
+    s/'database_name' => '.*'/'database_name' => '${DB_NAME}'/
+    s/'database_user' => '.*'/'database_user' => '${DB_USER}'/
+    s/'database_password' => '.*'/'database_password' => '${DB_PASS}'/
+    s/'prefix' => '.*'/'prefix' => '${DB_PREFIX}'/
+    s/'user' => '.*'/'user' => '${DB_USER}'/
+    s/'password' => '.*'/'password' => '${DB_PASS}'/
+    s/'database' => '.*'/'database' => '${DB_NAME}'/
+}" "$SETTINGS_FILE"
 
-# Replace site settings
-sed -i "s/'title' => '.*'/'title' => '${SITE_TITLE}'/" "$SETTINGS_FILE"
+# Replace site settings — only the first 'title' (under 'site')
+sed -i "0,/'title' => '.*'/s/'title' => '.*'/'title' => '${SITE_TITLE}'/" "$SETTINGS_FILE"
 sed -i "s/'site_address' => '.*'/'site_address' => '${SITE_ADDRESS}'/" "$SETTINGS_FILE"
 sed -i "s/'debug_output' => .*/'debug_output' => ${DEBUG_OUTPUT},/" "$SETTINGS_FILE"
-sed -i "s/'debug_view' => .*/'debug_view' => ${DEBUG_VIEW},/" "$SETTINGS_FILE"
+sed -i "s/'debug_view' => .*/'debug_view' => ${DEBUG_OUTPUT},/" "$SETTINGS_FILE"
 
 echo "[lhc-entrypoint] Settings generated."
 
