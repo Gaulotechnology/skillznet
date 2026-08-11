@@ -4,6 +4,9 @@ FROM node:20-alpine AS builder
 ARG VITE_API_BASE_URL=https://skillzlink.co.za/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
+ARG VITE_LHC_URL=http://62.238.107.93/lhc
+ENV VITE_LHC_URL=$VITE_LHC_URL
+
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
