@@ -42,16 +42,9 @@ class BotController extends Controller
             ]);
         }
 
-        // ── Step 2: AI / RAG (ASYNC — returns immediately, processes in background) ──
+        // ── Step 2: AI / RAG (ASYNC — dispatches queue job, pushes response when ready) ──
         if ($chatId) {
-            // Fire-and-forget background AI processing
-            $cmd = sprintf(
-                'php %s/artisan skillzlink:ai-response %s %d > /dev/null 2>&1 &',
-                base_path(),
-                escapeshellarg($question),
-                $chatId
-            );
-            exec($cmd);
+            ProcessAIQuery::dispatch($question, $chatId, $visitorName);
 
             return $this->respond(
                 "Let me check that for you... I'll get back with an answer shortly.",

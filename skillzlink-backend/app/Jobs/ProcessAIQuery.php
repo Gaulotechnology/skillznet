@@ -46,8 +46,8 @@ class ProcessAIQuery implements ShouldQueue
                 $response = "I couldn't find a specific answer to your question. A member of our team will get back to you shortly. In the meantime, you can browse professionals at /nearby-professionals.";
             }
 
-            // Post the response back to LHC
-            $success = $lhc->postMessageToChat($this->chatId, $response);
+            // Post the response back to LHC via REST API (bot message)
+            $success = $lhc->sendBotMessage($this->chatId, $response);
 
             if ($success) {
                 Log::info("ProcessAIQuery: Response posted to chat {$this->chatId}");
