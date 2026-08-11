@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     nginx \
     supervisor \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && docker-php-ext-install pdo pdo_mysql bcmath zip gd \
     && rm -rf /var/lib/apt/lists/*
 
