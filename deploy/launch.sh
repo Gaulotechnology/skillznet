@@ -36,15 +36,6 @@ if [ ! -f deploy/.env ]; then
     exit 1
 fi
 
-# LHC settings file
-if [ ! -f skillzlink-backend/public/lhc/settings/settings.ini.php ]; then
-    echo "WARNING: LHC settings.ini.php not found, copying from template..."
-    cp skillzlink-backend/public/lhc/settings/settings.ini.dist.php skillzlink-backend/public/lhc/settings/settings.ini.php
-    echo "  Edit skillzlink-backend/public/lhc/settings/settings.ini.php with real DB credentials!"
-    echo "  Then re-run this script."
-    exit 1
-fi
-
 # Source env vars
 set -a
 source deploy/.env

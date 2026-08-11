@@ -98,6 +98,7 @@ services:
       LHC_DB_DATABASE: skillzlink
       LHC_DB_USERNAME: skillzlink
       LHC_DB_PASSWORD: ${DB_PASSWORD}
+      LHC_DEBUG: "false"
     ports:
       - "127.0.0.1:8080:8080"
     networks:

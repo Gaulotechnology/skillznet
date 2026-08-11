@@ -12,13 +12,14 @@ WORKDIR /var/www
 
 COPY . /var/www
 
-# Create required cache/var directories with proper permissions
-RUN mkdir -p public/lhc/cache public/lhc/cache/cacheconfig public/lhc/cache/compiledtemplates public/lhc/cache/translations public/lhc/cache/userinfo \
+# Create required cache/var directories
+RUN mkdir -p public/lhc/cache public/lhc/cache/cacheconfig public/lhc/cache/compiledtemplates \
+    public/lhc/cache/translations public/lhc/cache/userinfo \
     public/lhc/var/storage public/lhc/var/userphoto public/lhc/var/tmpfiles \
     && chmod -R 777 public/lhc/cache public/lhc/var
 
-# Copy settings template if settings.ini.php doesn't exist
-RUN test -f public/lhc/settings/settings.ini.php || cp public/lhc/settings/settings.ini.dist.php public/lhc/settings/settings.ini.php
+# Make entrypoint executable
+RUN chmod +x docker/lhc-entrypoint.sh
 
-# Use PHP built-in server with error suppression
-CMD ["php", "-d", "display_errors=0", "-d", "error_reporting=0", "-S", "0.0.0.0:8080", "docker/lhc-router.php"]
+# Entrypoint generates settings.ini.php from env vars, then starts PHP server
+ENTRYPOINT ["docker/lhc-entrypoint.sh"]
