@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { Link, useSearchParams, useNavigate } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { publicApi, isLoggedIn } from "../services/api"
 import type { PublicProvider } from "../services/api"
 
@@ -72,8 +72,6 @@ const categoryIcons: Record<string, string> = {
 
 export function ProfessionalsListingPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const navigate = useNavigate()
-
   const initialCity = searchParams.get("city") || "All"
   const initialService = searchParams.get("service") || "All"
   const initialSearch = searchParams.get("q") || ""

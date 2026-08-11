@@ -4,6 +4,11 @@
  * Mimics Apache's mod_rewrite behavior: all requests go through index.php
  */
 
+// Never show PHP errors on frontend
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+error_reporting(0);
+
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '');
 $lhcRoot = __DIR__ . '/../public/lhc';
 $filePath = $lhcRoot . $uri;

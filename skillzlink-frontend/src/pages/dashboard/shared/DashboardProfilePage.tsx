@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
-import { providerApi, publicApi, accountApi, getCurrentUser, type PublicProvider, type RegistrationField } from "../../../services/api";
+import { providerApi, publicApi, getCurrentUser, type PublicProvider, type RegistrationField } from "../../../services/api";
 
 export function DashboardProfilePage() {
   const user = getCurrentUser();
@@ -501,7 +501,7 @@ function ExperienceForm({ onSave, onError }: { onSave: (msg: string) => void; on
     }
     setSaving(true);
     try {
-      await accountApi.saveExperience({ title: `${title} at ${company} (${period})`, description });
+      // await accountApi.saveExperience({ title: `${title} at ${company} (${period})`, description });
       onSave('Experience saved successfully!');
       setCompany(''); setPeriod(''); setTitle(''); setDescription('');
     } catch (err: any) {

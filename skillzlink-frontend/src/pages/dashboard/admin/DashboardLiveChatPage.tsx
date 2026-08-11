@@ -27,7 +27,7 @@ export function DashboardLiveChatPage() {
   const [reply, setReply] = useState("")
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
-  const [lhcAvailable, setLhcAvailable] = useState(true)
+  const [lhcAvailable, _setLhcAvailable] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const fetchSessions = async () => {

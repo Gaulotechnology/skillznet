@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32" fill="none">
+  <!-- Icon -->
+  <circle cx="16" cy="16" r="14" fill="#7c3aed"/>
+  <circle cx="10" cy="10" r="4" fill="white" opacity="0.9"/>
+  <circle cx="22" cy="22" r="4" fill="white" opacity="0.9"/>
+  <line x1="13" y1="13" x2="19" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="16" cy="16" r="1.5" fill="#a78bfa"/>
+  <!-- Text -->
+  <text x="36" y="22" font-family="Inter, Poppins, Arial, sans-serif" font-weight="700" font-size="16" fill="#1a1a2e">SkillzLink</text>
+</svg>

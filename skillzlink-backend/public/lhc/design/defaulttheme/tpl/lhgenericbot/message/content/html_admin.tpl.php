@@ -1,0 +1,38 @@
+<?php if (is_array($metaMessage)) : ?>
+    <?php if (isset($metaMessage['debug']) && $metaMessage['debug']) : ?>
+        <div class="msg-body msg-body-media">
+            [<?php print (is_object($msg) ? $msg->id : $msg['id'])?>]
+            <?php if (!empty($metaMessage['content'])) : ?>
+            <?php $debugData = json_decode($metaMessage['content'],true);?>
+            <?php if (isset($debugData['params_request'])) : ?>
+                <button class="btn btn-xs btn-outline-secondary" onclick="lhc.revealModal({'url':'<?php echo erLhcoreClassDesign::baseurl('audit/copycurl')?>/<?php print (is_object($msg) ? $msg->id : $msg['id'])?>'});"  type="button">Copy as CURL</button>
+            <?php endif; ?>
+            <pre title="Hold Alt to scroll" class="blockquote blockquote-code" id="debug-message-<?php print (is_object($msg) ? $msg->id : $msg['id'])?>" style="resize: vertical; height: 100px; min-height: 100px; "><?php
+                if (isset($debugData['params_request'])) {
+                    if (isset($debugData['params_request']['body']) && !is_array($debugData['params_request']['body'])){
+                        $bodyJSON = json_decode(str_replace(["\n","\r\n"],"",$debugData['params_request']['body']),true);
+                        if (is_array($bodyJSON)) {
+                            $debugData['params_request']['body_parsed'] = $bodyJSON;
+                        }
+                    }
+                    if (isset($debugData['stream']['content_raw']) && !is_array($debugData['stream']['content_raw'])){
+                        $bodyJSON = json_decode(str_replace(["\n","\r\n"],"",$debugData['stream']['content_raw']),true);
+                        if (is_array($bodyJSON)) {
+                            $debugData['stream']['content_raw_parsed'] = $bodyJSON;
+                        }
+                    }
+                    echo htmlspecialchars(json_encode($debugData,JSON_PRETTY_PRINT));
+                } else {
+                    echo htmlspecialchars($metaMessage['content']);
+                }?></pre>
+            <script>lhinst.addScrollHandler(<?php print (is_object($msg) ? $msg->id : $msg['id'])?>);</script>
+            <?php elseif (!empty($metaMessage['ex']) && preg_match('/^[a-z0-9-]+/i', $metaMessage['ex']) && ($pathDynamic = erLhcoreClassDesign::designtpldynamic('lhchat/part/debug_' . $metaMessage['ex'] . '.tpl.php')) && $pathDynamic !== null) : ?>
+                <?php include $pathDynamic;?>
+            <?php endif; ?>
+        </div>
+    <?php else : ?>
+        <?php $msgBody = '[html]'.str_replace(["\r","\n"],["",""],$metaMessage['content']).'[/html]'; $paramsMessageRender = array('msg_body_class' => (isset($type) && $type === 'debug' ? 'bg-transparent text-muted' : ''), 'sender' => (is_object($msg) ? $msg->user_id : $msg['user_id']));?>
+        <?php include(erLhcoreClassDesign::designtpl('lhchat/lists/msg_body.tpl.php'));?>
+    <?php endif; ?>
+
+<?php endif; ?>

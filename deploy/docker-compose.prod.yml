@@ -1,0 +1,112 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: skillzlink-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: skillzlink
+      MYSQL_USER: skillzlink
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - skillzlink-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: skillzlink-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - skillzlink-net
+
+  backend:
+    build:
+      context: ../skillzlink-backend
+      dockerfile: Dockerfile
+    container_name: skillzlink-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: skillzlink
+      DB_USERNAME: skillzlink
+      DB_PASSWORD: ${DB_PASSWORD}
+      CACHE_STORE: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      LIVE_HELPER_CHAT_URL: http://lhc:8080
+      LIVE_HELPER_CHAT_API_KEY: ${LHC_API_KEY}
+      LIVE_HELPER_CHAT_BOT_ID: ${LHC_BOT_ID:-1}
+      LHC_PUBLIC_URL: ${LHC_PUBLIC_URL:-http://62.238.107.93/lhc}
+    ports:
+      - "127.0.0.1:8000:80"
+    networks:
+      - skillzlink-net
+
+  frontend:
+    build:
+      context: ../skillzlink-frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    container_name: skillzlink-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3009:80"
+    depends_on:
+      - backend
+    networks:
+      - skillzlink-net
+
+  lhc:
+    build:
+      context: ../skillzlink-backend
+      dockerfile: docker/Dockerfile.lhc
+    container_name: skillzlink-lhc
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      LHC_DB_HOST: mysql
+      LHC_DB_PORT: 3306
+      LHC_DB_DATABASE: skillzlink
+      LHC_DB_USERNAME: skillzlink
+      LHC_DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "127.0.0.1:8080:8080"
+    networks:
+      - skillzlink-net
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  skillzlink-net:
+    driver: bridge

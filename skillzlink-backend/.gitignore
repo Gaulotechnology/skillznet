@@ -17,7 +17,11 @@
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
-/public/lhc
+/public/lhc/cache/
+/public/lhc/settings/settings.ini.php
+/public/lhc/var/storage/
+/public/lhc/var/userphoto/
+/public/lhc/var/tmpfiles/
 /public/storage
 /storage/*.key
 /storage/pail

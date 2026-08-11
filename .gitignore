@@ -1,35 +1,33 @@
-# Node
+# Dependencies
 node_modules/
-dist/
-build/
-npm-debug.log
-yarn-error.log
+vendor/
 
-# Environment variables
+# Environment
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
-# IDEs and Editors
+# LHC runtime
+skillzlink-backend/public/lhc/cache/
+skillzlink-backend/public/lhc/settings/settings.ini.php
+skillzlink-backend/public/lhc/var/storage/
+skillzlink-backend/public/lhc/var/userphoto/
+skillzlink-backend/public/lhc/var/tmpfiles/
+
+# Laravel
+skillzlink-backend/storage/
+skillzlink-backend/bootstrap/cache/
+
+# Build output
+skillzlink-frontend/dist/
+skillzlink-frontend/build/
+
+# IDEs
 .idea/
 .vscode/
 *.swp
 *.swo
 .DS_Store
 
-# Go (if skillzlink-backend uses Go)
-bin/
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-vendor/
-
 # Logs
-logs
 *.log

@@ -1,0 +1,94 @@
+<?php 
+
+try {
+
+    if (is_numeric((string)$Params['user_parameters']['chat_id']) && $Params['user_parameters']['chat_id'] > 0) {
+
+        if ((string)$Params['user_parameters']['hash'] != '') {
+            $hash = $Params['user_parameters']['hash'];
+        }
+
+        if (is_numeric($Params['user_parameters']['chat_id'])) {
+            $chat = erLhcoreClassModelChat::fetch($Params['user_parameters']['chat_id']);
+        }
+
+    } else if ((string)$Params['user_parameters']['hash'] != '') {
+        list($chatID,$hash) = explode('_',$Params['user_parameters']['hash']);
+        $chat = erLhcoreClassModelChat::fetch($chatID);
+    }
+
+    erLhcoreClassChat::setTimeZoneByChat($chat);
+
+    if ($chat->hash == $hash)
+    {
+        $survey = erLhAbstractModelSurvey::fetch($Params['user_parameters']['survey']);
+        
+        if ($survey instanceof erLhAbstractModelSurvey) {
+            // Change to default status
+            $chat->status_sub = erLhcoreClassModelChat::STATUS_SUB_DEFAULT;
+                     
+            $surveyItem = erLhAbstractModelSurveyItem::getInstance($chat, $survey);
+
+            $msgAppend = '';
+
+            // If filled change status to temp, so next time user goes to survey form they can continue to fill it.
+            if ($surveyItem->is_filled == true) {
+                $surveyItem->status = erLhAbstractModelSurveyItem::STATUS_TEMP;
+                $surveyItem->saveOrUpdate();
+                $msgAppend = '[survey="'. $surveyItem->survey_id . '_' . $surveyItem->id .'"]';
+            }
+            
+            $closed = (isset($survey->configuration_array['no_return_chat']) && $survey->configuration_array['no_return_chat'] == true) || !(isset($survey->configuration_array['return_on_close']) && $survey->configuration_array['return_on_close'] == true) && $chat->status == erLhcoreClassModelChat::STATUS_CLOSED_CHAT;
+
+            $msg = new erLhcoreClassModelmsg();
+
+            if ($closed === true) {
+                $chat->status_sub = erLhcoreClassModelChat::STATUS_SUB_SURVEY_COMPLETED;
+                $msg->msg = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/backtochat', 'Visitor completed survey!') . " " . $msgAppend;
+            } else {
+                $msg->msg = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/backtochat', 'Visitor has been redirected back to chat!') . " " . $msgAppend;
+            }
+ 
+            $msg->chat_id = $chat->id;
+            $msg->user_id = - 1;
+            
+            $chat->last_user_msg_time = $msg->time = time();
+
+            // Now we change responses to visitor not replying
+            // As they should inform operator that they have completed a survey.
+            $chat->last_op_msg_time = $chat->last_user_msg_time + 1;
+
+            erLhcoreClassChat::getSession()->save($msg);
+                                    
+            // Set last message ID
+            $chat->last_msg_id = $msg->id;
+              
+            if ($chat->has_unread_messages == 1 && $chat->last_user_msg_time < (time() - 5)) {
+                erLhcoreClassChatEventDispatcher::getInstance()->dispatch('chat.unread_chat',array('chat' => & $chat));
+            }
+            
+            $chat->has_unread_messages = 1;
+ 
+            $chat->saveThis();
+
+            echo json_encode(array('result' => true, 'closed' => $closed));
+
+            flush();
+
+            session_write_close();
+
+            if ( function_exists('fastcgi_finish_request') ) {
+                fastcgi_finish_request();
+            };
+
+            erLhcoreClassChatEventDispatcher::getInstance()->dispatch('survey.back_to_chat',array('chat' => & $chat, 'msg' => & $msg));
+        }
+    }
+    
+} catch(Exception $e) {
+   $tpl->setFile('lhchat/errors/chatnotexists.tpl.php');
+   print_r($e);
+}
+
+exit;
+?>

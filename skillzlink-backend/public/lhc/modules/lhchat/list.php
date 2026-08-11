@@ -1,0 +1,448 @@
+<?php
+
+$tpl = erLhcoreClassTemplate::getInstance( 'lhchat/lists.tpl.php');
+
+/*echo $_SERVER['REQUEST_METHOD'];
+exit;*/
+
+if ( isset($_POST['doDelete']) ) {
+	if (!isset($_POST['csfr_token']) || !$currentUser->validateCSFRToken($_POST['csfr_token'])) {
+		erLhcoreClassModule::redirect('chat/list',"?failed=1");
+		exit;
+	}
+
+	$definition = array(
+		'ChatID' => new ezcInputFormDefinitionElement(
+				ezcInputFormDefinitionElement::OPTIONAL, 'int', null, FILTER_REQUIRE_ARRAY
+		),
+	);
+
+	$form = new ezcInputForm( INPUT_POST, $definition );
+	$Errors = array();
+
+    $stats = ['selected' =>0, 'deleted' => 0];
+
+	if ( $form->hasValidData( 'ChatID' ) && !empty($form->ChatID) ) {
+		$chats = erLhcoreClassModelChat::getList(array('limit' => false, 'filterin' => array('id' => $form->ChatID)));
+        $stats['selected'] = count($chats);
+		foreach ($chats as $chatToDelete) {
+			if (erLhcoreClassChat::hasAccessToWrite($chatToDelete) && erLhcoreClassChat::hasAccessToRead($chatToDelete) && ($currentUser->hasAccessTo('lhchat','deleteglobalchat') || ($currentUser->hasAccessTo('lhchat','deletechat') && $chatToDelete->user_id == $currentUser->getUserID())))
+			{
+                erLhcoreClassChatEventDispatcher::getInstance()->dispatch('chat.delete', array('chat' => & $chatToDelete, 'user' => $currentUser));
+				$chatToDelete->removeThis();
+                $stats['deleted']++;
+			}
+		}
+	}
+    $tpl->set('stats_delete', $stats);
+}
+
+if ( isset($_POST['doClose']) ) {
+	if (!isset($_POST['csfr_token']) || !$currentUser->validateCSFRToken($_POST['csfr_token'])) {
+		erLhcoreClassModule::redirect('chat/list');
+		exit;
+	}
+
+	$definition = array(
+		'ChatID' => new ezcInputFormDefinitionElement(
+				ezcInputFormDefinitionElement::OPTIONAL, 'int', null, FILTER_REQUIRE_ARRAY
+		),
+	);
+
+	$form = new ezcInputForm( INPUT_POST, $definition );
+	$Errors = array();
+
+	if ( $form->hasValidData( 'ChatID' ) && !empty($form->ChatID) ) {
+		$chats = erLhcoreClassModelChat::getList(array('limit' => false, 'filterin' => array('id' => $form->ChatID)));
+        $userData = $currentUser->getUserData(true);
+
+		foreach ($chats as $chatToClose) {
+            if (($chatToClose->user_id == $currentUser->getUserID() || $currentUser->hasAccessTo('lhchat','allowcloseremote')) && erLhcoreClassChat::hasAccessToWrite($chatToClose) && erLhcoreClassChat::hasAccessToRead($chatToClose) )
+            {
+                erLhcoreClassChatHelper::closeChat(array(
+                    'user' => $userData,
+                    'chat' => $chatToClose,
+                ));
+            }
+		}
+	}
+}
+
+if (isset($_GET['doSearch'])) {
+	$filterParams = erLhcoreClassSearchHandler::getParams(array('module' => 'chat','module_file' => 'chat_search','format_filter' => true, 'use_override' => true, 'uparams' => $Params['user_parameters_unordered']));
+	$filterParams['is_search'] = true;
+} else {
+	$filterParams = erLhcoreClassSearchHandler::getParams(array('module' => 'chat','module_file' => 'chat_search','format_filter' => true, 'uparams' => $Params['user_parameters_unordered']));
+	$filterParams['is_search'] = false;
+}
+
+if (!$currentUser->hasAccessTo('lhaudit','ignore_view_actions') && count($filterParams['filter']) > 1) { // One element is always a sort. We want at-leat one real filter.
+    erLhcoreClassLog::write(erLhcoreClassSearchHandler::getURLAppendFromInput($filterParams['input_form']),
+        ezcLog::SUCCESS_AUDIT,
+        array(
+            'source' => 'lhc',
+            'category' => 'chat_search',
+            'line' => __LINE__,
+            'file' => __FILE__,
+            'object_id' => 0,
+            'user_id' => $currentUser->getUserID()
+        )
+    );
+}
+
+erLhcoreClassChatStatistic::formatUserFilter($filterParams);
+
+if ($filterParams['input_form']->as_participant === true) {
+    $userIdsForParticipant = [];
+    if (isset($filterParams['filter']['filterin']['user_id'])) {
+        $userIdsForParticipant = array_merge($userIdsForParticipant, (array)$filterParams['filter']['filterin']['user_id']);
+        unset($filterParams['filter']['filterin']['user_id']);
+    }
+    if (isset($filterParams['filter']['filterin']['lh_chat.user_id'])) {
+        $userIdsForParticipant = array_merge($userIdsForParticipant, (array)$filterParams['filter']['filterin']['lh_chat.user_id']);
+        unset($filterParams['filter']['filterin']['lh_chat.user_id']);
+    }
+    if (!empty($userIdsForParticipant)) {
+        erLhcoreClassChat::validateFilterIn($userIdsForParticipant);
+        $idsStr = implode(',', $userIdsForParticipant);
+        $filterParams['filter']['customfilter'][] = "EXISTS (SELECT 1 FROM `lh_chat_participant` WHERE `lh_chat_participant`.`chat_id` = `lh_chat`.`id` AND `lh_chat_participant`.`user_id` IN ({$idsStr}))";
+    }
+}
+
+if (is_array($filterParams['input_form']->subject_id) && !empty($filterParams['input_form']->subject_id)) {
+    erLhcoreClassChat::validateFilterIn($filterParams['input_form']->subject_id);
+    $filterParams['filter']['innerjoin']['lh_abstract_subject_chat'] = array('`lh_abstract_subject_chat`.`chat_id`','`lh_chat` . `id`');
+    $filterParams['filter']['filterin']['`lh_abstract_subject_chat`.`subject_id`'] = $filterParams['input_form']->subject_id;
+}
+
+if ($filterParams['input_form']->cls_time == true) {
+    if (isset($filterParams['filter']['filtergte']['time'])) {
+        $filterParams['filter']['filtergte']['cls_time'] = $filterParams['filter']['filtergte']['time'];
+        unset($filterParams['filter']['filtergte']['time']);
+    }
+    if (isset($filterParams['filter']['filterlte']['time'])) {
+        $filterParams['filter']['filterlte']['cls_time'] = $filterParams['filter']['filterlte']['time'];
+        unset($filterParams['filter']['filterlte']['time']);
+    }
+}
+
+if ($filterParams['input_form']->op_msg_count !== false && is_numeric($filterParams['input_form']->op_msg_count)) {
+    $n = (int)$filterParams['input_form']->op_msg_count;
+    $filterParams['filter']['customfilter'][] = "(SELECT COUNT(*) FROM `lh_msg` WHERE `lh_msg`.`chat_id` = `lh_chat`.`id` AND `lh_msg`.`user_id` > 0) >= {$n}";
+}
+
+if ($filterParams['input_form']->vi_msg_count !== false && is_numeric($filterParams['input_form']->vi_msg_count)) {
+    $n = (int)$filterParams['input_form']->vi_msg_count;
+    $filterParams['filter']['customfilter'][] = "(SELECT COUNT(*) FROM `lh_msg` WHERE `lh_msg`.`chat_id` = `lh_chat`.`id` AND `lh_msg`.`user_id` = 0) >= {$n}";
+}
+
+if ($filterParams['input_form']->bot_msg_count !== false && is_numeric($filterParams['input_form']->bot_msg_count)) {
+    $n = (int)$filterParams['input_form']->bot_msg_count;
+    $filterParams['filter']['customfilter'][] = "(SELECT COUNT(*) FROM `lh_msg` WHERE `lh_msg`.`chat_id` = `lh_chat`.`id` AND `lh_msg`.`user_id` = -2) >= {$n}";
+}
+
+$allMsgCountMin = ($filterParams['input_form']->all_msg_count !== false && is_numeric($filterParams['input_form']->all_msg_count)) ? (int)$filterParams['input_form']->all_msg_count : null;
+$allMsgCountMax = ($filterParams['input_form']->all_msg_count_till !== false && is_numeric($filterParams['input_form']->all_msg_count_till)) ? (int)$filterParams['input_form']->all_msg_count_till : null;
+$allMsgCountQuery = "(SELECT COUNT(*) FROM `lh_msg` WHERE `lh_msg`.`chat_id` = `lh_chat`.`id` AND (`lh_msg`.`user_id` IN (-2,0) OR `lh_msg`.`user_id` > 0))";
+
+if ($allMsgCountMin !== null && $allMsgCountMax !== null) {
+    if ($allMsgCountMin > $allMsgCountMax) {
+        [$allMsgCountMin, $allMsgCountMax] = [$allMsgCountMax, $allMsgCountMin];
+    }
+    $filterParams['filter']['customfilter'][] = "{$allMsgCountQuery} BETWEEN {$allMsgCountMin} AND {$allMsgCountMax}";
+} elseif ($allMsgCountMin !== null) {
+    $filterParams['filter']['customfilter'][] = "{$allMsgCountQuery} >= {$allMsgCountMin}";
+} elseif ($allMsgCountMax !== null) {
+    $filterParams['filter']['customfilter'][] = "{$allMsgCountQuery} <= {$allMsgCountMax}";
+}
+
+$showMsgCount = (
+    ($filterParams['input_form']->op_msg_count !== false && is_numeric($filterParams['input_form']->op_msg_count)) ||
+    ($filterParams['input_form']->vi_msg_count !== false && is_numeric($filterParams['input_form']->vi_msg_count)) ||
+    ($filterParams['input_form']->bot_msg_count !== false && is_numeric($filterParams['input_form']->bot_msg_count)) ||
+    $allMsgCountMin !== null ||
+    $allMsgCountMax !== null ||
+    in_array($filterParams['input_form']->sortby, ['hnm_desc', 'hnm_asc'])
+);
+
+
+if (in_array($filterParams['input_form']->sortby, ['hnm_desc', 'hnm_asc'])) {
+    $hnmTimeFrom = $filterParams['filter']['filtergte']['time'] ?? ($filterParams['filter']['filtergte']['cls_time'] ?? null);
+    $hnmTimeTo = $filterParams['filter']['filterlte']['time'] ?? ($filterParams['filter']['filterlte']['cls_time'] ?? time());
+    $hnmSortWarning = !($hnmTimeFrom !== null && $hnmTimeTo !== null && ($hnmTimeTo - $hnmTimeFrom) <= 31 * 24 * 3600);
+}
+
+/**
+ * Departments filter
+ * */
+$limitation = erLhcoreClassChat::getDepartmentLimitation( 'lh_chat', ['check_list_permissions' => true]);
+
+if ($limitation !== false) {
+    if ($limitation !== true) {
+        $filterParams['filter']['customfilter'][] = $limitation;
+    }
+} else {
+    $filterParams['filter']['customfilter'][] = '1 = -1';
+}
+
+erLhcoreClassChatEventDispatcher::getInstance()->dispatch('chat.list_filter',array('filter' => & $filterParams, 'uparams' => $Params['user_parameters_unordered']));
+
+if ($Params['user_parameters_unordered']['print'] == 1) {
+	$tpl = erLhcoreClassTemplate::getInstance('lhchat/printchats.tpl.php');
+	$items = erLhcoreClassModelChat::getList(array_merge($filterParams['filter'],array('limit' => 100000,'offset' => 0)));
+	$tpl->set('items',$items);
+	$Result['content'] = $tpl->fetch();
+	$Result['pagelayout'] = 'print';
+	return;
+}
+
+if (isset($Params['user_parameters_unordered']['export']) && $Params['user_parameters_unordered']['export'] == 1 && erLhcoreClassUser::instance()->hasAccessTo('lhchat','export_chats')) {
+    if (ezcInputForm::hasPostData() && isset($_POST['csfr_token']) && $currentUser->validateCSFRToken($_POST['csfr_token'])) {
+        $exportErrors = array();
+        $toolsDefinitions = array();
+
+        if (isset($_POST['ChatML']) && isset($_POST['tools_definitions']) && trim((string)$_POST['tools_definitions']) !== '') {
+            $toolsDefinitions = json_decode(trim((string)$_POST['tools_definitions']), true);
+
+            if (json_last_error() !== JSON_ERROR_NONE || !is_array($toolsDefinitions)) {
+                $exportErrors[] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/lists/search_panel','Tools definitions must be a valid JSON array.');
+            }
+        }
+
+        if (!empty($exportErrors)) {
+            $tpl = erLhcoreClassTemplate::getInstance('lhchat/export_config.tpl.php');
+            $tpl->set('action_url', erLhcoreClassDesign::baseurl('chat/list') . erLhcoreClassSearchHandler::getURLAppendFromInput($filterParams['input_form']));
+            $tpl->set('errors', $exportErrors);
+            $tpl->set('system_prompt_value', isset($_POST['system_prompt']) ? trim((string)$_POST['system_prompt']) : '');
+            $tpl->set('last_n_messages_value', (isset($_POST['last_n_messages']) && is_numeric($_POST['last_n_messages']) && (int)$_POST['last_n_messages'] > 0) ? (int)$_POST['last_n_messages'] : 15);
+            $tpl->set('exclude_operator_messages_value', isset($_POST['exclude_operator_messages']));
+            $tpl->set('only_with_tool_calls_value', isset($_POST['only_with_tool_calls']));
+            $tpl->set('tools_definitions_value', isset($_POST['tools_definitions']) ? trim((string)$_POST['tools_definitions']) : '');
+            echo $tpl->fetch();
+            exit;
+        }
+
+        session_write_close();
+        if (!$currentUser->hasAccessTo('lhaudit','ignore_view_actions') && count($filterParams['filter']) > 1) { // One element is always a sort. We want at-least one real filter.
+            erLhcoreClassLog::write(erLhcoreClassSearchHandler::getURLAppendFromInput($filterParams['input_form']),
+                ezcLog::SUCCESS_AUDIT,
+                array(
+                    'source' => 'lhc',
+                    'category' => 'chat_export',
+                    'line' => __LINE__,
+                    'file' => __FILE__,
+                    'object_id' => 0,
+                    'user_id' => $currentUser->getUserID()
+                )
+            );
+        }
+        $ignoreFields = (new erLhcoreClassModelChat)->getState();
+        unset($ignoreFields['id']);
+        $ignoreFields = array_keys($ignoreFields);
+        erLhcoreClassChatExport::chatListExportXLS(
+            erLhcoreClassModelChat::getList(array_merge($filterParams['filter'], array('limit' => 100000, 'offset' => 0, 'ignore_fields' => $ignoreFields))),
+            array(
+                'chatml' => isset($_POST['ChatML']),
+                'csv' => isset($_POST['CSV']),
+                'type' => (isset($_POST['exportOptions']) ? $_POST['exportOptions'] : []),
+                'system_prompt' => isset($_POST['system_prompt']) ? trim((string)$_POST['system_prompt']) : '',
+                'tools' => $toolsDefinitions,
+                'last_messages' => (isset($_POST['last_n_messages']) && is_numeric($_POST['last_n_messages']) && (int)$_POST['last_n_messages'] > 0) ? (int)$_POST['last_n_messages'] : 15,
+                'exclude_operator_messages' => isset($_POST['exclude_operator_messages']),
+                'only_with_tool_calls' => isset($_POST['only_with_tool_calls'])
+            )
+        );
+        exit;
+    } else {
+        $tpl = erLhcoreClassTemplate::getInstance('lhchat/export_config.tpl.php');
+        $tpl->set('action_url', erLhcoreClassDesign::baseurl('chat/list') . erLhcoreClassSearchHandler::getURLAppendFromInput($filterParams['input_form']));
+        $tpl->set('system_prompt_value', '');
+        $tpl->set('last_n_messages_value', 15);
+        $tpl->set('exclude_operator_messages_value', false);
+        $tpl->set('only_with_tool_calls_value', false);
+        $tpl->set('tools_definitions_value', '');
+        echo $tpl->fetch();
+        exit;
+    }
+}
+
+if (isset($Params['user_parameters_unordered']['export']) && $Params['user_parameters_unordered']['export'] == 2) {
+
+    $savedSearch = new erLhAbstractModelSavedSearch();
+
+    if ($Params['user_parameters_unordered']['view'] > 0) {
+        $savedSearchPresent = erLhAbstractModelSavedSearch::fetch($Params['user_parameters_unordered']['view']);
+        if ($savedSearchPresent->user_id == $currentUser->getUserID()) {
+            $savedSearch = $savedSearchPresent;
+        }
+    }
+
+    $tpl = erLhcoreClassTemplate::getInstance('lhviews/save_chat_view.tpl.php');
+    $tpl->set('action_url', erLhcoreClassDesign::baseurl('chat/list') . erLhcoreClassSearchHandler::getURLAppendFromInput($filterParams['input_form']));
+    $tpl->set('input', $filterParams['input_form']);
+
+    if (ezcInputForm::hasPostData()) {
+
+        $Errors = erLhcoreClassAdminChatValidatorHelper::validateSavedSearch($savedSearch, array('filter' => $filterParams['filter'], 'input_form' => $filterParams['input_form']));
+
+        if (!isset($_SERVER['HTTP_X_CSRFTOKEN']) || !$currentUser->validateCSFRToken($_SERVER['HTTP_X_CSRFTOKEN'])) {
+            $Errors[] = 'Invalid CSRF token!';
+        }
+
+        if (empty($Errors)) {
+            $savedSearch->user_id = $currentUser->getUserID();
+            $savedSearch->scope = 'chat';
+            $savedSearch->saveThis();
+            $tpl->set('updated', true);
+        } else {
+            $tpl->set('errors', $Errors);
+        }
+    }
+    $tpl->set('item', $savedSearch);
+    echo $tpl->fetch();
+    exit;
+}
+
+if (isset($Params['user_parameters_unordered']['export']) && $Params['user_parameters_unordered']['export'] == 3 && (erLhcoreClassUser::instance()->hasAccessTo('lhchat','deleteglobalchat') || erLhcoreClassUser::instance()->hasAccessTo('lhchat','deletechat'))) {
+
+    $tpl = erLhcoreClassTemplate::getInstance('lhchat/delete_chats.tpl.php');
+    $tpl->set('action_url', erLhcoreClassDesign::baseurl('chat/list') . erLhcoreClassSearchHandler::getURLAppendFromInput($filterParams['input_form']));
+
+    if (ezcInputForm::hasPostData() && isset($_SERVER['HTTP_X_CSRFTOKEN']) && $currentUser->validateCSFRToken($_SERVER['HTTP_X_CSRFTOKEN'])) {
+        session_write_close();
+        $filterParams['filter']['limit'] = 20;
+        $filterParams['filter']['offset'] = 0;
+
+        foreach (erLhcoreClassModelChat::getList($filterParams['filter']) as $item){
+            if (erLhcoreClassChat::hasAccessToWrite($item) && erLhcoreClassChat::hasAccessToRead($item) && ($currentUser->hasAccessTo('lhchat','deleteglobalchat') || ($currentUser->hasAccessTo('lhchat','deletechat') && $item->user_id == $currentUser->getUserID())))
+            {
+                erLhcoreClassChatEventDispatcher::getInstance()->dispatch('chat.delete', array('chat' => & $item, 'user' => $currentUser));
+                $item->removeThis();
+            }
+        }
+
+        erLhcoreClassRestAPIHandler::setHeaders();
+        echo json_encode(['left_to_delete' => erLhcoreClassModelChat::getCount($filterParams['filter'])]);
+        exit;
+    }
+
+    $tpl->set('update_records',erLhcoreClassModelChat::getCount($filterParams['filter']));
+
+    echo $tpl->fetch();
+    exit;
+}
+
+$db = ezcDbInstance::get();
+
+try {
+    $db->query("SET SESSION wait_timeout=2");
+} catch (Exception $e){
+    //
+}
+
+try {
+    $db->query("SET SESSION interactive_timeout=5");} catch (Exception $e){
+} catch (Exception $e) {
+    //
+}
+
+try {
+    $db->query("SET SESSION innodb_lock_wait_timeout=5");
+} catch (Exception $e) {
+    //
+}
+
+try {
+    $db->query("SET SESSION max_execution_time=5000;");
+} catch (Exception $e) {
+    //
+}
+
+try {
+    $db->query("SET SESSION max_statement_time=5;");
+} catch (Exception $e) {
+    // Ignore we try to limit how long query can run
+}
+
+$append = erLhcoreClassSearchHandler::getURLAppendFromInput($filterParams['input_form']);
+
+$rowsNumber = null;
+
+if (empty($filterParams['filter'])) {
+    $rowsNumber = ($rowsNumber = erLhcoreClassModelChat::estimateRows()) && $rowsNumber > 10000 ? $rowsNumber : null;
+}
+
+try {
+
+    $filterCount = $filterParams['filter'];
+    unset($filterCount['sort']);
+
+    $pages = new lhPaginator();
+    $pages->items_total = ($hnmSortWarning ?? false) ? 0 : (is_numeric($rowsNumber) ? $rowsNumber : erLhcoreClassModelChat::getCount($filterCount));
+    $pages->translationContext = 'chat/pendingchats';
+    $pages->serverURL = erLhcoreClassDesign::baseurl('chat/list').$append;
+    if ($filterParams['input']->ipp > 0) {
+        $pages->setItemsPerPage($filterParams['input']->ipp);
+    } else {
+        $pages->setItemsPerPage(60);
+    }
+    $pages->paginate();
+    $tpl->set('pages',$pages);
+
+    if ($pages->items_total > 0) {
+        $listExtraParams = array('limit' => $pages->items_per_page, 'offset' => $pages->low);
+        if ($showMsgCount) {
+            $listExtraParams['select_columns'] = $allMsgCountQuery . ' as msg_all_count';
+        }
+        $items = erLhcoreClassModelChat::getList(array_merge($filterParams['filter'], $listExtraParams));
+        $iconsAdditional = erLhAbstractModelChatColumn::getList(array('ignore_fields' => array('position','conditions','column_identifier','enabled'), 'sort' => false, 'filter' => array('icon_mode' => 1, 'enabled' => 1, 'chat_enabled' => 1)));
+        $iconsAdditionalColumn = erLhAbstractModelChatColumn::getList(array('ignore_fields' => array('position','conditions','column_identifier','enabled'), 'sort' => 'position ASC, id ASC','filter' => array('enabled' => 1, 'icon_mode' => 0, 'chat_list_enabled' => 1)));
+
+        erLhcoreClassChat::prefillGetAttributes($items, array(), array(), array('additional_columns' => ($iconsAdditional + $iconsAdditionalColumn), 'do_not_clean' => true));
+        $tpl->set('icons_additional',$iconsAdditional);
+        $tpl->set('additional_chat_columns',$iconsAdditionalColumn);
+
+        erLhcoreClassChatEventDispatcher::getInstance()->dispatch('chat.list_items',array('filter' => & $items, 'uparams' => $Params['user_parameters_unordered']));
+
+        $subjectsChats = erLhAbstractModelSubjectChat::getList(array('filterin' => array('chat_id' => array_keys($items))));
+        erLhcoreClassChat::prefillObjects($subjectsChats, array(
+            array(
+                'subject_id',
+                'subject',
+                'erLhAbstractModelSubject::getList'
+            ),
+        ));
+        foreach ($subjectsChats as $chatSubject) {
+            if (!is_array($items[$chatSubject->chat_id]->subjects)) {
+                $items[$chatSubject->chat_id]->subjects = [];
+            }
+            $items[$chatSubject->chat_id]->subjects[] = $chatSubject->subject;
+        }
+
+        $tpl->set('items',$items);
+    }
+
+} catch (Exception $e) {
+    $tpl->set('takes_to_long',true);
+    $pages = new lhPaginator();
+    $pages->items_total = 0;
+    $pages->translationContext = 'chat/pendingchats';
+    $pages->serverURL = erLhcoreClassDesign::baseurl('chat/list').$append;
+    $pages->paginate();
+    $tpl->set('pages',$pages);
+}
+
+$filterParams['input_form']->form_action = erLhcoreClassDesign::baseurl('chat/list');
+$tpl->set('input',$filterParams['input_form']);
+$tpl->set('inputAppend',$append);
+$tpl->set('can_delete_global',$currentUser->hasAccessTo('lhchat','deleteglobalchat'));
+$tpl->set('can_delete_general',$currentUser->hasAccessTo('lhchat','deletechat'));
+$tpl->set('can_close_global',$currentUser->hasAccessTo('lhchat','allowcloseremote'));
+$tpl->set('current_user_id',$currentUser->getUserID());
+$tpl->set('show_msg_count', $showMsgCount ?? false);
+$tpl->set('hnm_sort_warning', $hnmSortWarning ?? false);
+
+$Result['content'] = $tpl->fetch();
+
+erLhcoreClassChatEventDispatcher::getInstance()->dispatch('chat.list_path',array('result' => & $Result));
+?>

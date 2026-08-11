@@ -146,15 +146,16 @@ export function DashboardThemeSettingsPage() {
         });
         if (res.ok) {
           const data = await res.json();
-          if (data.general) setGeneral(prev => ({ ...prev, ...data.general }));
-          if (data.email) setEmail(prev => ({ ...prev, ...data.email }));
-          if (data.payment) setPayment(prev => ({ ...prev, ...data.payment }));
-          if (data.paynow) setPaynow(prev => ({ ...prev, ...data.paynow }));
-          if (data.security) setSecurity(prev => ({ ...prev, ...data.security }));
-          if (data.affiliate) setAffiliate(prev => ({ ...prev, ...data.affiliate }));
-          if (data.agent) setAgent(prev => ({ ...prev, ...data.agent }));
-          if (data.social) setSocial(prev => ({ ...prev, ...data.social }));
-          if (data.packages) setPackages(data.packages);
+          const s = data.settings || data;
+          if (s.general) setGeneral(prev => ({ ...prev, ...s.general }));
+          if (s.email) setEmail(prev => ({ ...prev, ...s.email }));
+          if (s.payment) setPayment(prev => ({ ...prev, ...s.payment }));
+          if (s.paynow) setPaynow(prev => ({ ...prev, ...s.paynow }));
+          if (s.security) setSecurity(prev => ({ ...prev, ...s.security }));
+          if (s.affiliate) setAffiliate(prev => ({ ...prev, ...s.affiliate }));
+          if (s.agent) setAgent(prev => ({ ...prev, ...s.agent }));
+          if (s.social) setSocial(prev => ({ ...prev, ...s.social }));
+          if (s.packages) setPackages(s.packages);
         }
       } catch { /* use defaults */ }
     };

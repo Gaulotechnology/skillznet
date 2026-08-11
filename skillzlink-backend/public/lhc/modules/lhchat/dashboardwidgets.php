@@ -1,0 +1,192 @@
+<?php
+$tpl = erLhcoreClassTemplate::getInstance('lhchat/dashboardwidgets.tpl.php');
+
+$dashboardOrder = json_decode(erLhcoreClassModelUserSetting::getSetting('dwo', ''),true);
+
+if ($dashboardOrder === null) {
+	$dashboardOrder = json_decode(erLhcoreClassModelChatConfig::fetch('dashboard_order')->current_value,true);
+}
+
+if (!is_array($dashboardOrder)){
+    $dashboardOrder = json_decode('[["online_operators","departments_stats","online_visitors"],["group_chats","my_chats","pending_chats","transfered_chats"],["active_chats","bot_chats"]]',true);
+}
+
+$widgetsUser = array();
+foreach ($dashboardOrder as $widgetsColumn) {
+    foreach ($widgetsColumn as $widget) {
+        $widgetsUser[] = $widget;
+    }
+}
+
+// Exclude notifications icons
+$dwic = json_decode(erLhcoreClassModelUserSetting::getSetting('dwic', ''),true);
+
+if ($dwic === null) {
+    $dwic = [];
+}
+
+// Exclude notifications icons
+$notif_icons = json_decode(erLhcoreClassModelUserSetting::getSetting('dw_nic', ''),true);
+
+if ($notif_icons === null) {
+    $notif_icons = [];
+}
+
+$supportedWidgets = array();
+
+if (erLhcoreClassModelChatConfig::fetch('list_online_operators')->current_value == 1 && (erLhcoreClassUser::instance()->hasAccessTo('lhuser', 'userlistonline') || erLhcoreClassUser::instance()->hasAccessTo('lhuser', 'userlistonlineall'))) {
+    $supportedWidgets['online_operators'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets', 'Online operators');
+}
+
+if (erLhcoreClassModelUserSetting::getSetting('enable_active_list', 1)){
+    $supportedWidgets['active_chats'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Active chats');
+}
+
+if (erLhcoreClassUser::instance()->hasAccessTo('lhchat', 'use_onlineusers')) {
+    $supportedWidgets['online_visitors'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets', 'Online visitors');
+}
+
+if (erLhcoreClassUser::instance()->hasAccessTo('lhuser', 'canseedepartmentstats')){
+    $supportedWidgets['departments_stats'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Departments stats');
+}
+
+if (erLhcoreClassModelUserSetting::getSetting('enable_pending_list', 1)){
+    $supportedWidgets['pending_chats'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Pending chats');
+}
+
+$supportedWidgets['transfered_chats'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Transfered chats');
+
+if (erLhcoreClassUser::instance()->hasAccessTo('lhchat', 'subject_chats')) {
+    $supportedWidgets['subject_chats'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Ongoing trigger alerts');
+}
+
+if (erLhcoreClassUser::instance()->hasAccessTo('lhgroupchat', 'use')) {
+    $supportedWidgets['group_chats'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Group chats');
+}
+
+if (erLhcoreClassModelChatConfig::fetchCache('list_unread')->current_value == 1) {
+    $supportedWidgets['unread_chats'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Unread chats');
+}
+
+if (erLhcoreClassModelUserSetting::getSetting('enable_mchats_list', 1)){
+    $supportedWidgets['my_chats'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','My active and pending chats');
+}
+
+if (erLhcoreClassModelUserSetting::getSetting('enable_bot_list',1)){
+    $supportedWidgets['bot_chats'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Bot chats');
+}
+
+if (erLhcoreClassUser::instance()->hasAccessTo('lhmailconv', 'use_admin')) {
+    $supportedWidgets['my_mails'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','My active and new mails');
+    $supportedWidgets['amails'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Active mails');
+
+    if (erLhcoreClassUser::instance()->hasAccessTo('lhmailconv', 'use_pmailsw')) {
+        $supportedWidgets['pmails'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','New mails');
+    }
+
+    if (erLhcoreClassUser::instance()->hasAccessTo('lhmailconv', 'use_alarms')) {
+        $supportedWidgets['malarms'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Mail queue alarm');
+    }
+}
+
+if (erLhcoreClassUser::instance()->hasAccessTo('lhstatistic', 'dep_performance')) {
+    $supportedWidgets['dep_performance'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Department performance');
+}
+
+if (erLhcoreClassUser::instance()->hasAccessTo('lhstatistic', 'op_performance') || erLhcoreClassUser::instance()->hasAccessTo('lhstatistic', 'op_performance_write')) {
+    $supportedWidgets['op_performance'] = erTranslationClassLhTranslation::getInstance()->getTranslation('chat/dashboardwidgets','Operator performance');
+}
+
+erLhcoreClassChatEventDispatcher::getInstance()->dispatch('chat.dashboardwidgets',array('supported_widgets' => & $supportedWidgets));
+
+if (ezcInputForm::hasPostData()) {
+
+    if (!isset($_SERVER['HTTP_X_CSRFTOKEN']) || !$currentUser->validateCSFRToken($_SERVER['HTTP_X_CSRFTOKEN'])) {
+        die('Invalid CSRF Token');
+        exit;
+    }
+
+    $definition = array(
+        'WidgetsUser' => new ezcInputFormDefinitionElement(ezcInputFormDefinitionElement::OPTIONAL, 'unsafe_raw', null, FILTER_REQUIRE_ARRAY),
+        'ColumnNumber' => new ezcInputFormDefinitionElement(ezcInputFormDefinitionElement::OPTIONAL, 'int'),
+        'exclude_icon' => new ezcInputFormDefinitionElement(ezcInputFormDefinitionElement::OPTIONAL, 'unsafe_raw', null, FILTER_REQUIRE_ARRAY),
+        'notif_icons' => new ezcInputFormDefinitionElement(ezcInputFormDefinitionElement::OPTIONAL, 'unsafe_raw', null, FILTER_REQUIRE_ARRAY)
+    );
+    
+    $form = new ezcInputForm(INPUT_POST, $definition);
+    $Errors = array();
+    
+    if ($form->hasValidData('WidgetsUser') && ! empty($form->WidgetsUser)) {
+        
+        // Add new widgets
+        foreach ($form->WidgetsUser as $newUserWidget) {
+            if (! in_array($newUserWidget, $widgetsUser)) {
+                $dashboardOrder[0][] = $newUserWidget;
+                $widgetsUser[] = $newUserWidget;
+            }
+        }
+
+        // Remove removed widgets
+        foreach ($widgetsUser as $userWidget) {
+            if (! in_array($userWidget, $form->WidgetsUser)) {
+                foreach ($dashboardOrder as $key => $widgetsColumn) {
+                	if (in_array($userWidget, $widgetsColumn)) {
+                		unset($widgetsColumn[array_search($userWidget, $widgetsColumn)]);
+                		$dashboardOrder[$key] = $widgetsColumn;
+                	}
+                }
+                unset($widgetsUser[array_search($userWidget, $widgetsUser)]);
+            }
+        }
+
+        if ($form->ColumnNumber !== count($dashboardOrder)) {
+            if ($form->ColumnNumber > count($dashboardOrder)) {
+                for ($i = $form->ColumnNumber - count($dashboardOrder); $i > 0; $i--) {
+                    $dashboardOrder[] = array();
+                }
+            } elseif ($form->ColumnNumber < count($dashboardOrder)) {
+                $dashboardRemoved = array_splice($dashboardOrder,$form->ColumnNumber);
+
+                foreach ($dashboardRemoved as $items) {
+                    foreach ($items as $item) {
+                        $dashboardOrder[0][] = $item;
+                    }
+                }
+            }
+        }
+
+        // Store settings in user scope now
+        erLhcoreClassModelUserSetting::setSetting('dwo', json_encode(array_values($dashboardOrder)));
+
+        $tpl->set('updated', true);
+    }
+
+    if ($form->hasValidData('exclude_icon')) {
+        $dwic = array_values($form->exclude_icon);
+        erLhcoreClassModelUserSetting::setSetting('dwic', json_encode($dwic));
+    } else {
+        $dwic = [];
+        erLhcoreClassModelUserSetting::setSetting('dwic', json_encode($dwic));
+    }
+
+    if ($form->hasValidData('notif_icons')) {
+        $notif_icons = array_values($form->notif_icons);
+        erLhcoreClassModelUserSetting::setSetting('dw_nic', json_encode($notif_icons));
+    } else {
+        $notif_icons = [];
+        erLhcoreClassModelUserSetting::setSetting('dw_nic', json_encode($notif_icons));
+    }
+}
+
+$tpl->setArray(array(
+    'widgets' => $supportedWidgets,
+    'user_widgets' => $widgetsUser,
+    'columns_number' => count($dashboardOrder),
+    'exclude_icons' => $dwic,
+    'notif_icons' => $notif_icons,
+));
+
+echo $tpl->fetch();
+exit();
+
+?>

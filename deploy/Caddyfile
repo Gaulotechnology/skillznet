@@ -1,0 +1,83 @@
+# SkillzLink — Caddy Reverse Proxy
+# Auto-SSL via Let's Encrypt when a domain is configured
+
+skillzlink.co.za {
+    encode gzip zstd
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+
+    # Laravel API
+    handle /api/* {
+        reverse_proxy localhost:8000
+    }
+
+    # LHC — strip /lhc prefix before proxying, rewrite redirects back
+    handle_path /lhc/* {
+        reverse_proxy localhost:8080 {
+            header_down Location ^/ /lhc/
+        }
+    }
+    # LHC compiled templates (CSS/JS)
+    handle /cache/* {
+        reverse_proxy localhost:8080
+    }
+    # Legacy direct routes (also work)
+    handle /design/* {
+        reverse_proxy localhost:8080
+    }
+    handle /widgetrestapi/* {
+        reverse_proxy localhost:8080
+    }
+    handle /index.php/* {
+        reverse_proxy localhost:8080
+    }
+
+    # Frontend (React SPA)
+    handle {
+        reverse_proxy localhost:3009
+    }
+}
+
+# Fallback: serve on IP with full routing
+http:// {
+    encode gzip zstd
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+
+    handle /api/* {
+        reverse_proxy localhost:8000
+    }
+
+    # LHC — strip /lhc prefix before proxying, rewrite redirects back
+    handle_path /lhc/* {
+        reverse_proxy localhost:8080 {
+            header_down Location ^/ /lhc/
+        }
+    }
+    # LHC compiled templates (CSS/JS)
+    handle /cache/* {
+        reverse_proxy localhost:8080
+    }
+    # Legacy direct routes (also work)
+    handle /design/* {
+        reverse_proxy localhost:8080
+    }
+    handle /widgetrestapi/* {
+        reverse_proxy localhost:8080
+    }
+    handle /index.php/* {
+        reverse_proxy localhost:8080
+    }
+
+    handle {
+        reverse_proxy localhost:3009
+    }
+}

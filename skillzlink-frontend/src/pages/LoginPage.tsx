@@ -104,30 +104,6 @@ export function LoginPage() {
     }
   }
 
-  const handleVerifyOtp = async (e: FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    setMessage(null)
-    try {
-      const formattedPhone = formatPhone(phoneNumber)
-      const data = await authApi.verifyOtp(formattedPhone, otp)
-      const res = data as any
-      setToken(res.token)
-      setCurrentUser(res.user)
-      const role = res.user.role
-      if (role === "admin" || role === "super_admin") navigate("/dashboard/admin/overview")
-      else if (role === "provider") navigate("/dashboard/provider/overview")
-      else if (role === "agent") navigate("/dashboard/agent/overview")
-      else if (role === "affiliate") navigate("/dashboard/affiliate/overview")
-      else navigate("/dashboard/seeker/overview")
-    } catch {
-      setError("Invalid or expired OTP. Please try again.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="min-h-screen flex">
       {/* Left Panel */}
