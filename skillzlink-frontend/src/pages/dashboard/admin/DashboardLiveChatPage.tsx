@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { DashboardLayout } from "../../../components/layout/DashboardLayout"
 import { fetchJson } from "../../../services/api"
+import { LHC_BASE_URL } from "../../../config/lhc"
 
 const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:18080/api"
 
@@ -81,7 +82,7 @@ export function DashboardLiveChatPage() {
       }
     } catch {
       // Fallback to auto-login URL
-      window.open("http://localhost:18081/index.php/site_admin/user/autologinuser/bec30634d5782ed60b0927776a286b83", "_blank")
+      window.open(`${LHC_BASE_URL}/index.php/site_admin/user/autologinuser/bec30634d5782ed60b0927776a286b83`, "_blank")
     }
   }
 

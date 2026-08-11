@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { LHC_BASE_URL } from "../../config/lhc"
 
 export function LiveChatWidget() {
   const [open, setOpen] = useState(false)
@@ -8,7 +9,7 @@ export function LiveChatWidget() {
     const interval = setInterval(() => {
       const hash = localStorage.getItem("lhc_chat_hash")
       if (!hash) return
-      fetch(`http://localhost:18081/index.php/chat/checkchatstatus?hash=${hash}`)
+      fetch(`${LHC_BASE_URL}/index.php/chat/checkchatstatus?hash=${hash}`)
         .then(r => r.json())
         .then(d => { if (d.unread > 0) setUnread(d.unread) })
         .catch(() => {})
@@ -58,7 +59,7 @@ export function LiveChatWidget() {
         </button>
       </div>
       <iframe
-        src="http://localhost:18081/index.php/chat/start/(department)/1"
+        src={`${LHC_BASE_URL}/index.php/chat/start/(department)/1`}
         style={{ flex: 1, border: "none", width: "100%" }}
         title="Live Chat"
       />

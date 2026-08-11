@@ -52,6 +52,7 @@ services:
       LIVE_HELPER_CHAT_URL: ${LIVE_HELPER_CHAT_URL:-http://lhc:8080}
       LIVE_HELPER_CHAT_API_KEY: ${LIVE_HELPER_CHAT_API_KEY:-u6wHmj6B9fmmujDct4eZI6BfJnHRZIP3QEXIR3orjfiSAtmJhY93wEudGU3O6Yx93c8Y6sOqXuU9G5x2}
       LIVE_HELPER_CHAT_BOT_ID: ${LIVE_HELPER_CHAT_BOT_ID:-}
+      LHC_PUBLIC_URL: ${LHC_PUBLIC_URL:-http://localhost:18081}
       WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-skillzlink-verify-token}
     volumes:
       - ./skillzlink-backend:/var/www
@@ -67,6 +68,7 @@ services:
       - "5173:5173"
     environment:
       VITE_API_BASE_URL: http://localhost:18080/api
+      VITE_LHC_URL: http://localhost:18081
     volumes:
       - ./skillzlink-frontend:/app
       - /app/node_modules
