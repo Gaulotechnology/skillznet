@@ -141,9 +141,11 @@ class LhcService
 
         try {
             $response = Http::withBasicAuth('admin', $this->apiKey)
+                ->asForm()
                 ->post($this->baseUrl . '/restapi/addmsgadmin', [
                     'chat_id' => $chatId,
                     'msg' => $message,
+                    'sender' => 'bot',
                 ]);
 
             return $response->successful();
