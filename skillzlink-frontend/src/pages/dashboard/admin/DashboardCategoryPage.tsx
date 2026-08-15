@@ -154,13 +154,11 @@ export function DashboardCategoryPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 md:p-8 max-w-7xl mx-auto relative">
-        
+      <div className="p-8 relative">
+
         {/* Toast Notification */}
-        <div className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-[var(--accent-color)] text-white px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-2xl transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100 visible' : '-translate-y-10 opacity-0 invisible'}`}>
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${toastType === 'success' ? 'bg-emerald-500' : 'bg-[var(--accent-light)]0'}`}>
-            <i className={`lnr ${toastType === 'success' ? 'lnr-checkmark-circle' : 'lnr-warning'}`}></i>
-          </div>
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'} ${toastType === 'success' ? 'bg-[var(--accent-color)] text-white' : 'bg-red-600 text-white'}`}>
+          <i className={`lnr ${toastType === 'success' ? 'lnr-checkmark-circle' : 'lnr-warning'} text-sm`}></i>
           {toastMessage}
         </div>
 
@@ -168,37 +166,28 @@ export function DashboardCategoryPage() {
         {deleteModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteModalOpen(false)}></div>
-            <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full relative z-10 shadow-2xl animate-fade-in-up">
-              <div className="w-16 h-16 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center text-3xl mx-auto mb-4">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full relative z-10 shadow-xl">
+              <div className="w-14 h-14 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] flex items-center justify-center text-2xl mx-auto mb-4">
                 <i className="lnr lnr-trash"></i>
               </div>
-              <h3 className="text-2xl font-black text-[var(--text-primary)] text-center mb-2">Delete Category?</h3>
-              <p className="text-[var(--text-secondary)] text-center mb-8">This action cannot be undone. Any services tied to this category may be affected.</p>
-              
-              <div className="flex gap-4">
-                <button 
-                  onClick={() => setDeleteModalOpen(false)}
-                  className="flex-1 py-3 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-bold hover:bg-slate-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={handleDelete}
-                  className="flex-1 py-3 rounded-xl bg-[var(--accent-light)]0 text-white font-bold hover:bg-rose-600 shadow-lg shadow-lg transition-all active:scale-95"
-                >
-                  Yes, Delete
-                </button>
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] text-center mb-2">Delete Category?</h3>
+              <p className="text-sm text-[var(--text-secondary)] text-center mb-6">This action cannot be undone. Any services tied to this category may be affected.</p>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteModalOpen(false)} className="flex-1 py-2.5 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium text-sm hover:bg-slate-200 transition-colors">Cancel</button>
+                <button onClick={handleDelete} className="flex-1 py-2.5 rounded-lg bg-red-600 text-white font-medium text-sm hover:bg-red-700 transition-colors">Yes, Delete</button>
               </div>
             </div>
           </div>
         )}
 
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-[var(--text-primary)]">Service Categories</h2>
-          <p className="text-[var(--text-secondary)] mt-1">Manage the types of services professionals can offer.</p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-semibold text-[var(--text-primary)]">Service Categories</h1>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">Manage the types of services professionals can offer.</p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Add/Edit Form */}
           <div className="lg:col-span-1">

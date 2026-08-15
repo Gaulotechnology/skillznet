@@ -42,37 +42,41 @@ export function DashboardSmsLogsPage() {
 
   return (
     <DashboardLayout>
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      <div className="p-8 relative">
 
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-[var(--text-primary)]">SMS Logs</h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">All SMS messages sent from the platform</p>
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-[var(--text-primary)]">SMS Logs</h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">All SMS messages sent from the platform</p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Total Sent</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{logs.length}</p>
+          </div>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Delivered Rate</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{logs.length ? Math.round((delivered / logs.length) * 100) : 0}%</p>
+          </div>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Failed</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{failed}</p>
+          </div>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Monthly Cost</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">${monthlyCost.toFixed(2)}</p>
+          </div>
+        </div>
+
+        <DataTable columns={columns} data={logs} loading={loading} exportFileName="sms-logs" />
+
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Total Sent</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{logs.length}</p>
-        </div>
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Delivered Rate</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{logs.length ? Math.round((delivered / logs.length) * 100) : 0}%</p>
-        </div>
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Failed</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{failed}</p>
-        </div>
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Monthly Cost</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">${monthlyCost.toFixed(2)}</p>
-        </div>
-      </div>
-
-      <DataTable columns={columns} data={logs} loading={loading} exportFileName="sms-logs" />
     </DashboardLayout>
   );
 }

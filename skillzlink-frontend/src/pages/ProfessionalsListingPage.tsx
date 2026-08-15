@@ -342,14 +342,21 @@ export function ProfessionalsListingPage() {
           
           {/* Inline Search + Location */}
           <div className="flex flex-col sm:flex-row gap-3 mt-6 max-w-2xl">
-            <div className="relative flex-1">
-              <i className="lnr lnr-magnifier absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-              <input 
-                type="text" 
+            {/* Search — flex wrapper avoids absolute-icon + main.css padding conflict */}
+            <div
+              className="flex-1 flex items-center gap-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 shadow-sm transition-all focus-within:border-[var(--accent-color)] focus-within:ring-4 focus-within:ring-[var(--accent-light)]/50"
+              style={{ height: '48px' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[var(--text-secondary)]">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
                 placeholder="Search by name, skill, or keyword..."
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] text-sm placeholder-[var(--text-secondary)] outline-none focus:border-[var(--accent-color)] focus:ring-4 focus:ring-[var(--accent-light)]/50 transition-all shadow-sm"
+                style={{ border: 'none', outline: 'none', background: 'transparent', padding: 0, height: '100%', width: '100%', fontSize: '14px', color: 'var(--text-primary)' }}
+                className="placeholder-[var(--text-secondary)]"
               />
             </div>
             <div className="relative" ref={cityRef}>
@@ -357,9 +364,13 @@ export function ProfessionalsListingPage() {
                 onClick={() => { setCityDropdownOpen(prev => !prev); setMoreFiltersOpen(false); setSortDropdownOpen(false) }}
                 className={primaryChip(cityFilter !== "All")}
               >
-                <i className={`text-sm ${cityFilter === "Near Me" ? "lnr lnr-pointer" : "lnr lnr-map-marker"}`} />
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 10c0 6-8 13-8 13S4 16 4 10a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
+                </svg>
                 <span>{cityFilter === "All" ? "Location" : cityFilter === "Near Me" ? "Near Me" : cityFilter}</span>
-                <i className={`lnr lnr-chevron-down text-[10px] transition-transform duration-200 ${cityDropdownOpen ? "rotate-180" : ""}`} />
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${cityDropdownOpen ? "rotate-180" : ""}`}>
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
               </button>
               <div className={`${dropdownPanel} ${cityDropdownOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"} transition-all duration-200 origin-top-right`}>
                 <button

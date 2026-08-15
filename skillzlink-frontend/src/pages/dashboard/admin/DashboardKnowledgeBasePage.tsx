@@ -67,60 +67,64 @@ export function DashboardKnowledgeBasePage() {
 
   return (
     <DashboardLayout>
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
-      )}
-      {notice && (
-        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700">{notice}</div>
-      )}
+      <div className="p-8 relative">
 
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-semibold text-[var(--text-primary)]">Knowledge Base</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-1">
-            Vector data the AI assistant retrieves answers from (RAG)
-          </p>
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+        )}
+        {notice && (
+          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700">{notice}</div>
+        )}
+
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-xl font-semibold text-[var(--text-primary)]">Knowledge Base</h1>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
+              Vector data the AI assistant retrieves answers from (RAG)
+            </p>
+          </div>
+          <button
+            onClick={rebuild}
+            disabled={rebuilding}
+            className="px-4 py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] transition-colors flex items-center gap-2 disabled:opacity-60"
+          >
+            <i className={`lnr lnr-sync ${rebuilding ? "animate-spin" : ""}`}></i>
+            {rebuilding ? "Rebuilding…" : "Rebuild Index"}
+          </button>
         </div>
-        <button
-          onClick={rebuild}
-          disabled={rebuilding}
-          className="px-4 py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] transition-colors flex items-center gap-2 disabled:opacity-60"
-        >
-          <i className={`lnr lnr-sync ${rebuilding ? "animate-spin" : ""}`}></i>
-          {rebuilding ? "Rebuilding…" : "Rebuild Index"}
-        </button>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Documents</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{stats.documents}</p>
+          </div>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Chunks</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{stats.chunks}</p>
+          </div>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Vectors</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{stats.vectors}</p>
+          </div>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Last Sync</p>
+            <p className="text-lg font-semibold text-[var(--text-primary)] mt-1">
+              {stats.last_sync ? new Date(stats.last_sync).toLocaleString() : "—"}
+            </p>
+          </div>
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={documents}
+          loading={loading}
+          title="Indexed Documents"
+          exportFileName="knowledge-base"
+          emptyIcon="lnr lnr-book"
+          emptyMessage="No documents indexed yet. Click 'Rebuild Index' to generate the knowledge base."
+        />
+
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Documents</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{stats.documents}</p>
-        </div>
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Chunks</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{stats.chunks}</p>
-        </div>
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Vectors</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{stats.vectors}</p>
-        </div>
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Last Sync</p>
-          <p className="text-lg font-semibold text-[var(--text-primary)] mt-1">
-            {stats.last_sync ? new Date(stats.last_sync).toLocaleString() : "—"}
-          </p>
-        </div>
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={documents}
-        loading={loading}
-        title="Indexed Documents"
-        exportFileName="knowledge-base"
-        emptyIcon="lnr lnr-book"
-        emptyMessage="No documents indexed yet. Click 'Rebuild Index' to generate the knowledge base."
-      />
     </DashboardLayout>
   );
 }

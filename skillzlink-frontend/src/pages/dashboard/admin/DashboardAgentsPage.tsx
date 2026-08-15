@@ -64,38 +64,43 @@ export function DashboardAgentsPage() {
 
   return (
     <DashboardLayout>
-      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-[var(--accent-color)] text-white" : "bg-red-600 text-white"}`}>
-        <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
-        {toastMessage}
-      </div>
+      <div className="p-8 relative">
 
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {error}
+        {/* Toast */}
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-[var(--accent-color)] text-white" : "bg-red-600 text-white"}`}>
+          <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
+          {toastMessage}
         </div>
-      )}
 
-      <DataTable
-        columns={columns}
-        data={agents}
-        loading={loading}
-        title="Agents"
-        subtitle="Manage agents assigned to seekers"
-        exportFileName="agents"
-        headerActions={
-          <button className="px-4 py-2 bg-[var(--accent-color)] text-white text-sm font-medium rounded-xl hover:bg-[var(--accent-hover)] transition-colors" onClick={() => toast("Add Agent modal coming soon.")}>
-            Add Agent
-          </button>
-        }
-        actions={(row) => (
-          <div className="flex items-center gap-1">
-            <button onClick={() => navigate(`/dashboard/admin/agents/${row.id}`)} title="View details" className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-color)] rounded"><i className="lnr lnr-eye text-sm"></i></button>
-            <button onClick={() => toast("Edit modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded"><i className="lnr lnr-pencil text-sm"></i></button>
-            <button onClick={() => handleSuspend(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-orange-600 rounded"><i className="lnr lnr-power-switch text-sm"></i></button>
-            <button onClick={() => handleDelete(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-red-600 rounded"><i className="lnr lnr-trash2 text-sm"></i></button>
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            {error}
           </div>
         )}
-      />
+
+        <DataTable
+          columns={columns}
+          data={agents}
+          loading={loading}
+          title="Agents"
+          subtitle="Manage agents assigned to seekers"
+          exportFileName="agents"
+          headerActions={
+            <button className="px-4 py-2 bg-[var(--accent-color)] text-white text-sm font-medium rounded-xl hover:bg-[var(--accent-hover)] transition-colors" onClick={() => toast("Add Agent modal coming soon.")}>
+              Add Agent
+            </button>
+          }
+          actions={(row) => (
+            <div className="flex items-center gap-1">
+              <button onClick={() => navigate(`/dashboard/admin/agents/${row.id}`)} title="View details" className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-color)] rounded"><i className="lnr lnr-eye text-sm"></i></button>
+              <button onClick={() => toast("Edit modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded"><i className="lnr lnr-pencil text-sm"></i></button>
+              <button onClick={() => handleSuspend(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-orange-600 rounded"><i className="lnr lnr-power-switch text-sm"></i></button>
+              <button onClick={() => handleDelete(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-red-600 rounded"><i className="lnr lnr-trash2 text-sm"></i></button>
+            </div>
+          )}
+        />
+
+      </div>
     </DashboardLayout>
   );
 }

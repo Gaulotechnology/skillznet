@@ -268,21 +268,27 @@ export function DataTable<T extends Record<string, any>>({
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Search */}
-          <div className="relative">
-            <i className="lnr lnr-magnifier absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+          <div
+            className="flex items-center gap-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl px-3 transition-all focus-within:border-[var(--accent-color)] focus-within:ring-2 focus-within:ring-[var(--accent-light)]"
+            style={{ height: '40px', width: '224px' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-400">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+            </svg>
             <input
               type="text"
               placeholder="Search…"
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-56 pl-9 pr-4 py-2 text-sm bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] transition-all placeholder:text-[var(--text-secondary)] text-[var(--text-primary)]"
+              style={{ border: 'none', outline: 'none', background: 'transparent', padding: 0, height: '100%', width: '100%', fontSize: '14px', color: 'var(--text-primary)' }}
+              className="placeholder-[var(--text-secondary)]"
             />
             {search && (
               <button
                 onClick={() => { setSearch(""); setPage(1); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="shrink-0 text-gray-400 hover:text-gray-600 leading-none"
               >
-                <i className="lnr lnr-cross text-xs"></i>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
               </button>
             )}
           </div>

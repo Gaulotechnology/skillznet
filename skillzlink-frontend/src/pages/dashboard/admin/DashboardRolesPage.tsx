@@ -127,33 +127,33 @@ export function DashboardRolesPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-12 bg-[var(--bg-primary)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-[var(--border-color)]">
+      <div className="p-8 relative">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[var(--border-color)] mb-6">
           <div>
-            <h2 className="text-3xl font-semibold text-[var(--text-primary)] tracking-tight">Roles & Permissions</h2>
-            <p className="text-[var(--text-secondary)] mt-2 text-sm font-medium">Control access rights across the platform</p>
+            <h1 className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">Roles &amp; Permissions</h1>
+            <p className="text-[var(--text-secondary)] mt-1 text-sm">Control access rights across the platform</p>
           </div>
-          <button onClick={openCreateRole} className="px-6 py-3 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-xl transition-colors text-sm">
+          <button onClick={openCreateRole} className="px-4 py-2 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-xl transition-colors text-sm">
             Create Role
           </button>
         </div>
 
         {/* Roles List */}
         {roles.length > 0 && (
-          <div className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] overflow-hidden">
-            <div className="px-8 py-5 border-b border-[var(--border-color)]">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)]">Managed Roles</h3>
+          <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-hidden mb-6">
+            <div className="px-5 py-3 border-b border-[var(--border-color)]">
+              <h3 className="text-sm font-semibold text-[var(--text-primary)]">Managed Roles</h3>
             </div>
-            <div className="p-4">
+            <div className="divide-y divide-[var(--border-color)]">
               {roles.map((role: any) => (
-                <div key={role.id} className="flex items-center justify-between p-4 rounded-xl hover:bg-[var(--bg-secondary)] transition-colors">
+                <div key={role.id} className="flex items-center justify-between px-5 py-3 hover:bg-[var(--bg-secondary)] transition-colors">
                   <div>
-                    <span className="font-semibold text-[var(--text-primary)] capitalize">{role.name}</span>
-                    {role.description && <span className="text-sm text-[var(--text-secondary)] ml-3">{role.description}</span>}
+                    <span className="font-medium text-sm text-[var(--text-primary)] capitalize">{role.name}</span>
+                    {role.description && <span className="text-xs text-[var(--text-secondary)] ml-3">{role.description}</span>}
                   </div>
                   <div className="flex gap-3">
-                    <button onClick={() => openEditRole(role)} className="text-sm font-medium text-[var(--text-primary)] underline hover:text-[var(--accent-color)]">Edit</button>
-                    <button onClick={() => handleDeleteRole(role.id)} className="text-sm font-medium text-rose-600 underline hover:text-rose-700">Delete</button>
+                    <button onClick={() => openEditRole(role)} className="text-xs font-medium text-[var(--text-primary)] underline hover:text-[var(--accent-color)]">Edit</button>
+                    <button onClick={() => handleDeleteRole(role.id)} className="text-xs font-medium text-rose-600 underline hover:text-rose-700">Delete</button>
                   </div>
                 </div>
               ))}
@@ -162,66 +162,58 @@ export function DashboardRolesPage() {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="w-12 h-12 border-4 border-[var(--accent-color)] border-t-transparent rounded-full animate-spin"></div>
+          <div className="flex items-center justify-center h-40">
+            <div className="w-10 h-10 border-4 border-[var(--accent-color)] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : (
-          <div className="space-y-10">
+          <div className="space-y-5">
             {roleNames.map(role => (
-              <div key={role} className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] overflow-hidden">
-                <div className="px-8 py-5 flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] flex items-center justify-center">
-                      <i className="lnr lnr-user text-lg"></i>
+              <div key={role} className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] overflow-hidden">
+                <div className="px-5 py-3.5 flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-secondary)]/40">
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-full bg-[var(--bg-secondary)] text-[var(--text-secondary)] flex items-center justify-center">
+                      <i className="lnr lnr-user text-sm"></i>
                     </div>
-                    <h3 className="text-xl font-semibold text-[var(--text-primary)] capitalize">{role}</h3>
+                    <h3 className="text-sm font-semibold text-[var(--text-primary)] capitalize">{role}</h3>
                   </div>
-                  <button 
+                  <button
                     onClick={() => handleSave(role)}
                     disabled={saving}
-                    className="px-6 py-2.5 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-lg transition-colors text-sm"
+                    className="px-4 py-1.5 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-semibold rounded-lg transition-colors text-xs"
                   >
                     Save
                   </button>
                 </div>
-                
-                <div className="p-8 space-y-10">
+
+                <div className="p-5 space-y-5">
                   {Object.entries(groupedPermissions).map(([category, perms]) => (
                     <div key={category}>
-                      <h4 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider mb-6 pb-2 border-b border-[var(--border-color)]">
+                      <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-3 pb-1.5 border-b border-[var(--border-color)]">
                         {category}
                       </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-2 gap-x-3">
                         {perms.map(perm => {
                           const isChecked = (rolePermissions[role] || []).includes(perm.id);
                           return (
-                            <label key={perm.id} className="flex items-start gap-4 p-4 rounded-xl hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer border border-transparent">
-                              <div className="pt-0.5">
-                                <div className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${isChecked ? 'bg-[var(--accent-color)] border-[var(--accent-color)]' : 'bg-transparent border-2 border-[var(--border-color)]'}`}>
-                                  {isChecked && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                            <label key={perm.id} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer">
+                              <div className="pt-0.5 shrink-0">
+                                <div className={`w-4 h-4 rounded flex items-center justify-center transition-colors ${isChecked ? 'bg-[var(--accent-color)] border-[var(--accent-color)]' : 'bg-transparent border-2 border-[var(--border-color)]'}`}>
+                                  {isChecked && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                                 </div>
-                                <input 
-                                  type="checkbox" 
-                                  className="hidden" 
-                                  checked={isChecked}
-                                  onChange={() => handleToggle(role, perm.id)}
-                                />
+                                <input type="checkbox" className="hidden" checked={isChecked} onChange={() => handleToggle(role, perm.id)} />
                               </div>
                               <div>
-                                <div className="font-semibold text-[var(--text-primary)] text-sm leading-tight">{perm.label}</div>
-                                <div className="text-xs text-[var(--text-secondary)] font-mono mt-1">{perm.key}</div>
+                                <div className="font-medium text-[var(--text-primary)] text-xs leading-tight">{perm.label}</div>
+                                <div className="text-[10px] text-[var(--text-secondary)] font-mono mt-0.5">{perm.key}</div>
                               </div>
                             </label>
                           );
                         })}
                       </div>
-
                     </div>
                   ))}
                   {permissions.length === 0 && (
-                    <div className="text-center py-8 text-[var(--text-secondary)] font-medium">
-                      No permissions defined in the database.
-                    </div>
+                    <div className="text-center py-6 text-sm text-[var(--text-secondary)]">No permissions defined in the database.</div>
                   )}
                 </div>
               </div>

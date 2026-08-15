@@ -66,54 +66,58 @@ export function DashboardMatchingPage() {
 
   return (
     <DashboardLayout>
-      <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-[var(--accent-color)] text-white" : "bg-red-600 text-white"}`}>
-        <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
-        {toastMessage}
-      </div>
+      <div className="p-8 relative">
 
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {error}
+        <div className={`fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium shadow-lg transition-all duration-300 ${showToast ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"} ${toastType === "success" ? "bg-[var(--accent-color)] text-white" : "bg-red-600 text-white"}`}>
+          <i className={`lnr ${toastType === "success" ? "lnr-checkmark-circle" : "lnr-warning"}`}></i>
+          {toastMessage}
         </div>
-      )}
 
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-[var(--text-primary)]">On-Demand Matching</h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">Service requests from seekers awaiting provider matching</p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Total Requests</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{requests.length}</p>
-        </div>
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Pending</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{pending}</p>
-        </div>
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Matched Today</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{matchedToday}</p>
-        </div>
-        <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
-          <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Avg Match Time</p>
-          <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">2.4h</p>
-        </div>
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={requests}
-        loading={loading}
-        exportFileName="matching-requests"
-        actions={(row) => (
-          <div className="flex items-center gap-1">
-            <button onClick={() => toast("Match modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-green-600 rounded" title="Match"><i className="lnr lnr-sync text-sm"></i></button>
-            <button onClick={() => toast("View details coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded" title="View"><i className="lnr lnr-eye text-sm"></i></button>
-            {(row.status === "Pending" || row.status === "pending") && <button onClick={() => handleCancel(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-red-600 rounded" title="Cancel"><i className="lnr lnr-cross-circle text-sm"></i></button>}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            {error}
           </div>
         )}
-      />
+
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-[var(--text-primary)]">On-Demand Matching</h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">Service requests from seekers awaiting provider matching</p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Total Requests</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{requests.length}</p>
+          </div>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Pending</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{pending}</p>
+          </div>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Matched Today</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">{matchedToday}</p>
+          </div>
+          <div className="bg-white border border-[var(--border-color)] rounded-lg p-4">
+            <p className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">Avg Match Time</p>
+            <p className="text-2xl font-semibold text-[var(--text-primary)] mt-1">2.4h</p>
+          </div>
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={requests}
+          loading={loading}
+          exportFileName="matching-requests"
+          actions={(row) => (
+            <div className="flex items-center gap-1">
+              <button onClick={() => toast("Match modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-green-600 rounded" title="Match"><i className="lnr lnr-sync text-sm"></i></button>
+              <button onClick={() => toast("View details coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded" title="View"><i className="lnr lnr-eye text-sm"></i></button>
+              {(row.status === "Pending" || row.status === "pending") && <button onClick={() => handleCancel(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-red-600 rounded" title="Cancel"><i className="lnr lnr-cross-circle text-sm"></i></button>}
+            </div>
+          )}
+        />
+
+      </div>
     </DashboardLayout>
   );
 }

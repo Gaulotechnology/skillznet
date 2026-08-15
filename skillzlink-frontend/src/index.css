@@ -76,3 +76,32 @@ body {
 .border-collapse tbody td {
   background: transparent;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Input reset — public/css/main.css lines 94-130 globally forces
+   `padding: 10px 20px`, `height: 50px`, `display: inline-block` on every
+   input, which breaks Tailwind pl-* / py-* / h-* / w-full utilities and
+   causes icon+input layouts to look broken (icon sits on top of text).
+───────────────────────────────────────────────────────────────────────────── */
+input.pl-4  { padding-left: 1rem !important; }
+input.pl-5  { padding-left: 1.25rem !important; }
+input.pl-6  { padding-left: 1.5rem !important; }
+input.pl-8  { padding-left: 2rem !important; }
+input.pl-9  { padding-left: 2.25rem !important; }
+input.pl-10 { padding-left: 2.5rem !important; }
+input.pl-11 { padding-left: 2.75rem !important; }
+input.pl-12 { padding-left: 3rem !important; }
+input.pr-3  { padding-right: 0.75rem !important; }
+input.pr-4  { padding-right: 1rem !important; }
+input.pr-6  { padding-right: 1.5rem !important; }
+input.py-2  { padding-top: 0.5rem !important;   padding-bottom: 0.5rem !important; }
+input.py-2\.5 { padding-top: 0.625rem !important; padding-bottom: 0.625rem !important; }
+input.py-3  { padding-top: 0.75rem !important;  padding-bottom: 0.75rem !important; }
+input.py-3\.5 { padding-top: 0.875rem !important; padding-bottom: 0.875rem !important; }
+input.py-4  { padding-top: 1rem !important;     padding-bottom: 1rem !important; }
+input.w-full  { width: 100% !important; display: block !important; }
+input.h-auto  { height: auto !important; }
+input.h-10    { height: 2.5rem !important; }
+input.h-11    { height: 2.75rem !important; }
+input.h-12    { height: 3rem !important; }
+

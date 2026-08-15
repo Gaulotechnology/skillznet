@@ -89,15 +89,21 @@ export function DashboardHelpSupportPage() {
             <p className="text-[var(--text-secondary)] mt-1 font-medium">Find answers to common questions or contact our support team.</p>
           </div>
           
-          <div className="relative w-full md:w-72">
-            <input 
-              type="text" 
-              placeholder="Search help articles..." 
+          <div
+            className="flex items-center gap-3 w-full md:w-72 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl px-4 transition-all focus-within:border-[var(--accent-color)] focus-within:ring-2 focus-within:ring-[var(--accent-light)] shadow-sm"
+            style={{ height: '48px' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[var(--text-secondary)]">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search help articles..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] outline-none transition-all font-medium text-[var(--text-primary)] shadow-sm"
+              style={{ border: 'none', outline: 'none', background: 'transparent', padding: 0, height: '100%', width: '100%', fontSize: '14px', color: 'var(--text-primary)', fontWeight: 500 }}
+              className="placeholder-[var(--text-secondary)]"
             />
-            <i className="lnr lnr-magnifier absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] font-bold text-lg"></i>
           </div>
         </div>
 

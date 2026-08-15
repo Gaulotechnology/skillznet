@@ -78,20 +78,25 @@ export function Footer() {
 
           <form onSubmit={handleSubscribe} className="w-full lg:w-auto lg:min-w-[400px]">
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <MailIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#717171]" />
+              {/* Flex-wrapper: icon + input as siblings — avoids main.css padding override */}
+              <div
+                className="flex-1 flex items-center gap-3 bg-white border border-[#dddddd] rounded-xl px-4 transition-all duration-300 focus-within:border-[var(--accent-color)] focus-within:shadow-[0_0_0_3px_rgba(255,56,92,0.12)]"
+                style={{ height: '52px' }}
+              >
+                <MailIcon size={16} className="shrink-0 text-[#717171]" />
                 <input
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full bg-white border border-[#dddddd] rounded-xl pl-12 pr-4 py-3.5 text-[#222222] placeholder:text-[#717171] focus:outline-none focus:border-[var(--accent-color)] text-[14px] transition-colors duration-300"
+                  style={{ border: 'none', outline: 'none', background: 'transparent', padding: 0, height: '100%', width: '100%', fontSize: '14px', color: '#222222' }}
+                  className="placeholder-[#717171]"
                 />
               </div>
               <button
                 type="submit"
-                className="text-white px-8 py-3.5 rounded-xl font-bold text-[14px] transition-all active:scale-95 whitespace-nowrap hover:shadow-lg hover:-translate-y-0.5"
-                style={{ backgroundColor: primary }}
+                className="text-white px-8 rounded-xl font-bold text-[14px] transition-all active:scale-95 whitespace-nowrap hover:shadow-lg hover:-translate-y-0.5"
+                style={{ backgroundColor: primary, height: '52px' }}
               >
                 Subscribe
               </button>
@@ -102,6 +107,7 @@ export function Footer() {
               </p>
             )}
           </form>
+
         </div>
 
         {/* Main Links Grid */}
@@ -109,93 +115,89 @@ export function Footer() {
           {/* Company */}
           <div className="space-y-4">
             <h4 className="text-[#222222] font-semibold text-[14px]">Company</h4>
-            <ul className="space-y-3 list-none p-0 m-0">
+            <div className="flex flex-col gap-3">
               {[
                 { name: "Home", path: "/" },
                 { name: "How it works", path: "/how-it-works" },
                 { name: "About", path: "/about" },
                 { name: "Careers", path: "/careers" },
               ].map((l) => (
-                <li key={l.name}>
-                  <Link to={l.path} onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors text-[14px] font-medium block">
+                <div key={l.name}>
+                  <Link to={l.path} onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors text-[14px] font-medium">
                     {l.name}
                   </Link>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
 
           {/* Discovery */}
           <div className="space-y-4">
             <h4 className="text-[#222222] font-semibold text-[14px]">Discovery</h4>
-            <ul className="space-y-3 list-none p-0 m-0">
+            <div className="flex flex-col gap-3">
               {cityLinks.map((city) => (
-                <li key={city}>
-                  <Link to={`/nearby-professionals?city=${encodeURIComponent(city.toLowerCase())}`} onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors text-[14px] font-medium block">
+                <div key={city}>
+                  <Link to={`/nearby-professionals?city=${encodeURIComponent(city.toLowerCase())}`} onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors text-[14px] font-medium">
                     {city}
                   </Link>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
 
           {/* Explore */}
           <div className="space-y-4">
             <h4 className="text-[#222222] font-semibold text-[14px]">Explore</h4>
-            <ul className="space-y-3 list-none p-0 m-0">
+            <div className="flex flex-col gap-3">
               {serviceLinks.map((s) => (
-                <li key={s.slug}>
-                  <Link to={`/nearby-professionals?service=${s.slug}`} onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors text-[14px] font-medium block">
+                <div key={s.slug}>
+                  <Link to={`/nearby-professionals?service=${s.slug}`} onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors text-[14px] font-medium">
                     {s.name}
                   </Link>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
 
           {/* Support */}
           <div className="space-y-4">
             <h4 className="text-[#222222] font-semibold text-[14px]">Support</h4>
-            <ul className="space-y-3 text-[14px] font-medium list-none p-0 m-0">
+            <div className="flex flex-col gap-3 text-[14px] font-medium">
               {contact.phone && (
-                <li>
-                  <a href={`tel:${contact.phone.replace(/[^0-9+]/g, "")}`} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors block">
+                <div>
+                  <a href={`tel:${contact.phone.replace(/[^0-9+]/g, "")}`} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors">
                     {contact.phone}
                   </a>
-                </li>
+                </div>
               )}
               {contact.email && (
-                <li>
-                  <a href={`mailto:${contact.email}`} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors block">
+                <div>
+                  <a href={`mailto:${contact.email}`} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors">
                     {contact.email}
                   </a>
-                </li>
+                </div>
               )}
-              <li>
-                <span className="text-[#717171] block">Zimbabwe</span>
-              </li>
-            </ul>
+              <div>
+                <span className="text-[#717171]">Zimbabwe</span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
         <div className="py-6 border-t border-[#dddddd]/60 flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Left: copyright & legal */}
-          <ul className="flex flex-wrap items-center justify-center md:justify-start gap-x-3 text-[#222222] text-[14px] font-medium list-none p-0 m-0 leading-none">
-            <li>© {year} SkillzLink</li>
-            <li className="hidden md:inline text-[16px] leading-[0]">·</li>
-            <li>
-              <Link to="/terms-and-conditions" onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline block leading-none">
-                Terms
-              </Link>
-            </li>
-            <li className="hidden md:inline text-[16px] leading-[0]">·</li>
-            <li>
-              <Link to="/privacy-policy" onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline block leading-none">
-                Privacy
-              </Link>
-            </li>
-          </ul>
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-3 text-[#222222] text-[14px] font-medium leading-none">
+            <span>© {year} SkillzLink</span>
+            <span className="hidden md:inline text-[16px] leading-[0]">·</span>
+            <Link to="/terms-and-conditions" onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline leading-none">
+              Terms
+            </Link>
+            <span className="hidden md:inline text-[16px] leading-[0]">·</span>
+            <Link to="/privacy-policy" onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline leading-none">
+              Privacy
+            </Link>
+          </div>
 
           {/* Right: location & socials */}
           <div className="flex items-center gap-6">
