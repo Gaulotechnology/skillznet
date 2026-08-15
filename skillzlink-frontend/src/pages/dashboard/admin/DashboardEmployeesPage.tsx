@@ -3,6 +3,7 @@ import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { adminApi, setToken, setCurrentUser } from "../../../services/api";
 import { useNavigate } from "react-router-dom";
 import { DataTable, type Column } from "../../../components/shared/DataTable";
+import { UserAvatar } from "../../../components/shared/UserAvatar";
 
 export function DashboardEmployeesPage() {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -83,13 +84,7 @@ export function DashboardEmployeesPage() {
       label: "Employee",
       render: (u) => (
         <div className="flex items-center gap-3">
-          {u.avatar ? (
-            <img src={u.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm font-medium text-[var(--text-secondary)]">
-              {u.name.charAt(0).toUpperCase()}
-            </div>
-          )}
+          <UserAvatar src={u.avatar} name={u.name} size={32} />
           <div>
             <span className="text-sm font-medium text-[var(--text-primary)]">{u.name}</span>
             <span className="text-xs text-[var(--text-secondary)] font-normal ml-1.5">#{String(u.id).padStart(6, '0')}</span>
