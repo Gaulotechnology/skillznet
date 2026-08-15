@@ -77,4 +77,21 @@ class User extends Authenticatable
             ->pluck('permissions.key')
             ->toArray();
     }
+
+    /**
+     * Return the user's avatar, falling back to a deterministic profile
+     * portrait when none has been uploaded (mirrors provider profile images).
+     */
+    public function getAvatarAttribute($value): string
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+
+        $id = (int) ($this->id ?? 0);
+        $gender = ($id % 2 === 0) ? 'men' : 'women';
+        $n = ($id % 99) + 1;
+
+        return "https://randomuser.me/api/portraits/{$gender}/{$n}.jpg";
+    }
 }
