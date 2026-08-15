@@ -49,7 +49,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[var(--bg-primary)]/95 backdrop-blur-md border-b border-[var(--border-color)]" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <header className="sticky top-0 z-50 bg-white border-b border-[var(--border-color)]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
         {/* Logo */}
         <Link to="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2.5 group">
