@@ -1,12 +1,12 @@
 import { useState } from "react"
 import { useEffect } from "react"
 import { Hero } from "./components/landing/Hero"
+import { WhatsAppRegistrationBanner } from "./components/landing/WhatsAppRegistrationBanner"
 import { FeaturedProfessionals } from "./components/landing/FeaturedProfessionals"
 import { PopularServices } from "./components/landing/PopularServices"
 import { HowItWorks } from "./components/landing/HowItWorks"
 import { JoinInfo } from "./components/landing/JoinInfo"
 import { PlatformFeatures } from "./components/landing/PlatformFeatures"
-import { LimitlessExperience } from "./components/landing/LimitlessExperience"
 import { SkillsFooter } from "./components/landing/SkillsFooter"
 import { ApplyBannerSection } from "./pages/ApplyBannerSection"
 import { LiveChatWidget } from "./components/common/LiveChatWidget"
@@ -66,12 +66,12 @@ function App() {
   return (
     <>
       <Hero />
+      <WhatsAppRegistrationBanner />
       <FeaturedProfessionals />
       <PopularServices />
       <HowItWorks />
       <JoinInfo />
       <PlatformFeatures showPlans={showVisibilityLevel} />
-      <LimitlessExperience />
       {showJoinNetwork && <ApplyBannerSection />}
       <SkillsFooter />
       <LiveChatWidget />
