@@ -10,10 +10,12 @@ class RagService
 {
     private string $deepseekApiKey;
     private string $deepseekBaseUrl = 'https://api.deepseek.com/v1';
+    private string $siteUrl;
 
     public function __construct()
     {
         $this->deepseekApiKey = env('DEEPSEEK_API_KEY', '');
+        $this->siteUrl = rtrim(env('SITE_URL', 'http://localhost:5173'), '/');
     }
 
     // ─── Ingestion ──────────────────────────────────────────────────────────
@@ -256,7 +258,9 @@ You are a helpful customer support assistant for SkillzLink, a Zimbabwean platfo
 
 Use ONLY the context provided below to answer the question. If the context doesn't contain enough information, say so honestly and suggest the visitor browse the website or chat with a human agent.
 
-Keep answers friendly, concise, and helpful. Use emojis sparingly.
+Keep answers friendly, concise, and helpful. Do not use emojis.
+
+The SkillzLink website is hosted at {$this->siteUrl}. When you reference any page, always give the full URL (for example, {$this->siteUrl}/nearby-professionals, {$this->siteUrl}/register, {$this->siteUrl}/how-it-works). Never give only a relative path like /nearby-professionals.
 
 Context:
 {$context}

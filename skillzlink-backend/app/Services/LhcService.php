@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -134,23 +135,123 @@ class LhcService
 
     /**
      * Send a bot response back to an LHC chat (admin-side).
+     *
+     * Idempotent (deduplicates identical messages within a window) and
+     * retries transient failures with exponential backoff — mirrors the
+     * push-based pattern used by the IVA proxy (broadcast_tool).
      */
-    public function sendBotMessage(int $chatId, string $message): bool
+    public function sendBotMessage(int $chatId, string $message, array $meta = []): bool
     {
         if (!$this->available) return false;
 
-        try {
-            $response = Http::withBasicAuth('admin', $this->apiKey)
-                ->asForm()
-                ->post($this->baseUrl . '/restapi/addmsgadmin', [
-                    'chat_id' => $chatId,
-                    'msg' => $message,
-                    'sender' => 'bot',
-                ]);
+        // Idempotency — prevent duplicate bubbles from replayed/duplicate jobs.
+        $messageId = md5($chatId . '|' . $message);
+        $cacheKey = "lhc:sent:{$messageId}";
+        if (Cache::has($cacheKey)) {
+            Log::info('LHC: duplicate bot message skipped', ['chat_id' => $chatId]);
+            return true;
+        }
 
-            return $response->successful();
+        $payload = [
+            'chat_id' => $chatId,
+            'msg' => $message,
+            'sender' => 'bot',
+        ];
+
+        if (!empty($meta)) {
+            $payload['meta_msg'] = json_encode($meta);
+        }
+
+        $attempts = 3;
+        $sleepMs = 500;
+
+        for ($i = 0; $i < $attempts; $i++) {
+            try {
+                $response = Http::withBasicAuth('admin', $this->apiKey)
+                    ->asForm()
+                    ->timeout(10)
+                    ->post($this->baseUrl . '/restapi/addmsgadmin', $payload);
+
+                if ($response->successful()) {
+                    Cache::put($cacheKey, true, 3600);
+                    return true;
+                }
+
+                $status = $response->status();
+
+                // 4xx (except 408/429) are non-retryable
+                if ($status >= 400 && $status < 500 && !in_array($status, [408, 429])) {
+                    Log::warning("LHC addmsgadmin failed (non-retryable): HTTP {$status} " . $response->body());
+                    return false;
+                }
+
+                Log::warning("LHC addmsgadmin failed (retryable): HTTP {$status}", ['attempt' => $i + 1]);
+            } catch (\Exception $e) {
+                Log::warning("LHC addmsgadmin attempt " . ($i + 1) . " failed: " . $e->getMessage());
+            }
+
+            if ($i < $attempts - 1) {
+                usleep($sleepMs * 1000);
+                $sleepMs *= 2;
+            }
+        }
+
+        return false;
+    }
+
+    // ─── Chat Variables & Handoff (native DB, mirrors IVA proxy) ──────────────
+
+    /**
+     * Read the chat variables JSON for a chat.
+     */
+    public function fetchChatVariables(int $chatId): array
+    {
+        try {
+            $json = DB::table('lh_chat')->where('id', $chatId)->value('chat_variables');
+            if ($json) {
+                $parsed = json_decode($json, true);
+                if (is_array($parsed)) {
+                    return $parsed;
+                }
+            }
         } catch (\Exception $e) {
-            Log::warning('LHC bot message failed: ' . $e->getMessage());
+            Log::warning('LHC fetch chat variables failed: ' . $e->getMessage());
+        }
+
+        return [];
+    }
+
+    /**
+     * Merge and persist chat variables JSON for a chat.
+     */
+    public function updateChatVariables(int $chatId, array $variables): bool
+    {
+        try {
+            $merged = array_merge($this->fetchChatVariables($chatId), $variables);
+
+            return DB::table('lh_chat')
+                ->where('id', $chatId)
+                ->update(['chat_variables' => json_encode($merged)]) > 0;
+        } catch (\Exception $e) {
+            Log::warning('LHC update chat variables failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Transfer a bot chat back to pending so a human operator can pick it up.
+     */
+    public function transferChatToPending(int $chatId): bool
+    {
+        try {
+            return DB::table('lh_chat')
+                ->where('id', $chatId)
+                ->update([
+                    'status' => 0, // erLhcoreClassModelChat::STATUS_PENDING_CHAT
+                    'pnd_time' => time(),
+                ]) > 0;
+        } catch (\Exception $e) {
+            Log::warning('LHC transfer to pending failed: ' . $e->getMessage());
             return false;
         }
     }

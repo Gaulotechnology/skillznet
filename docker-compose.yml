@@ -45,6 +45,7 @@ services:
       DB_USERNAME: skillzlink
       DB_PASSWORD: skillzlink
       CACHE_STORE: redis
+      REDIS_CLIENT: phpredis
       REDIS_HOST: redis
       REDIS_PORT: 6379
       SESSION_DRIVER: database
@@ -90,7 +91,7 @@ services:
       LHC_DB_DATABASE: skillzlink
       LHC_DB_USERNAME: skillzlink
       LHC_DB_PASSWORD: skillzlink
-      LHC_DEBUG: "true"
+      LHC_DEBUG: "false"
     volumes:
       - ./skillzlink-backend:/var/www
     ports:

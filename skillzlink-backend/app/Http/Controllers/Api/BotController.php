@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessAIQuery;
+use App\Services\HiringService;
 use App\Services\LhcService;
 use App\Services\RagService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Bot webhook endpoint — called by LHC's Generic Bot or any external bot system.
@@ -20,7 +22,7 @@ use Illuminate\Http\Request;
  */
 class BotController extends Controller
 {
-    public function webhook(Request $request, RagService $rag, LhcService $lhc): JsonResponse
+    public function webhook(Request $request, RagService $rag, LhcService $lhc, HiringService $hiring): JsonResponse
     {
         $validated = $request->validate([
             'message' => ['required', 'string', 'max:5000'],
@@ -34,7 +36,7 @@ class BotController extends Controller
         $visitorName = $validated['visitor_name'] ?? 'Visitor';
 
         // ── Step 1: Bot quick rules (FAST — returns immediately) ───────────
-        $botReply = $this->processBotRules($question);
+        $botReply = $this->processBotRules($question, $hiring, $chatId);
 
         if ($botReply && !$botReply['fallback']) {
             return $this->respond($botReply['text'], $botReply['escalate'] ?? false, [
@@ -44,6 +46,9 @@ class BotController extends Controller
 
         // ── Step 2: AI / RAG (ASYNC — dispatches queue job, pushes response when ready) ──
         if ($chatId) {
+            // The "AI thinking" state is set inside ProcessAIQuery (async) so we
+            // do NOT write to lh_chat here — doing so synchronously deadlocks
+            // against LHC's own message-processing transaction.
             ProcessAIQuery::dispatch($question, $chatId, $visitorName);
 
             return $this->respond(
@@ -64,22 +69,23 @@ class BotController extends Controller
      * Simple keyword-based bot rules for common SkillzLink topics.
      * Returns null if no rule matches.
      */
-    private function processBotRules(string $message): ?array
+    private function processBotRules(string $message, HiringService $hiring, ?int $chatId): ?array
     {
         $msg = mb_strtolower(trim($message));
 
-        // Greetings
-        if (preg_match('/^(hi|hello|hey|good morning|good afternoon|good evening|yo|sup)\b/', $msg)) {
+        // Greetings — only match standalone greetings (short message), so
+        // "hi i would love to hire a plumber" routes to the find/AI path instead.
+        if (preg_match('/^(hi|hello|hey|good morning|good afternoon|good evening|yo|sup)\b/', $msg) && mb_strlen($msg) <= 20) {
             return [
-                'text' => "Hello! 👋 I'm the SkillzLink assistant. I can help you find professionals, become a provider, learn about pricing, or answer any questions. What can I help with?",
+                'text' => "Hello! I'm the SkillzLink assistant. I can help you find professionals, become a provider, learn about pricing, or answer any questions. What can I help with?",
                 'escalate' => false,
                 'fallback' => false,
                 'quickReplies' => [
-                    '🔍 Find a Professional',
-                    '📝 Become a Provider',
-                    '💰 Pricing & Cost',
-                    '📖 How It Works',
-                    '💬 Chat with a human',
+                    'Find a Professional',
+                    'Become a Provider',
+                    'Pricing & Cost',
+                    'How It Works',
+                    'Chat with a human',
                 ],
             ];
         }
@@ -87,26 +93,91 @@ class BotController extends Controller
         // Chat with AI — direct handler so it never goes quiet
         if (preg_match('/chat with ai\b|\bchat.?gpt\b|\bai assist\b|\bask ai\b/i', $msg)) {
             return [
-                'text' => "🤖 You're now chatting with the SkillzLink AI assistant! Ask me anything about our platform — finding professionals, becoming a provider, pricing, safety, how it works, or any other question you have.",
+                'text' => "You can type your query and our AI assistant will help you with anything you need help on.",
                 'escalate' => false,
                 'fallback' => false,
                 'quickReplies' => [
-                    '🔍 Find a Professional',
-                    '📝 Become a Provider',
-                    '💰 Pricing & Cost',
-                    '📖 How It Works',
-                    '💬 Chat with a human',
+                    'Find a Professional',
+                    'Become a Provider',
+                    'Pricing & Cost',
+                    'How It Works',
+                    'Chat with a human',
                 ],
             ];
         }
 
-        // Find a professional
-        if (preg_match('/find|hire|need|looking for|search|plumber|electrician|cleaner|tutor|mechanic|carpenter|painter|gardener/i', $msg)) {
+        // Hiring follow-up — remember the last suggestion and let the visitor
+        // select a candidate ("the 1st option", "give me Dr. Toney Zieme") or
+        // switch city without losing their service.
+        //
+        // NOTE: state is kept in the application cache, NOT in LHC's
+        // chat_variables. The webhook runs synchronously inside LHC's
+        // message-processing request, and writing to lh_chat there deadlocks
+        // against LHC's own row lock.
+        if ($chatId) {
+            $state = Cache::get($this->hiringStateKey($chatId), []);
+            $candidates = $state['candidates'] ?? [];
+
+            if (!empty($candidates)) {
+                $city = $hiring->detectCity($message);
+                $service = $state['service'] ?? null;
+
+                // "show me in Bulawayo" → same service, new city
+                if ($city && $service && !$hiring->detectService($message)) {
+                    $result = $hiring->searchCandidates($service . ' in ' . $city);
+                    if ($result && !empty($result['candidates'])) {
+                        Cache::put($this->hiringStateKey($chatId), [
+                            'candidates' => $result['candidates'],
+                            'service'    => $result['service'],
+                            'city'       => $result['city'],
+                        ], now()->addHours(2));
+
+                        return [
+                            'text' => $this->formatCandidates($result),
+                            'escalate' => false,
+                            'fallback' => false,
+                        ];
+                    }
+                }
+
+                // "1", "the first one", "give me Dr. Toney Zieme"
+                $selected = $hiring->selectCandidate($message, $candidates);
+                if ($selected) {
+                    return [
+                        'text' => $this->formatSelectedCandidate($selected),
+                        'escalate' => false,
+                        'fallback' => false,
+                        'quickReplies' => ['Find a Professional', 'Chat with a human'],
+                    ];
+                }
+            }
+        }
+
+        // Find a professional — search real providers and suggest candidates.
+        $hiringResult = $hiring->searchCandidates($message);
+        if ($hiringResult && !empty($hiringResult['candidates'])) {
+            if ($chatId) {
+                Cache::put($this->hiringStateKey($chatId), [
+                    'candidates' => $hiringResult['candidates'],
+                    'service'    => $hiringResult['service'],
+                    'city'       => $hiringResult['city'],
+                ], now()->addHours(2));
+            }
+
+            return [
+                'text' => $this->formatCandidates($hiringResult),
+                'escalate' => false,
+                'fallback' => false,
+            ];
+        }
+
+        // Find a professional (generic browse fallback)
+        if (preg_match('/find|looking for|search|browse|professional/i', $msg)) {
             return [
                 'text' => "You can browse our verified professionals at /nearby-professionals. Filter by city, category, experience level, and budget to find the perfect match. All professionals are ID-verified for your safety.",
                 'escalate' => false,
                 'fallback' => false,
-                'quickReplies' => ['🔍 Browse Now', '📝 Post a Request', '💬 Chat with a human'],
+                'quickReplies' => ['Browse Now', 'Post a Request', 'Chat with a human'],
             ];
         }
 
@@ -116,7 +187,7 @@ class BotController extends Controller
                 'text' => "Great! You can register as a provider in a few minutes. Just provide your name, phone number, service category, and National ID for verification. Once approved, clients will find and message you directly on WhatsApp. Register at /register.",
                 'escalate' => false,
                 'fallback' => false,
-                'quickReplies' => ['📝 Register Now', '📖 How It Works', '💬 Chat with a human'],
+                'quickReplies' => ['Register Now', 'How It Works', 'Chat with a human'],
             ];
         }
 
@@ -126,7 +197,7 @@ class BotController extends Controller
                 'text' => "SkillzLink is free to browse and register. Professionals set their own rates (typically $15–$50/hr depending on the service). You negotiate directly on WhatsApp — no hidden fees from us.",
                 'escalate' => false,
                 'fallback' => false,
-                'quickReplies' => ['🏷️ View Professionals', '💬 Chat with a human'],
+                'quickReplies' => ['View Professionals', 'Chat with a human'],
             ];
         }
 
@@ -136,7 +207,7 @@ class BotController extends Controller
                 'text' => "It's simple: 1) Browse professionals near you, 2) Check their profiles, ratings, and verification, 3) Click 'Reveal Contact' to get their WhatsApp and chat directly. No app download needed! Learn more at /how-it-works.",
                 'escalate' => false,
                 'fallback' => false,
-                'quickReplies' => ['📖 Full Guide', '🔍 Find a Pro', '💬 Chat with a human'],
+                'quickReplies' => ['Full Guide', 'Find a Pro', 'Chat with a human'],
             ];
         }
 
@@ -146,12 +217,13 @@ class BotController extends Controller
                 'text' => "Safety is our priority. Every professional must provide their National ID for verification before being listed. Verified providers get a blue checkmark badge. We show real client reviews and success rates so you can hire with confidence.",
                 'escalate' => false,
                 'fallback' => false,
-                'quickReplies' => ['🛡️ Trust & Safety', '💬 Chat with a human'],
+                'quickReplies' => ['Trust & Safety', 'Chat with a human'],
             ];
         }
 
-        // Human escalation
-        if (preg_match('/human|agent|person|real|talk to|speak|support|help/i', $msg)) {
+        // Human escalation — only when the visitor explicitly asks for a human/agent.
+        // ("help" is intentionally excluded so "help me hire" routes to the AI.)
+        if (preg_match('/human|agent|real person|talk to|speak to|support|contact us/i', $msg)) {
             return [
                 'text' => "Let me connect you with a member of our team. Someone will be with you shortly. In the meantime, feel free to describe what you need help with.",
                 'escalate' => true,
@@ -174,5 +246,74 @@ class BotController extends Controller
             'escalate' => $escalate,
             'mode' => $escalate ? 'human_escalation' : 'bot',
         ], $extra));
+    }
+
+    /**
+     * Redis cache key holding the short-lived hiring conversation state for a chat.
+     */
+    private function hiringStateKey(int $chatId): string
+    {
+        return "hiring:state:{$chatId}";
+    }
+
+    /**
+     * Format candidate providers into a readable suggestion list.
+     */
+    private function formatCandidates(array $result): string
+    {
+        $service = $result['service'];
+        $city = $result['city'];
+        $candidates = $result['candidates'];
+        $siteUrl = rtrim(env('SITE_URL', 'http://localhost:5173'), '/');
+
+        $label = ucfirst(str_replace('-', ' ', $service));
+        $cityText = $city ? " in {$city}" : '';
+
+        $lines = ["I found " . count($candidates) . " {$label} professional(s){$cityText} for you:"];
+        $lines[] = '';
+
+        foreach (array_slice($candidates, 0, 5) as $i => $c) {
+            $verified = $c['identity_verified'] ? ' (verified)' : '';
+            $rate = $c['hourly_rate'] > 0 ? sprintf('$%.2f/hr', $c['hourly_rate']) : 'rate on request';
+            $rating = $c['rating'] > 0 ? number_format($c['rating'], 1) . '/5' : 'new';
+            $lines[] = ($i + 1) . ". {$c['name']}{$verified} - {$rating}, {$rate}";
+        }
+
+        $lines[] = '';
+        $lines[] = "You can browse their full profiles and reveal contact details at {$siteUrl}/nearby-professionals. Reply with a number for more details, or tell me a different city.";
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Format the details of a single selected candidate and guide the next step.
+     */
+    private function formatSelectedCandidate(array $c): string
+    {
+        $siteUrl = rtrim(env('SITE_URL', 'http://localhost:5173'), '/');
+
+        $name = $c['name'] ?? 'Professional';
+        $verified = !empty($c['identity_verified']) ? ' (ID verified)' : '';
+        $rate = !empty($c['hourly_rate']) ? sprintf('$%.2f/hr', (float) $c['hourly_rate']) : 'rate on request';
+        $rating = !empty($c['rating']) ? number_format((float) $c['rating'], 1) . '/5' : 'new';
+
+        $lines = ["Here are the details for {$name}{$verified}:"];
+        $lines[] = "- Rating: {$rating}";
+        $lines[] = "- Rate: {$rate}";
+
+        if (!empty($c['completed_services'])) {
+            $lines[] = "- Jobs completed: {$c['completed_services']}";
+        }
+        if (!empty($c['success_rate'])) {
+            $lines[] = "- Success rate: {$c['success_rate']}%";
+        }
+        if (!empty($c['description'])) {
+            $lines[] = "- About: {$c['description']}";
+        }
+
+        $lines[] = '';
+        $lines[] = "To get {$name}'s WhatsApp number, log in and reveal their contact on their profile at {$siteUrl}/nearby-professionals. Reply with another number for a different candidate, or ask for a human.";
+
+        return implode("\n", $lines);
     }
 }
