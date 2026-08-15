@@ -33,11 +33,13 @@ export function DashboardRolesPage() {
 
   const fetchData = async () => {
     try {
-      const permRes = await fetchJson<any>(apiBaseUrl() + '/admin/permissions');
+      const [permRes, rolesRes] = await Promise.all([
+        fetchJson<any>(apiBaseUrl() + '/admin/permissions'),
+        adminApi.getRoles(),
+      ]);
       setPermissions(permRes.permissions || []);
       setRolePermissions(permRes.role_permissions || {});
-      // Dynamic roles are not implemented in the backend, fallback to default roles
-      setRoles([]);
+      setRoles(rolesRes.roles || []);
     } catch (err) {
       showToast("Failed to load data", "error");
     } finally {

@@ -87,8 +87,8 @@ docker exec skillzlink-backend php artisan config:cache
 docker exec skillzlink-backend php artisan route:cache
 
 # ── Seed Data ────────────────────────────────────────────────────────────────
-echo "[seed] Seeding data..."
-docker exec skillzlink-backend php artisan db:seed --force --class=ServiceCategorySeeder 2>/dev/null || echo "  (seeder not found, skipping)"
+echo "[seed] Seeding roles & permissions..."
+docker exec skillzlink-backend php artisan db:seed --force --class=PermissionsSeeder 2>/dev/null || echo "  (seeder not found, skipping)"
 
 # ── Caddy ────────────────────────────────────────────────────────────────────
 echo "[caddy] Deploying Caddy config..."

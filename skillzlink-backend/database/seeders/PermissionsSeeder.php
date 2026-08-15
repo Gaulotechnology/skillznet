@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class PermissionsSeeder extends Seeder
 {
+    use WithoutModelEvents;
+
     /**
      * Run the database seeds.
      */
@@ -25,11 +27,39 @@ class PermissionsSeeder extends Seeder
             ['key' => 'manage_roles', 'label' => 'Manage Roles & Permissions', 'category' => 'System Config'],
             ['key' => 'view_financials', 'label' => 'View Financial Data', 'category' => 'Reports'],
         ];
-        
+
         foreach ($permissions as $perm) {
             DB::table('permissions')->updateOrInsert(
                 ['key' => $perm['key']],
                 ['label' => $perm['label'], 'category' => $perm['category'], 'created_at' => now(), 'updated_at' => now()]
+            );
+        }
+
+        // Base roles shown in the roles & permissions admin page.
+        $roles = [
+            ['name' => 'admin', 'description' => 'Platform administrator'],
+            ['name' => 'agent', 'description' => 'Onboarding agent'],
+            ['name' => 'affiliate', 'description' => 'Referral partner'],
+            ['name' => 'provider', 'description' => 'Service provider'],
+            ['name' => 'seeker', 'description' => 'Service seeker / client'],
+        ];
+
+        foreach ($roles as $role) {
+            DB::table('roles')->updateOrInsert(
+                ['name' => $role['name']],
+                ['description' => $role['description'], 'created_at' => now(), 'updated_at' => now()]
+            );
+        }
+
+        // Grant the admin role every permission by default so admins can manage
+        // the platform out of the box. Other roles start empty and can be
+        // configured from the admin dashboard.
+        $permissionIds = DB::table('permissions')->pluck('id');
+
+        foreach ($permissionIds as $permissionId) {
+            DB::table('role_permissions')->updateOrInsert(
+                ['role' => 'admin', 'permission_id' => $permissionId],
+                ['created_at' => now(), 'updated_at' => now()]
             );
         }
     }
