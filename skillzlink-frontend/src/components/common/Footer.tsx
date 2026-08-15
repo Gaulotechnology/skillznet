@@ -60,7 +60,7 @@ export function Footer() {
   ]
 
   return (
-    <footer className="w-full bg-[#F7F7F7] border-t border-[#ebebeb] relative">
+    <footer className="w-full clear-both bg-[#F7F7F7] border-t border-[#ebebeb] relative">
       <div className="max-w-6xl mx-auto px-6">
         {/* Newsletter & Brand Area */}
         <div className="py-12 border-b border-[#dddddd]/60 flex flex-col lg:flex-row gap-10 items-start justify-between">
