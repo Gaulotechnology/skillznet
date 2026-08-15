@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\PaynowController;
 use App\Http\Controllers\Api\RagController;
 use App\Http\Controllers\Api\BotController;
 use App\Http\Controllers\Api\WhatsAppWebhookController;
+use App\Http\Controllers\Api\InfobipController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['ok' => true]));
@@ -95,6 +96,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
         // Placeholder: store ticket in DB for future implementation
         return response()->json(['message' => 'Ticket received', 'ticket_id' => rand(1000, 9999)]);
     });
+
+    // ─── WhatsApp (Infobip) ────────────────────────────────────────────────
+    Route::post('/whatsapp/send', [InfobipController::class, 'send']);
 
     // ─── PayNow payments ───────────────────────────────────────────────────
     Route::post('/paynow/initiate', [PaynowController::class, 'initiate']);

@@ -47,6 +47,7 @@
       ),
       'extensions' => 
       array (
+        0 => 'infobip',
       ),
       'available_site_access' => 
       array (
