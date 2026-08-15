@@ -70,10 +70,33 @@ const categoryIcons: Record<string, string> = {
   "Driver": "lnr lnr-car",
 }
 
+function normalizeSearch(s: string): string {
+  return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim()
+}
+
+// Map category slug → common terms people actually type when searching
+const CATEGORY_ALIASES: Record<string, string[]> = {
+  "plumbing": ["plumber", "plumbers", "pipe", "leak", "drain", "toilet"],
+  "electrical": ["electrician", "electricians", "wiring", "power"],
+  "cleaning": ["cleaner", "cleaners", "maid", "housekeeping"],
+  "tutoring": ["tutor", "tutors", "teacher", "lessons"],
+  "carpentry": ["carpenter", "carpenters", "woodwork", "furniture"],
+  "painting": ["painter", "painters"],
+  "gardening": ["gardener", "gardeners", "landscaping", "lawn"],
+  "appliance-repair": ["appliance", "appliances", "repair", "repairs", "technician"],
+  "mechanic": ["mechanic", "mechanics", "car", "auto", "motor"],
+  "roofing": ["roofer", "roofers", "roof"],
+}
+
+function categoryNameFor(slug: string, categories: any[]): string {
+  return categories.find(c => c.slug === slug)?.name ?? ""
+}
+
 export function ProfessionalsListingPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const initialCity = searchParams.get("city") || "All"
-  const initialService = searchParams.get("service") || "All"
+  const rawService = searchParams.get("service") || "All"
+  const initialService = rawService.toLowerCase() === "all" ? "All" : rawService
   const initialSearch = searchParams.get("q") || ""
 
   const [professionals, setProfessionals] = useState<PublicProvider[]>([])
@@ -158,11 +181,28 @@ export function ProfessionalsListingPage() {
   }, [categoryFilter, cityFilter, searchText, experienceFilter, hourlyRateFilter, successRateFilter, setSearchParams])
 
   const filteredProfessionals = professionals.filter(pro => {
-    const cat = pro.service_category ?? ""
+    const catSlug = (pro.service_category ?? "").toLowerCase()
+    const catName = categoryNameFor(catSlug, categories)
+    const aliases = CATEGORY_ALIASES[catSlug] ?? []
     const loc = pro.location ?? ""
     const yoe = Number(pro.years_of_experience ?? 0)
 
-    const matchesCategory = categoryFilter === "All" || cat.toLowerCase().includes(categoryFilter.toLowerCase())
+    // Everything a user might search for on this provider (slug + name + aliases + free text + location)
+    const searchIndex = normalizeSearch([
+      pro.service_category, catName, pro.name, pro.description,
+      (pro.skills ?? []).join(" "), loc, ...aliases,
+    ].join(" "))
+
+    let matchesCategory = true
+    if (categoryFilter !== "All") {
+      const f = normalizeSearch(categoryFilter)
+      if (f) {
+        const catIndex = normalizeSearch([pro.service_category, catName, ...aliases].join(" "))
+        matchesCategory = f.split(" ").filter(Boolean).every(t => catIndex.includes(t))
+          || catIndex.replace(/\s+/g, "").includes(f.replace(/\s+/g, ""))
+      }
+    }
+
     const matchesCity = cityFilter === "All" || cityFilter === "Near Me" || loc.toLowerCase().includes(cityFilter.toLowerCase())
 
     let matchesExperience = true
@@ -192,10 +232,11 @@ export function ProfessionalsListingPage() {
       else if (successRateFilter === "70% & Above") matchesSuccess = sr >= 70
     }
 
-    const matchesSearch = !searchText ||
-      pro.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      cat.toLowerCase().includes(searchText.toLowerCase()) ||
-      (pro.skills ?? []).some(s => s.toLowerCase().includes(searchText.toLowerCase()))
+    let matchesSearch = true
+    if (searchText) {
+      const tokens = normalizeSearch(searchText).split(" ").filter(Boolean)
+      matchesSearch = tokens.length > 0 && tokens.every(t => searchIndex.includes(t))
+    }
 
     return matchesCategory && matchesCity && matchesExperience && matchesRate && matchesSuccess && matchesSearch
   })
