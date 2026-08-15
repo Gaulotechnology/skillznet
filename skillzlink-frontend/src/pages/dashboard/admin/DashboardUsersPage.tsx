@@ -31,7 +31,9 @@ export function DashboardUsersPage() {
   const fetchUsers = () => {
     setLoading(true);
     adminApi.getUsers().then(res => {
-      setUsers(res.users || []);
+      // Providers are managed on the Professionals page — exclude them here to
+      // avoid the "provider" / "professional" role being shown in two places.
+      setUsers((res.users || []).filter((u: any) => u.role !== 'provider'));
     }).catch(() => showNotification("Failed to load users.", "error"))
       .finally(() => setLoading(false));
   };
@@ -74,7 +76,7 @@ export function DashboardUsersPage() {
   };
 
   const getRoleLabel = (r: string) => ({
-    admin: "Admin", super_admin: "Super Admin", provider: "Provider",
+    admin: "Admin", super_admin: "Super Admin", provider: "Professional",
     agent: "Agent", affiliate: "Affiliate", seeker: "Seeker"
   }[r] ?? r);
 
@@ -269,7 +271,6 @@ export function DashboardUsersPage() {
                   <label className="block text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-1.5">Role</label>
                   <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} disabled={formLoading} className="w-full bg-white border border-[var(--border-color)] text-[var(--text-primary)] text-sm rounded-lg px-4 py-2.5 outline-none focus:border-[var(--accent-color)] transition-colors">
                     <option value="seeker">Seeker</option>
-                    <option value="provider">Provider</option>
                     <option value="agent">Agent</option>
                     <option value="admin">Admin</option>
                   </select>

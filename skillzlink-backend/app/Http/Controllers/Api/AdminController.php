@@ -49,7 +49,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:admin,seeker,provider',
+            'role' => 'required|in:admin,seeker,provider,agent,affiliate',
         ]);
 
         $user = User::create([
@@ -77,7 +77,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|string|email|max:255|unique:users,email,' . $id,
-            'role' => 'sometimes|in:admin,seeker,provider',
+            'role' => 'sometimes|in:admin,seeker,provider,agent,affiliate',
             'is_active' => 'sometimes|boolean',
             'password' => 'nullable|string|min:8',
         ]);
