@@ -516,6 +516,19 @@ export const adminApi = {
     fetchJson<{ message: string; chunks_indexed: number }>(`${API_BASE_URL}/admin/knowledge-base/rebuild`, {
       method: "POST",
     }),
+
+  getApplications: () =>
+    fetchJson<{ applications: any[]; stats: { total: number; pending: number; approved: number; rejected: number } }>(
+      `${API_BASE_URL}/admin/applications`
+    ),
+  approveApplication: (id: number) =>
+    fetchJson<{ message: string; user?: any; temp_password?: string }>(`${API_BASE_URL}/admin/applications/${id}/approve`, {
+      method: "POST",
+    }),
+  rejectApplication: (id: number) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/admin/applications/${id}/reject`, {
+      method: "POST",
+    }),
 }
 
 // ─── Affiliate endpoints (auth required) ─────────────────────────────────────
