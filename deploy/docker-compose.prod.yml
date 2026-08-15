@@ -65,6 +65,9 @@ services:
       LHC_BASE_URL: ${LHC_BASE_URL:-http://lhc:8080}
       LHC_API_KEY: ${LHC_API_KEY}
       LHC_PUBLIC_URL: ${LHC_PUBLIC_URL:-http://62.238.107.93/lhc}
+      INFOBIP_API_KEY: ${INFOBIP_API_KEY:-59c28a39f3f7df59a1195e77d5d58427-e938ca84-d4c6-47b1-a619-663f64275c68}
+      INFOBIP_BASE_URL: ${INFOBIP_BASE_URL:-https://x1l2r4.api.infobip.com}
+      INFOBIP_SENDER_NUMBER: ${INFOBIP_SENDER_NUMBER:-27780179816}
     ports:
       - "127.0.0.1:8000:80"
     networks:
