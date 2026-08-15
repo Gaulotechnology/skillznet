@@ -28,6 +28,17 @@ class AdminController extends Controller
         ]);
     }
 
+    public function showUser(Request $request, int $id): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $user = User::with(['provider', 'seeker'])->findOrFail($id);
+
+        return response()->json(['user' => $user]);
+    }
+
     public function storeUser(Request $request): JsonResponse
     {
         if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
@@ -135,6 +146,18 @@ class AdminController extends Controller
         $provider = Provider::with('user')->findOrFail($id);
         $provider->user->update(['is_active' => false]);
         return response()->json(['message' => 'Provider suspended']);
+    }
+
+    public function showProvider(Request $request, int $id): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $provider = Provider::with(['user', 'documents', 'experiences', 'portfolios', 'services', 'ratings.seeker.user'])
+            ->findOrFail($id);
+
+        return response()->json(['provider' => $provider]);
     }
 
     public function subscriptions(Request $request): JsonResponse

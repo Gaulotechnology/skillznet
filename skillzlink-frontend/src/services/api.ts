@@ -379,6 +379,7 @@ export const providerApi = {
 // ─── Admin endpoints (auth required) ─────────────────────────────────────────
 export const adminApi = {
   getUsers: () => fetchJson<{ users: any[] }>(`${API_BASE_URL}/admin/users`),
+  getUser: (id: number) => fetchJson<{ user: any }>(`${API_BASE_URL}/admin/users/${id}`),
   createUser: (payload: any) =>
     fetchJson<{ message: string; user: any }>(`${API_BASE_URL}/admin/users`, {
       method: "POST", body: JSON.stringify(payload)
@@ -424,6 +425,7 @@ export const adminApi = {
     fetchJson<{ message: string }>(`${API_BASE_URL}/admin/provider/${id}/verify`, { method: "PUT" }),
   suspendProvider: (id: number) =>
     fetchJson<{ message: string }>(`${API_BASE_URL}/admin/provider/${id}/suspend`, { method: "PUT" }),
+  getProvider: (id: number) => fetchJson<{ provider: any }>(`${API_BASE_URL}/admin/provider/${id}`),
   getSubscriptions: () => fetchJson<{ subscriptions: any }>(`${API_BASE_URL}/admin/subscriptions`),
   getStats: () => fetchJson<any>(`${API_BASE_URL}/admin/stats`),
 

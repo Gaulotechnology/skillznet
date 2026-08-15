@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { adminApi, publicApi } from "../../../services/api";
 import { DataTable, type Column } from "../../../components/shared/DataTable";
+import { UserAvatar } from "../../../components/shared/UserAvatar";
 
 export function DashboardProfessionalsPage() {
+  const navigate = useNavigate();
   const [providers, setProviders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,11 +73,7 @@ export function DashboardProfessionalsPage() {
       render: (p) => (
         <div className="flex items-center gap-3">
           <div className="relative">
-            <img
-              src={p.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=f3f4f6&color=4b5563&bold=true`}
-              alt={p.name}
-              className="w-8 h-8 rounded-full object-cover shrink-0 bg-[var(--bg-secondary)]"
-            />
+            <UserAvatar src={p.image || p.profile_image} name={p.name} size={32} />
             {p.id_verified && (
               <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center text-white">
                 <i className="lnr lnr-checkmark text-[7px]"></i>
@@ -166,6 +165,9 @@ export function DashboardProfessionalsPage() {
           emptyMessage="No professionals found"
           actions={(p) => (
             <div className="flex items-center justify-end gap-1">
+              <button onClick={() => navigate(`/dashboard/admin/professionals/${p.id}`)} title="View details" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent-color)] hover:bg-[var(--bg-secondary)] transition-colors">
+                <i className="lnr lnr-eye text-sm"></i>
+              </button>
               {!p.id_verified && (
                 <button onClick={() => openModal(p, "verify")} className="px-4 py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] transition-colors">
                   Verify

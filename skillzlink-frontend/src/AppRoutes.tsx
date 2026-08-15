@@ -50,6 +50,8 @@ import { DashboardPackagesPage } from './pages/dashboard/admin/DashboardPackages
 import { DashboardUsersPage } from './pages/dashboard/admin/DashboardUsersPage';
 import { DashboardProfessionalsPage } from './pages/dashboard/admin/DashboardProfessionalsPage';
 import { DashboardSeekersPage } from './pages/dashboard/admin/DashboardSeekersPage';
+import { AdminUserDetailsPage } from './pages/dashboard/admin/AdminUserDetailsPage';
+import { AdminProviderDetailsPage } from './pages/dashboard/admin/AdminProviderDetailsPage';
 import { DashboardInsightsPage } from './pages/dashboard/admin/DashboardInsightsPage';
 import { DashboardRolesPage } from './pages/dashboard/admin/DashboardRolesPage';
 import { DashboardEmployeesPage } from './pages/dashboard/admin/DashboardEmployeesPage';
@@ -202,7 +204,9 @@ export function AppRoutes() {
       <Route path="/dashboard/admin/overview" element={<ProtectedRoute><DashboardAdminOverviewPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/users" element={<ProtectedRoute><DashboardUsersPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/professionals" element={<ProtectedRoute><DashboardProfessionalsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/professionals/:id" element={<ProtectedRoute><AdminProviderDetailsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/seekers" element={<ProtectedRoute><DashboardSeekersPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/seekers/:id" element={<ProtectedRoute><AdminUserDetailsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/theme-settings" element={<ProtectedRoute><DashboardThemeSettingsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/form-builder" element={<ProtectedRoute><DashboardFormBuilderPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/api-logs" element={<ProtectedRoute><DashboardApiLogsPage /></ProtectedRoute>} />
@@ -214,7 +218,9 @@ export function AppRoutes() {
       <Route path="/dashboard/admin/employees" element={<ProtectedRoute><DashboardEmployeesPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/conversations" element={<ProtectedRoute><DashboardAdminConversationsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/agents" element={<ProtectedRoute><DashboardAgentsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/agents/:id" element={<ProtectedRoute><AdminUserDetailsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/affiliates" element={<ProtectedRoute><DashboardAffiliatesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/affiliates/:id" element={<ProtectedRoute><AdminUserDetailsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/matching" element={<ProtectedRoute><DashboardMatchingPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/invitations" element={<ProtectedRoute><DashboardInvitationsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/appointments" element={<ProtectedRoute><DashboardAppointmentsPage /></ProtectedRoute>} />

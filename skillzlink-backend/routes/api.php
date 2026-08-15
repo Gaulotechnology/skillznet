@@ -162,6 +162,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::prefix('admin')->middleware('role:admin,super_admin')->group(function (): void {
         Route::get('/users', [AdminController::class, 'users']);
+        Route::get('/users/{id}', [AdminController::class, 'showUser']);
         Route::post('/users', [AdminController::class, 'storeUser']);
         Route::put('/users/{id}', [AdminController::class, 'updateUser']);
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
@@ -180,6 +181,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
         Route::put('/provider/{id}/verify', [AdminController::class, 'verifyProvider']);
         Route::put('/provider/{id}/suspend', [AdminController::class, 'suspendProvider']);
+        Route::get('/provider/{id}', [AdminController::class, 'showProvider']);
         Route::get('/subscriptions', [AdminController::class, 'subscriptions']);
         Route::get('/stats', [AdminController::class, 'stats']);
         Route::put('/provider/{id}/subscription', [AdminController::class, 'overrideSubscription']);

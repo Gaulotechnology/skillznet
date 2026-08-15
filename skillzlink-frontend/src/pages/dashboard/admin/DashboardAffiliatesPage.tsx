@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { DataTable, type Column } from "../../../components/shared/DataTable";
+import { UserAvatar } from "../../../components/shared/UserAvatar";
 import { adminApi } from "../../../services/api";
 
 export function DashboardAffiliatesPage() {
+  const navigate = useNavigate();
   const [affiliates, setAffiliates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,9 +41,7 @@ export function DashboardAffiliatesPage() {
     {
       key: "name", label: "Affiliate", render: (row) => (
         <div className="flex items-center gap-3">
-          {row.avatar ? <img src={row.avatar} alt="" className="w-8 h-8 rounded-full object-cover" /> : (
-            <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm font-medium text-[var(--text-secondary)]">{(row.name || "A").charAt(0)}</div>
-          )}
+          <UserAvatar src={row.avatar} name={row.name} size={32} />
           <span className="text-sm font-medium text-[var(--text-primary)]">{row.name}</span>
         </div>
       ),
@@ -84,7 +85,7 @@ export function DashboardAffiliatesPage() {
         }
         actions={(row) => (
           <div className="flex items-center gap-1">
-            <button onClick={() => toast("View details coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded"><i className="lnr lnr-eye text-sm"></i></button>
+            <button onClick={() => navigate(`/dashboard/admin/affiliates/${row.id}`)} title="View details" className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--accent-color)] rounded"><i className="lnr lnr-eye text-sm"></i></button>
             <button onClick={() => toast("Edit modal coming soon.")} className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded"><i className="lnr lnr-pencil text-sm"></i></button>
             <button onClick={() => handleSuspend(row)} className="p-1.5 text-[var(--text-secondary)] hover:text-orange-600 rounded"><i className="lnr lnr-power-switch text-sm"></i></button>
           </div>

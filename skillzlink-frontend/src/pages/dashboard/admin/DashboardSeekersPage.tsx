@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { adminApi } from "../../../services/api";
 import { DataTable, type Column } from "../../../components/shared/DataTable";
+import { UserAvatar } from "../../../components/shared/UserAvatar";
 
 export function DashboardSeekersPage() {
+  const navigate = useNavigate();
   const [seekers, setSeekers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,13 +59,7 @@ export function DashboardSeekersPage() {
       label: "User",
       render: (user) => (
         <div className="flex items-center gap-3">
-          {user.avatar ? (
-            <img src={user.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-sm font-medium text-[var(--text-secondary)]">
-              {(user.name || 'S').charAt(0).toUpperCase()}
-            </div>
-          )}
+          <UserAvatar src={user.avatar} name={user.name} size={32} />
           <div>
             <span className="text-sm font-medium text-[var(--text-primary)]">{user.name || '—'}</span>
             <span className="text-xs text-[var(--text-secondary)] font-normal ml-1.5">#{String(user.id).padStart(6, '0')}</span>
@@ -142,6 +139,9 @@ export function DashboardSeekersPage() {
           emptyMessage="No seekers found"
           actions={(user) => (
             <div className="flex items-center justify-end gap-1">
+              <button onClick={() => navigate(`/dashboard/admin/seekers/${user.id}`)} title="View details" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--accent-color)] hover:bg-[var(--bg-secondary)] transition-colors">
+                <i className="lnr lnr-eye text-sm"></i>
+              </button>
               <button onClick={() => handleSuspend(user)} title="Suspend Seeker" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors">
                 <i className="lnr lnr-ban text-sm"></i>
               </button>
