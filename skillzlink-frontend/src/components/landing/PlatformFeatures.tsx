@@ -1,5 +1,13 @@
 import { Link } from "react-router-dom"
 
+const primary = "var(--accent-color, #2563eb)"
+
+const CheckIcon = () => (
+  <svg className="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+)
+
 const features = [
   {
     icon: "lnr lnr-checkmark-circle",
@@ -93,60 +101,76 @@ export function PlatformFeatures({ showPlans = true }: { showPlans?: boolean }) 
         {showPlans && (
           <>
             {/* Provider Plans */}
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--accent-color)] bg-[var(--accent-light)] rounded-full px-4 py-1.5 mb-3">
-                <i className="lnr lnr-diamond" />
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white text-[13px] font-bold tracking-wide mb-8" style={{ backgroundColor: primary }}>
+                <i className="lnr lnr-diamond text-sm" />
                 Provider Plans
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Choose Your Visibility Level</h2>
-              <p className="text-gray-500 max-w-lg mx-auto text-sm">
+              <h2 className="text-3xl md:text-5xl font-bold text-[#222222] mb-6 tracking-tight leading-[1.1]">
+                Choose Your Visibility Level
+              </h2>
+              <p className="text-lg text-[#717171] max-w-2xl mx-auto font-normal leading-relaxed">
                 Start free and upgrade anytime. Premium providers get priority placement and more client visibility.
               </p>
+              <div className="w-12 h-1 mx-auto mt-8 rounded-full" style={{ backgroundColor: primary }} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {plans.map((plan) => (
                 <div
                   key={plan.name}
-                  className={`relative rounded-2xl border-2 p-8 ${
-                    plan.accent
-                      ? "border-[var(--accent-color)] bg-white shadow-lg"
-                      : "border-gray-200 bg-white"
+                  className={`p-8 rounded-[2rem] flex flex-col h-full bg-white transition-all hover:shadow-xl hover:-translate-y-1 relative overflow-hidden ${
+                    plan.accent ? "shadow-lg" : "border-2 border-[#ebebeb]"
                   }`}
+                  style={plan.accent ? { border: `2px solid ${primary}` } : undefined}
                 >
                   {plan.accent && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[var(--accent-color)] text-white text-xs font-bold rounded-full">
-                      RECOMMENDED
-                    </div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[var(--accent-light)] to-transparent rounded-bl-full pointer-events-none" />
                   )}
 
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1 mb-6">
-                    <span className="text-3xl font-black text-gray-900">{plan.price}</span>
-                    <span className="text-sm text-gray-500">/{plan.period}</span>
+                  <div className="mb-6 relative z-10">
+                    {plan.accent && (
+                      <span className="inline-block text-white text-[13px] font-bold px-3 py-1 rounded-full mb-4" style={{ backgroundColor: primary }}>
+                        RECOMMENDED
+                      </span>
+                    )}
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: `${primary}15` }}>
+                      <i className={`${plan.accent ? "lnr lnr-star" : "lnr lnr-diamond"} text-2xl`} style={{ color: primary }} />
+                    </div>
+                    <h3 className="text-2xl font-bold text-[#222222] mb-2">{plan.name}</h3>
+                    <p className="text-[#717171] font-medium leading-relaxed mb-6">
+                      {plan.accent
+                        ? "Everything in Free, plus priority placement and advanced visibility tools to win more clients."
+                        : "Create a public profile and start receiving client inquiries at no cost."}
+                    </p>
+                    <div className="flex items-baseline">
+                      <span className="text-5xl font-black text-[#222222] tracking-tight">{plan.price}</span>
+                      <span className="text-[15px] text-[#717171] ml-2 font-medium">/ {plan.period}</span>
+                    </div>
                   </div>
 
-                  <ul className="space-y-3 mb-8">
+                  <ul className="space-y-4 flex-1 my-8 border-t border-[#ebebeb] pt-8 relative z-10">
                     {plan.features.map((feat) => (
-                      <li key={feat} className="flex items-start gap-3 text-sm text-gray-600">
-                        <svg className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        {feat}
+                      <li key={feat} className="flex items-start">
+                        <span style={{ color: primary }}><CheckIcon /></span>
+                        <span className="text-[15px] text-[#222222] font-medium leading-tight ml-3">{feat}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <Link
-                    to="/register"
-                    className={`block text-center py-3 rounded-xl font-semibold text-sm transition-colors ${
-                      plan.accent
-                        ? "bg-[var(--accent-color)] text-white hover:bg-[var(--accent-hover)]"
-                        : "border-2 border-gray-900 text-gray-900 hover:bg-gray-50"
-                    }`}
-                  >
-                    {plan.cta}
-                  </Link>
+                  <div className="mt-auto relative z-10">
+                    <Link
+                      to="/register"
+                      className={`block w-full text-center py-4 rounded-xl text-[16px] font-bold transition-all active:scale-95 ${
+                        plan.accent
+                          ? "text-white shadow-md hover:shadow-lg"
+                          : "bg-white hover:bg-[#F7F7F7] text-[#222222] border-2 border-[#ebebeb]"
+                      }`}
+                      style={plan.accent ? { backgroundColor: primary } : undefined}
+                    >
+                      {plan.cta}
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>

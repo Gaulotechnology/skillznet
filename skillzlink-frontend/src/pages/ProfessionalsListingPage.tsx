@@ -3,10 +3,39 @@ import { Link, useSearchParams } from "react-router-dom"
 import { publicApi, isLoggedIn } from "../services/api"
 import type { PublicProvider } from "../services/api"
 
-function normalizePhone(phone?: string): string {
-  if (!phone) return ""
-  return phone.replace(/[^0-9+]/g, "")
-}
+const primary = "var(--accent-color, #2563eb)"
+
+const Star = ({ size = 12, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+)
+
+const ShieldCheck = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <path d="M9 12l2 2 4-4" />
+  </svg>
+)
+
+const Heart = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+)
+
+const ChevronRight = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+)
+
+const MapPin = ({ size = 14, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+)
 
 function extractCity(location: string): string {
   const parts = location.split(",")
@@ -591,117 +620,117 @@ export function ProfessionalsListingPage() {
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {paginatedProfessionals.map(pro => (
                 <Link
                   key={pro.id}
                   to={`/professional-profile/${pro.id}`}
-                  className="group flex gap-4 cursor-pointer"
+                  className="group block no-underline"
                 >
-                  {/* Image - Airbnb style */}
-                  <div className="relative w-40 h-36 shrink-0 rounded-xl overflow-hidden">
-                    <img 
-                      src={pro.image || "https://via.placeholder.com/400x300"} 
-                      alt={pro.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-2 right-2 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg px-1.5 py-0.5 shadow-sm">
-                      <i className="lnr lnr-star text-amber-500 text-[10px]" />
-                      <span className="text-[11px] font-semibold text-gray-900">{pro.rating || "5.0"}</span>
-                    </div>
-                  </div>
+                  <div className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] transition-all duration-500 overflow-hidden flex flex-col h-full relative hover:-translate-y-2">
+                    {/* Image */}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-slate-50 border-b border-slate-50">
+                      <img
+                        src={pro.image || "https://via.placeholder.com/400x300"}
+                        alt={pro.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
 
-                  {/* Info section */}
-                  <div className="flex-1 min-w-0 py-0.5">
-                    <p className="text-xs text-gray-500 font-medium">
-                      {pro.service_category || "General Services"}
-                    </p>
-                    <p className="text-sm font-semibold text-gray-900 mt-0.5 truncate">
-                      {isLoggedIn() ? pro.name : maskFullName(pro.name)}
+                      {/* Verified badge */}
                       {pro.id_verified && (
-                        <i className="lnr lnr-checkmark-circle text-blue-500 inline-block ml-1 text-xs" title="Verified" />
+                        <div className="absolute top-4 left-4 z-10 bg-emerald-500/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 border border-emerald-400/20">
+                          <ShieldCheck size={14} className="text-white" />
+                          <span className="text-[9px] font-black uppercase tracking-wider text-white">Verified</span>
+                        </div>
                       )}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {isLoggedIn() ? (pro.location || "Zimbabwe") : extractCity(pro.location || "Zimbabwe")}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {(pro as any).years_of_experience != null && (
-                        <span>{(pro as any).years_of_experience} yrs exp</span>
-                      )}
-                      {pro.completed_services != null && pro.completed_services > 0 && (
-                        <span className="mx-1">·</span>
-                      )}
-                      {pro.completed_services != null && pro.completed_services > 0 && (
-                        <span>{pro.completed_services} jobs</span>
-                      )}
-                      {pro.response_time && (
-                        <span className="mx-1">·</span>
-                      )}
-                      {pro.response_time && (
-                        <span>responds in {pro.response_time}</span>
-                      )}
-                    </p>
 
-                    {/* Trust tags */}
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {pro.premium_badge && (
-                        <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px] font-semibold">
-                          PREMIUM
+                      {/* Favorite button */}
+                      <div className="absolute top-4 right-4 z-10">
+                        <span className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-md border border-white/50 shadow-md flex items-center justify-center">
+                          <Heart size={16} className="text-slate-400" />
                         </span>
-                      )}
-                      {pro.featured && (
-                        <span className="px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-700 text-[10px] font-semibold">
-                          FEATURED
-                        </span>
-                      )}
-                      {pro.success_rate != null && pro.success_rate > 0 && (
-                        <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-600 text-[10px] font-medium">
-                          {pro.success_rate}% success
-                        </span>
+                      </div>
+
+                      {/* Experience badge */}
+                      {pro.years_of_experience != null && (
+                        <div className="absolute bottom-4 left-4 z-10 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-sm border border-white/40">
+                          <span className="text-[11px] font-bold text-slate-800">{pro.years_of_experience}+ Yrs Exp</span>
+                        </div>
                       )}
                     </div>
 
-                    {/* Price + Actions */}
-                    <div className="flex items-center justify-between mt-2">
-                      {isLoggedIn() ? (
-                        <span className="text-sm font-semibold text-gray-900">{pro.rate || "$15/hr"}</span>
-                      ) : (
-                        <span className="text-xs text-gray-400">Login to see rate</span>
-                      )}
-                      
-                      {isLoggedIn() && pro.phone ? (
-                        <div className="flex items-center gap-1.5" onClick={e => e.preventDefault()}>
-                          <a
-                            href={`https://wa.me/${normalizePhone(pro.phone).replace(/^\+/, "")}?text=Hi ${encodeURIComponent(pro.name)}, I found your profile on SkillzLink.`}
-                            onClick={e => e.stopPropagation()}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="w-8 h-8 rounded-lg bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-colors"
-                            title="WhatsApp"
-                          >
-                            <i className="fab fa-whatsapp text-sm" />
-                          </a>
-                          <a
-                            href={`tel:${normalizePhone(pro.phone)}`}
-                            onClick={e => e.stopPropagation()}
-                            className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-900 hover:text-white transition-colors"
-                            title="Call"
-                          >
-                            <i className="lnr lnr-phone-handset text-sm" />
-                          </a>
+                    {/* Content */}
+                    <div className="p-6 flex flex-col flex-grow space-y-4">
+                      {/* Category / badges */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {pro.service_category && (
+                          <span className="bg-slate-50 text-slate-600 rounded-full px-3 py-1 text-[10px] font-bold tracking-wider uppercase border border-slate-100">
+                            {pro.service_category}
+                          </span>
+                        )}
+                        {pro.premium_badge && (
+                          <span className="bg-amber-50 text-amber-600 rounded-full px-3 py-1 text-[10px] font-bold tracking-wider uppercase border border-amber-100">
+                            Premium
+                          </span>
+                        )}
+                        {pro.featured && (
+                          <span className="bg-purple-50 text-purple-600 rounded-full px-3 py-1 text-[10px] font-bold tracking-wider uppercase border border-purple-100">
+                            Featured
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Name + rating */}
+                      <div className="flex justify-between items-center gap-2">
+                        <h4 className="font-semibold text-lg text-slate-900 truncate">
+                          {isLoggedIn() ? pro.name : maskFullName(pro.name)}
+                        </h4>
+                        <div className="flex items-center gap-1 bg-amber-50 border border-amber-100 rounded-lg px-2 py-0.5 shrink-0">
+                          <Star size={12} className="text-amber-500" />
+                          <span className="text-[12px] font-black text-amber-700">
+                            {pro.rating ? Number(pro.rating).toFixed(1) : "New"}
+                          </span>
                         </div>
-                      ) : isLoggedIn() ? (
-                        <span className="text-[10px] text-gray-400">No contact</span>
-                      ) : (
-                        <Link
-                          to="/login"
-                          onClick={e => e.stopPropagation()}
-                          className="text-xs font-medium text-gray-900 underline hover:no-underline"
-                        >
-                          Login to contact
-                        </Link>
+                      </div>
+
+                      {/* Bio */}
+                      {pro.description && (
+                        <p className="text-[13px] text-slate-500 font-normal leading-relaxed line-clamp-2 min-h-[40px]">
+                          {pro.description}
+                        </p>
                       )}
+
+                      {/* Details row */}
+                      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 text-[13px] text-slate-500 font-semibold mt-auto">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <MapPin size={13} className="text-slate-400 shrink-0" />
+                          <span className="truncate">{isLoggedIn() ? (pro.location || "Zimbabwe") : extractCity(pro.location || "Zimbabwe")}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 truncate justify-end">
+                          <span className="truncate">
+                            {pro.completed_services != null && pro.completed_services > 0
+                              ? `${pro.completed_services} jobs`
+                              : pro.success_rate ? `${pro.success_rate}% success` : "Available"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Price + CTA */}
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rate</span>
+                          {isLoggedIn() ? (
+                            <span className="text-xl font-black text-slate-900">{pro.rate || "$15/hr"}</span>
+                          ) : (
+                            <span className="text-[12px] font-bold text-slate-400">Login to view</span>
+                          )}
+                        </div>
+
+                        <div className="px-5 py-2.5 rounded-xl text-white text-[12px] font-bold flex items-center gap-1 transition-all active:scale-95 shadow-md" style={{ backgroundColor: primary }}>
+                          View Profile
+                          <ChevronRight size={14} />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </Link>
