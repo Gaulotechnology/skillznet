@@ -203,6 +203,7 @@ export function AppRoutes() {
       <Route path="/dashboard/affiliate/payouts" element={<ProtectedRoute><DashboardAffiliatePayoutsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/overview" element={<ProtectedRoute><DashboardAdminOverviewPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/users" element={<ProtectedRoute><DashboardUsersPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/users/:id" element={<ProtectedRoute><AdminUserDetailsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/professionals" element={<ProtectedRoute><DashboardProfessionalsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/professionals/:id" element={<ProtectedRoute><AdminProviderDetailsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/seekers" element={<ProtectedRoute><DashboardSeekersPage /></ProtectedRoute>} />
