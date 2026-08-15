@@ -1,0 +1,1 @@
+<li><a href="<?php echo erLhcoreClassDesign::baseurl('infobip/index')?>"><i class="material-icons">chat</i><?php echo erTranslationClassLhTranslation::getInstance()->getTranslation('pagelayout/pagelayout','Infobip WhatsApp');?></a></li>
