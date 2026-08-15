@@ -115,7 +115,7 @@ export function PlatformFeatures({ showPlans = true }: { showPlans?: boolean }) 
                 Provider Plans
               </div>
               <h2 className="text-3xl md:text-5xl font-bold text-[#222222] mb-6 tracking-tight leading-[1.1]">
-                Choose Your Visibility Level
+                Choose your subscription package
               </h2>
               <p className="text-lg text-[#717171] max-w-2xl mx-auto font-normal leading-relaxed">
                 Start free and upgrade anytime. Premium providers get priority placement and more client visibility.
