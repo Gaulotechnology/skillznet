@@ -79,21 +79,29 @@ export function PlatformFeatures({ showPlans = true }: { showPlans?: boolean }) 
     <section className="bg-white py-20">
       <div className="max-w-6xl mx-auto px-6">
         {/* Why Choose SkillzLink */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-semibold text-gray-900 mb-3">Why Choose SkillzLink</h2>
-          <p className="text-gray-500 max-w-xl mx-auto">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white text-[13px] font-bold tracking-wide mb-8" style={{ backgroundColor: primary }}>
+            <i className="lnr lnr-checkmark-circle text-sm" />
+            Why SkillzLink
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold text-[#222222] mb-6 tracking-tight leading-[1.1]">Why Choose SkillzLink</h2>
+          <p className="text-lg text-[#717171] max-w-2xl mx-auto font-normal leading-relaxed">
             We've built a platform that puts trust, simplicity, and local expertise first.
           </p>
+          <div className="w-12 h-1 mx-auto mt-8 rounded-full" style={{ backgroundColor: primary }} />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
           {features.map((f) => (
-            <div key={f.title} className="group bg-gray-50 border border-gray-100 rounded-2xl p-6 hover:bg-white hover:border-gray-200 hover:shadow-md transition-all duration-300">
-              <div className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center mb-4 group-hover:border-[var(--accent-light)] group-hover:text-[var(--accent-color)] transition-colors">
-                <i className={`${f.icon} text-xl text-gray-600 group-hover:text-[var(--accent-color)] transition-colors`} />
+            <div key={f.title} className="group bg-white border border-[#ebebeb] rounded-[1.5rem] p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 relative z-10" style={{ backgroundColor: `${primary}12` }}>
+                <i className={`${f.icon} text-2xl`} style={{ color: primary }} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">{f.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{f.description}</p>
+              <h3 className="text-lg font-bold text-[#222222] mb-3 relative z-10">{f.title}</h3>
+              <p className="text-[#717171] text-[15px] leading-relaxed relative z-10">{f.description}</p>
+
+              {/* Bottom accent line on hover */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 rounded-b-[1.5rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: primary }} />
             </div>
           ))}
         </div>

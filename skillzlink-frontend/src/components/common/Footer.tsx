@@ -109,7 +109,7 @@ export function Footer() {
           {/* Company */}
           <div className="space-y-4">
             <h4 className="text-[#222222] font-semibold text-[14px]">Company</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-3 list-none p-0 m-0">
               {[
                 { name: "Home", path: "/" },
                 { name: "How it works", path: "/how-it-works" },
@@ -128,7 +128,7 @@ export function Footer() {
           {/* Discovery */}
           <div className="space-y-4">
             <h4 className="text-[#222222] font-semibold text-[14px]">Discovery</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-3 list-none p-0 m-0">
               {cityLinks.map((city) => (
                 <li key={city}>
                   <Link to={`/nearby-professionals?city=${encodeURIComponent(city.toLowerCase())}`} onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors text-[14px] font-medium block">
@@ -142,7 +142,7 @@ export function Footer() {
           {/* Explore */}
           <div className="space-y-4">
             <h4 className="text-[#222222] font-semibold text-[14px]">Explore</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-3 list-none p-0 m-0">
               {serviceLinks.map((s) => (
                 <li key={s.slug}>
                   <Link to={`/nearby-professionals?service=${s.slug}`} onClick={scrollTop} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors text-[14px] font-medium block">
@@ -156,7 +156,7 @@ export function Footer() {
           {/* Support */}
           <div className="space-y-4">
             <h4 className="text-[#222222] font-semibold text-[14px]">Support</h4>
-            <ul className="space-y-3 text-[14px] font-medium">
+            <ul className="space-y-3 text-[14px] font-medium list-none p-0 m-0">
               {contact.phone && (
                 <li>
                   <a href={`tel:${contact.phone.replace(/[^0-9+]/g, "")}`} className="text-[#717171] hover:text-[var(--accent-color)] hover:underline transition-colors block">

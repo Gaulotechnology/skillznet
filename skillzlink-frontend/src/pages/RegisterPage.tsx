@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import type { FormEvent, ChangeEvent } from "react"
 import { Link } from "react-router-dom"
 import { authApi, publicApi, apiBaseUrl } from "../services/api"
+import { WhatsAppRegistrationBanner } from "../components/landing/WhatsAppRegistrationBanner"
 
 const zimbabweCities = [
   "Harare", "Bulawayo", "Mutare", "Gweru", "Kwekwe",
@@ -243,8 +244,9 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel */}
+    <>
+      <div className="min-h-screen flex">
+        {/* Left Panel */}
       <div className="hidden lg:flex lg:w-5/12 xl:w-1/3 relative overflow-hidden bg-[var(--bg-secondary)] flex-col justify-between p-12">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--accent-color)]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--accent-color)]/5 rounded-full blur-3xl" />
@@ -624,6 +626,9 @@ export function RegisterPage() {
 
         </div>
       </div>
-    </div>
+      </div>
+
+      <WhatsAppRegistrationBanner />
+    </>
   )
 }
