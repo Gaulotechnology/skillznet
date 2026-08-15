@@ -95,6 +95,7 @@ export function DashboardThemeSettingsPage() {
   const [general, setGeneral] = useState({
     siteName: "SkillzLink", siteDescription: "", currency: "ZAR", faviconUrl: "",
     enableChat: true, maintenanceMode: false, comingSoon: false, defaultLanguage: "English",
+    showJoinNetwork: true, showVisibilityLevel: true,
     accentColor: "#FF385C", accentHover: "#E31C5F", accentLight: "#FFF1F3",
     textPrimary: "#111827", textSecondary: "#6B7280", bgPrimary: "#FFFFFF", bgSecondary: "#F9FAFB", bgAuthPanel: "#F0F4F8", borderColor: "#E5E7EB",
   });
@@ -319,6 +320,8 @@ export function DashboardThemeSettingsPage() {
               <Toggle checked={general.maintenanceMode} onChange={v => setGeneral(s => ({ ...s, maintenanceMode: v }))} label="Enable Maintenance Mode" />
               {general.maintenanceMode && <p className="text-xs text-rose-500 ml-16 font-medium">⚠️ Site will be inaccessible to non-admin users</p>}
               <Toggle checked={general.comingSoon} onChange={v => setGeneral(s => ({ ...s, comingSoon: v }))} label="Enable Coming Soon Page" />
+              <Toggle checked={general.showJoinNetwork} onChange={v => setGeneral(s => ({ ...s, showJoinNetwork: v }))} label="Show 'Join the SkillzLink Network' section" />
+              <Toggle checked={general.showVisibilityLevel} onChange={v => setGeneral(s => ({ ...s, showVisibilityLevel: v }))} label="Show 'Choose Your Visibility Level' section" />
             </div>
             <div className="pt-8 border-t border-[var(--border-color)] mt-8">
               <button onClick={() => handleSave("general", general)} className="px-8 py-3.5 rounded-xl bg-[var(--accent-color)] text-white font-semibold text-sm hover:bg-[var(--accent-hover)] transition-colors">Save Changes</button>

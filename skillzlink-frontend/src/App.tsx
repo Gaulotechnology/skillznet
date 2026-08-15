@@ -16,6 +16,8 @@ import { publicApi } from "./services/api"
 function App() {
   const [searchParams] = useSearchParams()
   const [selectedService, setSelectedService] = useState("all")
+  const [showJoinNetwork, setShowJoinNetwork] = useState(true)
+  const [showVisibilityLevel, setShowVisibilityLevel] = useState(true)
 
   // Load Global Theme Settings
   useEffect(() => {
@@ -52,6 +54,14 @@ function App() {
           }
           link.href = res.settings.faviconUrl as string;
         }
+
+        // Landing section visibility
+        if (res.settings.showJoinNetwork !== undefined) {
+          setShowJoinNetwork(res.settings.showJoinNetwork !== '0');
+        }
+        if (res.settings.showVisibilityLevel !== undefined) {
+          setShowVisibilityLevel(res.settings.showVisibilityLevel !== '0');
+        }
       }
     }).catch(console.error);
   }, []);
@@ -70,9 +80,9 @@ function App() {
       <PopularServices />
       <HowItWorks />
       <JoinInfo />
-      <PlatformFeatures />
+      <PlatformFeatures showPlans={showVisibilityLevel} />
       <LimitlessExperience />
-      <ApplyBannerSection />
+      {showJoinNetwork && <ApplyBannerSection />}
       <SkillsFooter />
       <LiveChatWidget />
     </>

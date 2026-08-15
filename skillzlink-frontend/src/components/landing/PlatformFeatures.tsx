@@ -66,7 +66,7 @@ const plans = [
   },
 ]
 
-export function PlatformFeatures() {
+export function PlatformFeatures({ showPlans = true }: { showPlans?: boolean }) {
   return (
     <section className="bg-white py-20">
       <div className="max-w-6xl mx-auto px-6">
@@ -90,64 +90,68 @@ export function PlatformFeatures() {
           ))}
         </div>
 
-        {/* Provider Plans */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--accent-color)] bg-[var(--accent-light)] rounded-full px-4 py-1.5 mb-3">
-            <i className="lnr lnr-diamond" />
-            Provider Plans
-          </div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Choose Your Visibility Level</h2>
-          <p className="text-gray-500 max-w-lg mx-auto text-sm">
-            Start free and upgrade anytime. Premium providers get priority placement and more client visibility.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative rounded-2xl border-2 p-8 ${
-                plan.accent
-                  ? "border-[var(--accent-color)] bg-white shadow-lg"
-                  : "border-gray-200 bg-white"
-              }`}
-            >
-              {plan.accent && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[var(--accent-color)] text-white text-xs font-bold rounded-full">
-                  RECOMMENDED
-                </div>
-              )}
-
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">{plan.name}</h3>
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-3xl font-black text-gray-900">{plan.price}</span>
-                <span className="text-sm text-gray-500">/{plan.period}</span>
+        {showPlans && (
+          <>
+            {/* Provider Plans */}
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--accent-color)] bg-[var(--accent-light)] rounded-full px-4 py-1.5 mb-3">
+                <i className="lnr lnr-diamond" />
+                Provider Plans
               </div>
-
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feat) => (
-                  <li key={feat} className="flex items-start gap-3 text-sm text-gray-600">
-                    <svg className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {feat}
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                to="/register"
-                className={`block text-center py-3 rounded-xl font-semibold text-sm transition-colors ${
-                  plan.accent
-                    ? "bg-[var(--accent-color)] text-white hover:bg-[var(--accent-hover)]"
-                    : "border-2 border-gray-900 text-gray-900 hover:bg-gray-50"
-                }`}
-              >
-                {plan.cta}
-              </Link>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Choose Your Visibility Level</h2>
+              <p className="text-gray-500 max-w-lg mx-auto text-sm">
+                Start free and upgrade anytime. Premium providers get priority placement and more client visibility.
+              </p>
             </div>
-          ))}
-        </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {plans.map((plan) => (
+                <div
+                  key={plan.name}
+                  className={`relative rounded-2xl border-2 p-8 ${
+                    plan.accent
+                      ? "border-[var(--accent-color)] bg-white shadow-lg"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
+                  {plan.accent && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[var(--accent-color)] text-white text-xs font-bold rounded-full">
+                      RECOMMENDED
+                    </div>
+                  )}
+
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{plan.name}</h3>
+                  <div className="flex items-baseline gap-1 mb-6">
+                    <span className="text-3xl font-black text-gray-900">{plan.price}</span>
+                    <span className="text-sm text-gray-500">/{plan.period}</span>
+                  </div>
+
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feat) => (
+                      <li key={feat} className="flex items-start gap-3 text-sm text-gray-600">
+                        <svg className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        {feat}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    to="/register"
+                    className={`block text-center py-3 rounded-xl font-semibold text-sm transition-colors ${
+                      plan.accent
+                        ? "bg-[var(--accent-color)] text-white hover:bg-[var(--accent-hover)]"
+                        : "border-2 border-gray-900 text-gray-900 hover:bg-gray-50"
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   )

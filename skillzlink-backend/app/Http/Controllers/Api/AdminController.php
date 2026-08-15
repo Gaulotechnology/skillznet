@@ -308,6 +308,16 @@ class AdminController extends Controller
                     ['value' => (string) $data['siteName']]
                 );
             }
+
+            // Landing section visibility toggles (public page reads these)
+            foreach (['showJoinNetwork', 'showVisibilityLevel'] as $flag) {
+                if (array_key_exists($flag, $data)) {
+                    \App\Models\ThemeSetting::updateOrCreate(
+                        ['key' => $flag],
+                        ['value' => filter_var($data[$flag], FILTER_VALIDATE_BOOLEAN) ? '1' : '0']
+                    );
+                }
+            }
         }
 
         // Sync social/contact fields to ThemeSetting for footer display
