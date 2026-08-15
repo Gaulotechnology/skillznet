@@ -84,17 +84,13 @@ class ApplicationController extends Controller
             'admin_notes' => $request->input('notes', 'Approved'),
         ]);
 
-        // Log SMS notification
-        \App\Models\SmsLog::create([
-            'recipient' => $application->phone ?? 'N/A',
-            'type' => 'notification',
-            'message' => "Congratulations {$application->name}! Your SkillzLink {$application->type} application has been approved. Your temp password: {$password}",
-            'provider' => 'fake',
-            'status' => 'delivered',
-            'cost' => 0.0350,
-            'user_id' => $user->id,
-            'sent_at' => now(),
-        ]);
+        // Send + log SMS notification via SMS Portal
+        app(\App\Services\SmsPortalService::class)->send(
+            $application->phone ?? 'N/A',
+            "Congratulations {$application->name}! Your SkillzLink {$application->type} application has been approved. Your temp password: {$password}",
+            'notification',
+            $user->id
+        );
 
         return response()->json([
             'message' => "Application approved. Account created for {$application->name}.",

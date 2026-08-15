@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useEffect } from "react"
-import { useSearchParams } from "react-router-dom"
 import { Hero } from "./components/landing/Hero"
 import { FeaturedProfessionals } from "./components/landing/FeaturedProfessionals"
 import { PopularServices } from "./components/landing/PopularServices"
@@ -14,8 +13,6 @@ import { LiveChatWidget } from "./components/common/LiveChatWidget"
 import { publicApi } from "./services/api"
 
 function App() {
-  const [searchParams] = useSearchParams()
-  const [selectedService, setSelectedService] = useState("all")
   const [showJoinNetwork, setShowJoinNetwork] = useState(true)
   const [showVisibilityLevel, setShowVisibilityLevel] = useState(true)
 
@@ -66,16 +63,9 @@ function App() {
     }).catch(console.error);
   }, []);
 
-  useEffect(() => {
-    const serviceParam = searchParams.get("service")
-    if (serviceParam) {
-      setSelectedService(serviceParam)
-    }
-  }, [searchParams])
-
   return (
     <>
-      <Hero selectedService={selectedService} onServiceChange={setSelectedService} />
+      <Hero />
       <FeaturedProfessionals />
       <PopularServices />
       <HowItWorks />

@@ -15,6 +15,16 @@ function getStatusColor(code: number) {
   return STATUS_COLORS[first] || "bg-[var(--bg-secondary)] text-[var(--text-primary)]";
 }
 
+function formatJson(raw: string): string {
+  if (!raw) return "";
+  try {
+    const parsed = JSON.parse(raw);
+    return JSON.stringify(parsed, null, 2);
+  } catch {
+    return raw;
+  }
+}
+
 export function DashboardApiLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -183,7 +193,7 @@ export function DashboardApiLogsPage() {
             <div className="px-6 py-4 border-l-4 border-gray-900 bg-[var(--bg-secondary)]">
               <h5 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-2">Request Body</h5>
               <pre className="bg-gray-900 text-emerald-400 p-4 rounded-lg text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all">
-                {logs.find(l => l.id === expanded)?.request_body}
+                {formatJson(logs.find(l => l.id === expanded)?.request_body)}
               </pre>
             </div>
           </div>

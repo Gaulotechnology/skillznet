@@ -51,4 +51,10 @@ return [
         'sender_number' => env('INFOBIP_SENDER_NUMBER'),
     ],
 
+    'sms_portal' => [
+        'base_url' => env('SMS_PORTAL_BASE_URL', 'https://rest.smsportal.com'),
+        'client_id' => env('SMS_PORTAL_CLIENT_ID'),
+        'client_secret' => env('SMS_PORTAL_CLIENT_SECRET'),
+    ],
+
 ];

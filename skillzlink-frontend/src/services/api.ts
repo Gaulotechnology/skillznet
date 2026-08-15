@@ -508,6 +508,14 @@ export const adminApi = {
 
   getSmsLogs: () => fetchJson<{ logs: any[] }>(`${API_BASE_URL}/admin/sms-logs`),
   getCommLogs: () => fetchJson<{ logs: any[] }>(`${API_BASE_URL}/admin/comm-logs`),
+  getKnowledgeBase: () =>
+    fetchJson<{ stats: { documents: number; chunks: number; vectors: number; last_sync: string | null }; documents: any[] }>(
+      `${API_BASE_URL}/admin/knowledge-base`
+    ),
+  rebuildKnowledgeBase: () =>
+    fetchJson<{ message: string; chunks_indexed: number }>(`${API_BASE_URL}/admin/knowledge-base/rebuild`, {
+      method: "POST",
+    }),
 }
 
 // ─── Affiliate endpoints (auth required) ─────────────────────────────────────

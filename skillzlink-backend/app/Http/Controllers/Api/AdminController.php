@@ -454,19 +454,24 @@ class AdminController extends Controller
             $query->where('user_id', $request->query('user_id'));
         }
         if ($request->filled('error')) {
-            $query->where('status_code', '>=', 400);
+            $query->where(function ($q) {
+                $q->where('status_code', '>=', 400)->orWhereNull('status_code');
+            });
         }
 
         $logs = $query->limit(200)->get()->map(fn ($log) => [
-            'id'       => $log->id,
-            'from'     => $log->fromUser->name ?? 'Unknown',
-            'to'       => $log->toUser->name ?? 'Unknown',
-            'channel'  => $log->channel,
-            'subject'  => $log->subject,
-            'preview'  => $log->preview,
-            'status'   => $log->status,
-            'sent_at'  => $log->sent_at?->toISOString(),
+            'id'               => $log->id,
+            'method'           => $log->method,
+            'url'              => $log->url,
+            'status_code'      => $log->status_code,
+            'response_time_ms' => $log->response_time_ms,
+            'ip_address'       => $log->ip_address,
+            'user_id'          => $log->user_id,
+            'request_body'     => $log->request_body,
+            'user_agent'       => $log->user_agent,
+            'created_at'       => $log->created_at?->toISOString(),
         ])->values();
+
         return response()->json(['logs' => $logs]);
     }
 
@@ -504,7 +509,16 @@ class AdminController extends Controller
             $query->where('status', $request->query('status'));
         }
 
-        $logs = $query->limit(200)->get();
+        $logs = $query->limit(200)->get()->map(fn ($log) => [
+            'id'      => $log->id,
+            'from'    => $log->fromUser?->name ?? 'Unknown',
+            'to'      => $log->toUser?->name ?? 'Unknown',
+            'channel' => $log->channel,
+            'subject' => $log->subject,
+            'preview' => $log->preview,
+            'status'  => $log->status,
+            'sentAt'  => $log->sent_at?->toISOString(),
+        ])->values();
 
         $stats = [
             'total' => \App\Models\CommLog::count(),
@@ -513,6 +527,46 @@ class AdminController extends Controller
         ];
 
         return response()->json(['logs' => $logs, 'stats' => $stats]);
+    }
+
+    // ─── Knowledge Base (RAG vector data) ─────────────────────────────────────
+
+    public function knowledgeBase(Request $request): JsonResponse
+    {
+        $chunks = \App\Models\DocumentChunk::orderBy('id')->get();
+
+        $documents = $chunks->groupBy('title')->map(function ($group) {
+            return [
+                'title'   => $group->first()->title,
+                'source'  => $group->first()->source,
+                'chunks'  => $group->count(),
+                'vectors' => $group->whereNotNull('embedding')->count(),
+            ];
+        })->values();
+
+        return response()->json([
+            'stats' => [
+                'documents' => $documents->count(),
+                'chunks'    => $chunks->count(),
+                'vectors'   => $chunks->whereNotNull('embedding')->count(),
+                'last_sync' => $chunks->max('updated_at')?->toISOString(),
+            ],
+            'documents' => $documents,
+        ]);
+    }
+
+    public function rebuildKnowledgeBase(Request $request): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $count = app(\App\Services\RagService::class)->buildKnowledgeBase();
+
+        return response()->json([
+            'message' => 'Knowledge base rebuilt successfully.',
+            'chunks_indexed' => $count,
+        ]);
     }
 
     // ─── Roles & Permissions ──────────────────────────────────────────────────

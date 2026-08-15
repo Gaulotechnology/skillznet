@@ -43,17 +43,12 @@ class AuthController extends Controller
             'verified'     => false,
         ]);
 
-        // Log SMS
-        \App\Models\SmsLog::create([
-            'recipient' => $validated['phone_number'],
-            'type'      => 'otp',
-            'message'   => "Your SkillzLink verification code is: {$otp}. Valid for 10 minutes.",
-            'provider'  => 'fake',
-            'status'    => 'delivered',
-            'cost'      => 0.0350,
-            'user_id'   => null,
-            'sent_at'   => now(),
-        ]);
+        // Send + log SMS via SMS Portal
+        app(\App\Services\SmsPortalService::class)->send(
+            $validated['phone_number'],
+            "Your SkillzLink verification code is: {$otp}. Valid for 10 minutes.",
+            'otp'
+        );
 
         return response()->json([
             'message' => 'OTP generated',
