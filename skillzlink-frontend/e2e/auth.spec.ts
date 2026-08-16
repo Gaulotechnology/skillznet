@@ -63,13 +63,12 @@ test.describe('Authentication Flows', () => {
     const randomPhone = `077${Math.floor(1000000 + Math.random() * 9000000)}`;
     await page.fill('input[type="tel"]', randomPhone);
     
-    await page.fill('input[placeholder="For verification purposes"]', '12-345678-A-90');
+    const professionSelect = page.locator('select').filter({ hasText: 'Choose your profession' });
+    await professionSelect.selectOption('Plumbing');
     
-    // The second select on the page is Category
-    await page.locator('select').nth(1).selectOption('Plumbing');
-    
+    await page.fill('input[placeholder="For identity verification"]', '12-345678-A-90');
     await page.fill('input[placeholder="e.g. 123 Samora Machel Ave"]', 'Test Address');
-    await page.fill('textarea', 'I am a test provider.');
+    await page.fill('textarea[placeholder="Tell potential clients about your experience, trade skills and services..."]', 'I am a test provider.');
     
     await page.click('button:has-text("Continue")');
     

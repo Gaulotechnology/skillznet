@@ -31,3 +31,7 @@ skillzlink-frontend/build/
 
 # Logs
 *.log
+
+# Playwright test artifacts
+skillzlink-frontend/playwright-report/
+skillzlink-frontend/test-results/

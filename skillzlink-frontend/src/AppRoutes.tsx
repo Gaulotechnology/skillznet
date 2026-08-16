@@ -9,6 +9,7 @@ import { RegisterPage } from "./pages/RegisterPage"
 import { SearchPage } from "./pages/SearchPage"
 import { ProfessionalsListingPage } from "./pages/ProfessionalsListingPage"
 import { ProfessionalProfilePage } from "./pages/ProfessionalProfilePage"
+import { OnDemandHirePage } from "./pages/OnDemandHirePage"
 import { AboutPage } from "./pages/AboutPage"
 import { HowItWorksPage } from "./pages/HowItWorksPage"
 import { DashboardProfilePage } from "./pages/dashboard/shared/DashboardProfilePage"
@@ -66,6 +67,7 @@ import { DashboardPaymentsPage } from './pages/dashboard/admin/DashboardPayments
 import { DashboardSmsLogsPage } from './pages/dashboard/admin/DashboardSmsLogsPage';
 import { DashboardCommLogsPage } from './pages/dashboard/admin/DashboardCommLogsPage';
 import { DashboardLiveChatPage } from './pages/dashboard/admin/DashboardLiveChatPage';
+import { DashboardTeamMembersPage } from './pages/dashboard/admin/DashboardTeamMembersPage';
 
 import { DashboardAgentOverviewPage } from './pages/dashboard/agent/DashboardAgentOverviewPage';
 import { DashboardAgentReferralsPage } from './pages/dashboard/agent/DashboardAgentReferralsPage';
@@ -126,6 +128,8 @@ export function AppRoutes() {
 
       <Route path="/nearby-professionals" element={withLayout(<ProfessionalsListingPage />)} />
       <Route path="/professional-profile/:id" element={withLayout(<ProfessionalProfilePage />)} />
+      <Route path="/hire-now" element={withLayout(<OnDemandHirePage />)} />
+      <Route path="/on-demand" element={withLayout(<OnDemandHirePage />)} />
 
       <Route path="/careers" element={withLayout(<CareersPage />)} />
       <Route path="/terms-and-conditions" element={withLayout(<TermsAndConditionsPage />)} />
@@ -172,7 +176,9 @@ export function AppRoutes() {
       <Route path="/dashboard/seeker/overview" element={<ProtectedRoute>{withLayout(<DashboardSeekerOverviewPage />)}</ProtectedRoute>} />
       <Route path="/dashboard/seeker/bookings" element={<ProtectedRoute>{withLayout(<DashboardMyBookingsPage />)}</ProtectedRoute>} />
       <Route path="/dashboard/seeker/manage-requests" element={<ProtectedRoute>{withLayout(<DashboardManageRequestsPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/requests" element={<Navigate to="/dashboard/seeker/manage-requests" replace />} />
       <Route path="/dashboard/seeker/post-request" element={<ProtectedRoute>{withLayout(<DashboardPostRequestPage />)}</ProtectedRoute>} />
+      <Route path="/dashboard/seeker/requests/new" element={<Navigate to="/dashboard/seeker/post-request" replace />} />
       <Route path="/dashboard/seeker/billing" element={<ProtectedRoute>{withLayout(<DashboardBillingPage />)}</ProtectedRoute>} />
       <Route path="/dashboard/seeker/reviews" element={<ProtectedRoute>{withLayout(<DashboardReviewsPage />)}</ProtectedRoute>} />
       <Route path="/dashboard/seeker/messages" element={<ProtectedRoute>{withLayout(<SeekerMessagesPage />)}</ProtectedRoute>} />
@@ -189,6 +195,7 @@ export function AppRoutes() {
       <Route path="/dashboard/completed-services" element={<ProtectedRoute><DashboardCompleteServicesPage /></ProtectedRoute>} />
       <Route path="/dashboard/cancelled-services" element={<ProtectedRoute><DashboardCancelServicesPage /></ProtectedRoute>} />
       <Route path="/dashboard/quotes" element={<ProtectedRoute><DashboardQuotesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/provider/quotes" element={<ProtectedRoute><DashboardQuotesPage /></ProtectedRoute>} />
       <Route path="/dashboard/provider/availability" element={<ProtectedRoute><DashboardAvailabilityPage /></ProtectedRoute>} />
       <Route path="/dashboard/provider/bookings" element={<ProtectedRoute><DashboardBookingsPage /></ProtectedRoute>} />
       <Route path="/dashboard/provider/messages" element={<ProtectedRoute><DashboardProviderMessagesPage /></ProtectedRoute>} />
@@ -209,6 +216,8 @@ export function AppRoutes() {
       <Route path="/dashboard/admin/seekers" element={<ProtectedRoute><DashboardSeekersPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/seekers/:id" element={<ProtectedRoute><AdminUserDetailsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/theme-settings" element={<ProtectedRoute><DashboardThemeSettingsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/team" element={<ProtectedRoute><DashboardTeamMembersPage /></ProtectedRoute>} />
+      <Route path="/dashboard/admin/team-members" element={<ProtectedRoute><DashboardTeamMembersPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/form-builder" element={<ProtectedRoute><DashboardFormBuilderPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/api-logs" element={<ProtectedRoute><DashboardApiLogsPage /></ProtectedRoute>} />
       <Route path="/dashboard/admin/categories" element={<ProtectedRoute><DashboardCategoryPage /></ProtectedRoute>} />

@@ -68,6 +68,7 @@ export function Header() {
           <nav className="hidden lg:flex items-center gap-1">
             {[
               { to: "/", label: "Home" },
+              { to: "/hire-now", label: "⚡ Instant Hire" },
               { to: "/nearby-professionals", label: "Find Professionals" },
               { to: "/how-it-works", label: "How It Works" },
               { to: "/about", label: "About" },

@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { publicApi, seekerApi, isLoggedIn, type PublicProvider } from "../services/api"
+import { isWishlisted, toggleWishlist } from "../utils/wishlist"
 
 function normalizePhone(phone?: string): string {
   if (!phone) return ""
@@ -12,6 +13,7 @@ export function ProfessionalProfilePage() {
   const [pro, setPro] = useState<PublicProvider | null>(null)
   const [loading, setLoading] = useState(true)
   const [_error, setError] = useState(false)
+  const [saved, setSaved] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [revealingContact, setRevealingContact] = useState(false)
   const [revealedPhone, setRevealedPhone] = useState<string | null>(null)
@@ -52,6 +54,7 @@ export function ProfessionalProfilePage() {
       .finally(() => {
         setLoading(false)
       })
+    setSaved(isWishlisted(Number(id)))
   }, [id])
 
   useEffect(() => {
@@ -224,6 +227,34 @@ export function ProfessionalProfilePage() {
                 <i className="lnr lnr-lock" /> Login to contact
               </Link>
             )}
+
+            {/* Save to Wishlist Button */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!pro) return;
+                const { isSaved } = toggleWishlist({
+                  id: pro.id,
+                  name: pro.name,
+                  service_category: pro.service_category,
+                  rate: pro.rate,
+                  location: pro.location,
+                  image: pro.image,
+                  rating: pro.rating,
+                  reviews: pro.reviews,
+                  id_verified: pro.id_verified,
+                });
+                setSaved(isSaved);
+              }}
+              className={`px-5 py-3 rounded-xl border text-sm font-semibold transition-all flex items-center gap-2 active:scale-95 ${
+                saved
+                  ? "bg-rose-50 border-rose-300 text-rose-600 shadow-sm"
+                  : "border-gray-300 hover:border-rose-400 text-gray-700 hover:text-rose-600 bg-white"
+              }`}
+            >
+              <i className={`lnr lnr-heart text-base ${saved ? "text-rose-600 font-bold" : ""}`} />
+              <span>{saved ? "Saved to Wishlist" : "Save Pro"}</span>
+            </button>
           </div>
         </div>
 
@@ -242,23 +273,107 @@ export function ProfessionalProfilePage() {
             </div>
 
             {/* Dynamic Details Section */}
-            {pro.dynamic_data && typeof pro.dynamic_data === 'object' && Object.keys(pro.dynamic_data).length > 0 && (
-              <div className="pb-8 border-b border-gray-100">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Professional Details</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {Object.entries(pro.dynamic_data).map(([key, value]) => (
-                    <div key={key} className="flex flex-col gap-0.5">
-                      <span className="text-xs text-gray-400 uppercase tracking-wider">
-                        {key.replace(/_/g, ' ')}
+            {pro.dynamic_data && typeof pro.dynamic_data === 'object' && Object.keys(pro.dynamic_data).length > 0 && (() => {
+              const entries = Object.entries(pro.dynamic_data);
+              const booleanBadges = entries.filter(([, v]) => typeof v === 'boolean' && v === true);
+              const specs = entries.filter(([, v]) => typeof v !== 'boolean' && v !== '' && v !== null);
+
+              const formatLabel = (key: string) => {
+                const map: Record<string, string> = {
+                  cleaning_specialization: 'Cleaning Specialization',
+                  live_in_preference: 'Accommodation & Schedule',
+                  cleaning_experience_years: 'Cleaning Experience',
+                  cooking_ability: 'Cooking Skills',
+                  police_clearance_ready: 'Police Clearance Verified',
+                  childcare_certified: 'Childcare & First Aid Certified',
+                  plumbing_specialization: 'Plumbing Specialization',
+                  plumbing_experience_years: 'Plumbing Experience',
+                  plumbing_license_number: 'Trade License / Reg #',
+                  plumbing_tools_transport: 'Tools & Work Vehicle',
+                  emergency_callouts_available: '24/7 Emergency Callout Ready',
+                  electrical_specialization: 'Electrical Domain & Focus',
+                  electrical_experience_years: 'Electrical Experience',
+                  wiremans_license_number: 'Wireman’s License #',
+                  solar_certified: 'Solar PV & Inverter Certified',
+                  coc_certified: 'COC Compliance Certified',
+                  emergency_electric_available: '24/7 Emergency Outage Support',
+                };
+                return map[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              };
+
+              const getBadgeIcon = (key: string) => {
+                if (key.includes('police')) return 'lnr-shield-check';
+                if (key.includes('childcare') || key.includes('first_aid')) return 'lnr-heart-pulse';
+                if (key.includes('emergency')) return 'lnr-alarm';
+                if (key.includes('solar')) return 'lnr-sun';
+                if (key.includes('coc') || key.includes('license')) return 'lnr-license';
+                return 'lnr-checkmark-circle';
+              };
+
+              return (
+                <div className="pb-8 border-b border-gray-100">
+                  <div className="flex items-center justify-between mb-5">
+                    <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <span className="w-8 h-8 rounded-xl bg-gray-900 text-white flex items-center justify-center text-xs">
+                        <i className={`lnr ${
+                          pro.service_category?.toLowerCase() === 'cleaning' ? 'lnr-home' :
+                          pro.service_category?.toLowerCase() === 'plumbing' ? 'lnr-drop' :
+                          pro.service_category?.toLowerCase() === 'electrical' ? 'lnr-flash' : 'lnr-briefcase'
+                        }`}></i>
                       </span>
-                      <span className="text-gray-800 text-sm">
-                        {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value)}
+                      {pro.service_category || 'Trade'} Specifications & Credentials
+                    </h2>
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Verified {pro.service_category || 'Professional'}
+                    </span>
+                  </div>
+
+                  {/* Verified Credential Badges */}
+                  {booleanBadges.length > 0 && (
+                    <div className="mb-6">
+                      <span className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+                        Verified Credentials & Highlights
                       </span>
+                      <div className="flex flex-wrap gap-2">
+                        {booleanBadges.map(([key]) => (
+                          <div 
+                            key={key}
+                            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm ${
+                              key.includes('emergency')
+                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                : key.includes('police') || key.includes('coc')
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                : 'bg-blue-50 text-blue-800 border border-blue-200'
+                            }`}
+                          >
+                            <i className={`lnr ${getBadgeIcon(key)} text-sm`}></i>
+                            <span>{formatLabel(key)}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  )}
+
+                  {/* Structured Spec Cards */}
+                  {specs.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {specs.map(([key, value]) => (
+                        <div key={key} className="p-4 rounded-2xl bg-gray-50/80 border border-gray-100 flex flex-col justify-between hover:bg-gray-50 transition-colors">
+                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                            {formatLabel(key)}
+                          </span>
+                          <span className="text-gray-900 font-medium text-sm">
+                            {typeof value === 'number' && key.includes('years') 
+                              ? `${value} Years Experience` 
+                              : String(value)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Services Section */}
             <div className="pb-8 border-b border-gray-100">

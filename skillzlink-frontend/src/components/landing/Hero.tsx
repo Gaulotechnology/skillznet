@@ -88,7 +88,7 @@ export function Hero() {
           <div className="grid md:grid-cols-2 gap-6 max-w-5xl">
             {/* ── Book a Service Card ── */}
             <Link
-              to="/register"
+              to="/hire-now"
               className="group relative overflow-hidden rounded-[2rem] p-8 flex flex-col gap-6 cursor-pointer hover:-translate-y-1 transition-all duration-300"
               style={{
                 backgroundColor: primary,

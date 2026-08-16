@@ -400,8 +400,7 @@ class AuthController extends Controller
     {
         $otpRecord = OtpVerification::where('phone_number', $phoneNumber)
             ->where('code', $otp)
-            ->where('verified', false)
-            ->where('expires_at', '>', now())
+            ->where('created_at', '>', now()->subMinutes(15))
             ->latest()
             ->first();
 

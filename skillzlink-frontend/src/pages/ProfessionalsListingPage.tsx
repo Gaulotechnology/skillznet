@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { Link, useSearchParams } from "react-router-dom"
 import { publicApi, isLoggedIn } from "../services/api"
 import type { PublicProvider } from "../services/api"
+import { getWishlist, toggleWishlist } from "../utils/wishlist"
 
 const primary = "var(--accent-color, #2563eb)"
 
@@ -18,8 +19,8 @@ const ShieldCheck = ({ size = 14, className = "" }: { size?: number; className?:
   </svg>
 )
 
-const Heart = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+const Heart = ({ size = 16, className = "", filled = false }: { size?: number; className?: string; filled?: boolean }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
   </svg>
 )
@@ -146,14 +147,23 @@ export function ProfessionalsListingPage() {
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false)
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false)
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
-  const [categoryScrollOpen, setCategoryScrollOpen] = useState(false)
 
   const [geoLoading, setGeoLoading] = useState(false)
   const [geoError, setGeoError] = useState<string | null>(null)
+  const [wishlistIds, setWishlistIds] = useState<number[]>(() => getWishlist().map(p => p.id))
 
   const cityRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLDivElement>(null)
   const sortRef = useRef<HTMLDivElement>(null)
+
+  // Sync wishlist updates across tabs/components
+  useEffect(() => {
+    const handleWishlistUpdate = () => {
+      setWishlistIds(getWishlist().map(p => p.id))
+    }
+    window.addEventListener("wishlist_updated", handleWishlistUpdate)
+    return () => window.removeEventListener("wishlist_updated", handleWishlistUpdate)
+  }, [])
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -407,47 +417,57 @@ export function ProfessionalsListingPage() {
 
       {/* Sticky Filter Bar */}
       <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-[var(--border-color)] shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-3 py-2 overflow-visible">
-            {/* Category Chips - Horizontal Scroll */}
-            <div className="flex-1 flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1">
-              <button
-                onClick={() => setCategoryFilter("All")}
-                className={categoryChip(categoryFilter === "All")}
-              >
-                <i className="lnr lnr-grid text-xs" />
-                All
-              </button>
-              {categories.slice(0, categoryScrollOpen ? categories.length : 8).map((c: any) => {
-                const count = professionals.filter(p => (p.service_category || "").toLowerCase().includes(c.name.toLowerCase())).length
-                return (
-                  <button
-                    key={c.name}
-                    onClick={() => setCategoryFilter(c.name === categoryFilter ? "All" : c.name)}
-                    className={categoryChip(categoryFilter === c.name)}
-                  >
-                    {categoryIcons[c.name] && <i className={`${categoryIcons[c.name]} text-xs opacity-75`} />}
-                    <span>{c.name}</span>
-                    {count > 0 && (
-                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ml-0.5 ${categoryFilter === c.name ? "bg-white/25 text-white" : "bg-black/5 text-[var(--text-secondary)]"}`}>
-                        {count}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-              {categories.length > 8 && !categoryScrollOpen && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 space-y-3">
+          
+          {/* Row 1: Category Chips - Natural responsive wrap without horizontal scroll or overlap */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setCategoryFilter("All")}
+              className={categoryChip(categoryFilter === "All")}
+            >
+              <i className="lnr lnr-grid text-xs" />
+              All
+            </button>
+            {categories.map((c: any) => {
+              const count = professionals.filter(p => (p.service_category || "").toLowerCase().includes(c.name.toLowerCase())).length
+              return (
                 <button
-                  onClick={() => setCategoryScrollOpen(true)}
-                  className="shrink-0 px-3 py-1.5 text-xs text-[var(--accent-color)] font-medium hover:underline"
+                  key={c.name}
+                  onClick={() => setCategoryFilter(c.name === categoryFilter ? "All" : c.name)}
+                  className={categoryChip(categoryFilter === c.name)}
                 >
-                  +{categories.length - 8} more
+                  {categoryIcons[c.name] && <i className={`${categoryIcons[c.name]} text-xs opacity-75`} />}
+                  <span>{c.name}</span>
+                  {count > 0 && (
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ml-0.5 ${categoryFilter === c.name ? "bg-white/25 text-white" : "bg-black/5 text-[var(--text-secondary)]"}`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Row 2: Controls Toolbar (Results Count, Filters Modal & Sort Dropdown) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-[var(--border-color)]/60">
+            <div className="text-xs text-[var(--text-secondary)] font-medium flex items-center gap-2">
+              <span>
+                Showing <span className="font-bold text-[var(--text-primary)]">{paginatedProfessionals.length}</span> of <span className="font-bold text-[var(--text-primary)]">{sortedProfessionals.length}</span> professionals
+                {cityFilter !== "All" && cityFilter !== "Near Me" && <> in <span className="font-bold text-[var(--accent-color)]">{cityFilter}</span></>}
+              </span>
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={clearAllFilters}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--accent-color)] hover:underline ml-2 bg-[var(--accent-light)] px-2 py-0.5 rounded-full"
+                >
+                  <span>Reset {activeFiltersCount} filters</span>
+                  <i className="lnr lnr-cross text-[9px]"></i>
                 </button>
               )}
             </div>
 
             {/* Right side actions */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2">
               {/* More Filters */}
               <div className="relative" ref={moreRef}>
                 <button
@@ -586,16 +606,6 @@ export function ProfessionalsListingPage() {
           </div>
         )}
 
-        {/* Results header */}
-        {!loading && !error && (
-          <div className="flex items-center justify-between mb-5">
-            <p className="text-sm text-[var(--text-secondary)]">
-              Showing <span className="font-medium text-[var(--text-primary)]">{paginatedProfessionals.length}</span> of <span className="font-medium text-[var(--text-primary)]">{sortedProfessionals.length}</span> professionals
-              {cityFilter !== "All" && cityFilter !== "Near Me" && <> in <span className="font-medium text-[var(--text-primary)]">{cityFilter}</span></>}
-            </p>
-          </div>
-        )}
-
         {/* Results */}
         <div>
           {loading ? (
@@ -658,11 +668,32 @@ export function ProfessionalsListingPage() {
                       )}
 
                       {/* Favorite button */}
-                      <div className="absolute top-4 right-4 z-10">
-                        <span className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-md border border-white/50 shadow-md flex items-center justify-center">
-                          <Heart size={16} className="text-slate-400" />
-                        </span>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleWishlist({
+                            id: pro.id,
+                            name: pro.name,
+                            service_category: pro.service_category,
+                            rate: pro.rate,
+                            location: pro.location,
+                            image: pro.image,
+                            rating: pro.rating,
+                            reviews: pro.reviews,
+                            id_verified: pro.id_verified,
+                          });
+                        }}
+                        aria-label={wishlistIds.includes(pro.id) ? "Remove from saved" : "Save to wishlist"}
+                        className={`absolute top-4 right-4 z-10 w-9 h-9 rounded-full backdrop-blur-md shadow-md flex items-center justify-center transition-all duration-200 active:scale-90 ${
+                          wishlistIds.includes(pro.id)
+                            ? "bg-rose-50 border border-rose-200 text-rose-500 hover:bg-rose-100"
+                            : "bg-white/90 border border-white/50 text-slate-400 hover:text-rose-500 hover:bg-white"
+                        }`}
+                      >
+                        <Heart size={16} filled={wishlistIds.includes(pro.id)} className={wishlistIds.includes(pro.id) ? "text-rose-500 fill-rose-500" : "text-slate-400"} />
+                      </button>
 
                       {/* Experience badge */}
                       {pro.years_of_experience != null && (

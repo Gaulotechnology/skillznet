@@ -105,6 +105,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       items: [
         { to: '/dashboard/admin/categories',     icon: 'lnr lnr-list',            label: 'Categories' },
         { to: '/dashboard/admin/roles',          icon: 'lnr lnr-lock',            label: 'Roles & Permissions' },
+        { to: '/dashboard/admin/team',           icon: 'lnr lnr-users',           label: 'Team Members' },
         { to: '/dashboard/admin/form-builder',   icon: 'lnr lnr-text-align-left', label: 'Form Builder' },
         { to: '/dashboard/admin/knowledge-base', icon: 'lnr lnr-book',            label: 'Knowledge Base' },
         { to: '/dashboard/admin/theme-settings', icon: 'lnr lnr-cog',             label: 'Settings' },

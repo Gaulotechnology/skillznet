@@ -224,6 +224,7 @@ export function DashboardThemeSettingsPage() {
       Object.entries(colorMap).forEach(([key, varName]) => {
         if (data[key]) document.documentElement.style.setProperty(varName, data[key] as string);
       });
+      window.dispatchEvent(new CustomEvent("theme_updated", { detail: data }));
     }
     showToast("Settings saved successfully");
   };

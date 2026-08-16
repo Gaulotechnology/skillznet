@@ -9,7 +9,9 @@ export interface RegistrationField {
   label: string;
   name: string;
   type: string;
-  required: boolean;
+  required?: boolean;
+  is_required?: boolean;
+  placeholder?: string;
   options?: any;
   category_name: string | null;
   sort_order: number;
@@ -215,6 +217,44 @@ export const publicApi = {
     
   getProviderRegistrationFields: (category_slug: string) => 
     fetchJson<{ fields: RegistrationField[] }>(`${API_BASE_URL}/registration-fields?category=${encodeURIComponent(category_slug)}`),
+
+  // Guest On-Demand Matching
+  createGuestMatchingRequest: (payload: {
+    guest_name: string;
+    guest_phone: string;
+    service_category: string;
+    title: string;
+    description?: string;
+    city?: string;
+    address?: string;
+    urgency?: string;
+    budget?: number;
+  }) => fetchJson<{ message: string; request: MatchingRequest; token: string; user: any }>(`${API_BASE_URL}/matching-requests/guest`, {
+    method: "POST", body: JSON.stringify(payload),
+  }),
+
+  getGuestMatchingRequest: (id: number) =>
+    fetchJson<{ request: MatchingRequest }>(`${API_BASE_URL}/matching-requests/guest/${id}`),
+
+    cancelGuestMatchingRequest: (id: number) =>
+    fetchJson<{ message: string; request: MatchingRequest }>(`${API_BASE_URL}/matching-requests/guest/${id}/cancel`, {
+      method: "POST",
+    }),
+
+  getTeamMembers: () => fetchJson<{ team: TeamMember[] }>(`${API_BASE_URL}/team-members`),
+}
+
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  bio?: string;
+  photo_url?: string;
+  order_index?: number;
+  is_active?: boolean;
+  social_links?: Record<string, string>;
+  created_at?: string;
+  updated_at?: string;
 }
 
 
@@ -288,6 +328,51 @@ export const seekerApi = {
     }),
   deleteAccount: () => fetchJson<{ message: string }>(`${API_BASE_URL}/seeker/account`, { method: "DELETE" }),
   requestPasswordReset: () => fetchJson<{ message: string }>(`${API_BASE_URL}/auth/password-reset`, { method: "POST" }),
+
+  // On-Demand Matching
+  createMatchingRequest: (payload: {
+    service_category: string;
+    title: string;
+    description?: string;
+    city?: string;
+    address?: string;
+    urgency?: string;
+    budget?: number;
+  }) => fetchJson<{ message: string; request: MatchingRequest }>(`${API_BASE_URL}/seeker/matching-requests`, {
+    method: "POST", body: JSON.stringify(payload),
+  }),
+  getMatchingRequests: () => fetchJson<{ requests: MatchingRequest[] }>(`${API_BASE_URL}/seeker/matching-requests`),
+  getMatchingRequest: (id: number) => fetchJson<{ request: MatchingRequest }>(`${API_BASE_URL}/seeker/matching-requests/${id}`),
+  cancelMatchingRequest: (id: number) => fetchJson<{ message: string; request: MatchingRequest }>(`${API_BASE_URL}/seeker/matching-requests/${id}/cancel`, {
+    method: "POST",
+  }),
+}
+
+export interface MatchingRequest {
+  id: number;
+  seeker_id?: number;
+  service_category: string;
+  title: string;
+  description?: string;
+  city: string;
+  address?: string;
+  urgency: string;
+  budget?: number | null;
+  status: 'broadcasting' | 'matched' | 'in_progress' | 'completed' | 'cancelled' | 'expired' | string;
+  broadcast_count?: number;
+  candidate_provider_ids?: number[];
+  seeker?: string;
+  seeker_name?: string;
+  seeker_phone?: string;
+  provider?: string | null;
+  provider_name?: string | null;
+  provider_phone?: string | null;
+  provider_avatar?: string | null;
+  matched_provider_id?: number | null;
+  matched_provider?: any;
+  time_to_match?: string | null;
+  created_at: string;
+  accepted_at?: string | null;
 }
 
 // ─── Provider endpoints (auth required) ──────────────────────────────────────
@@ -373,6 +458,16 @@ export const providerApi = {
   respondToQuote: (id: number, action: 'accept' | 'reject') =>
     fetchJson<{ message: string }>(`${API_BASE_URL}/provider/quotes/${id}/respond`, {
       method: "POST", body: JSON.stringify({ action }),
+    }),
+
+  // On-Demand Matching
+  getAvailableJobs: () =>
+    fetchJson<{ jobs: MatchingRequest[] }>(`${API_BASE_URL}/provider/matching-requests/available`),
+  getMyJobs: () =>
+    fetchJson<{ jobs: MatchingRequest[] }>(`${API_BASE_URL}/provider/matching-requests/my-jobs`),
+  acceptJob: (id: number) =>
+    fetchJson<{ message: string; request: MatchingRequest }>(`${API_BASE_URL}/provider/matching-requests/${id}/accept`, {
+      method: "POST",
     }),
 }
 
@@ -503,7 +598,28 @@ export const adminApi = {
 
   getInsights: (period?: string) => {
     const qs = period ? `?period=${period}` : '';
-    return fetchJson<{ stats: { ongoing: number; completed: number; cancelled: number; reposted: number; revenue?: number; active_users?: number; completion_rate?: number }; hired_providers: any[]; chart_data: any[] }>(`${API_BASE_URL}/admin/insights${qs}`);
+    return fetchJson<{
+      stats: {
+        ongoing: number;
+        completed: number;
+        cancelled: number;
+        reposted: number;
+        revenue?: number;
+        total_bookings?: number;
+        active_users?: number;
+        total_seekers?: number;
+        total_providers?: number;
+        match_rate?: number;
+        completion_rate?: number;
+        avg_match_speed?: string;
+        satisfaction?: string;
+      };
+      trends?: any[];
+      categories?: any[];
+      top_providers?: any[];
+      hired_providers?: any[];
+      chart_data?: any[];
+    }>(`${API_BASE_URL}/admin/insights${qs}`);
   },
 
   getPackages: () => fetchJson<{ packages: any[] }>(`${API_BASE_URL}/admin/packages`),
@@ -534,7 +650,20 @@ export const adminApi = {
   getAgents: () => fetchJson<{ users: any[] }>(`${API_BASE_URL}/admin/agents`),
   getPayments: () => fetchJson<{ payments: any[] }>(`${API_BASE_URL}/admin/payments`),
   getAppointments: () => fetchJson<{ appointments: any[] }>(`${API_BASE_URL}/admin/appointments`),
-  getMatchingRequests: () => fetchJson<{ requests: any[] }>(`${API_BASE_URL}/admin/matching`),
+  getMatchingRequests: () =>
+    fetchJson<{ requests: MatchingRequest[]; stats: { total_requests: number; broadcasting: number; matched_today: number; avg_match_time: string } }>(`${API_BASE_URL}/admin/matching`),
+  assignMatchingProvider: (id: number, provider_id: number) =>
+    fetchJson<{ message: string; request: MatchingRequest }>(`${API_BASE_URL}/admin/matching/${id}/assign`, {
+      method: "POST", body: JSON.stringify({ provider_id }),
+    }),
+  cancelAdminMatchingRequest: (id: number) =>
+    fetchJson<{ message: string; request: MatchingRequest }>(`${API_BASE_URL}/admin/matching/${id}/cancel`, {
+      method: "POST",
+    }),
+  rebroadcastMatchingRequest: (id: number) =>
+    fetchJson<{ message: string; request: MatchingRequest }>(`${API_BASE_URL}/admin/matching/${id}/rebroadcast`, {
+      method: "POST",
+    }),
 
   getSmsLogs: () => fetchJson<{ logs: any[] }>(`${API_BASE_URL}/admin/sms-logs`),
   getCommLogs: () => fetchJson<{ logs: any[] }>(`${API_BASE_URL}/admin/comm-logs`),
@@ -564,6 +693,35 @@ export const adminApi = {
     fetchJson<{ message: string }>(`${API_BASE_URL}/admin/applications/${id}/reject`, {
       method: "POST",
     }),
+
+  getTeamMembers: () => fetchJson<{ team: TeamMember[] }>(`${API_BASE_URL}/admin/team-members`),
+  createTeamMember: (payload: Partial<TeamMember>) =>
+    fetchJson<{ message: string; member: TeamMember }>(`${API_BASE_URL}/admin/team-members`, {
+      method: "POST", body: JSON.stringify(payload),
+    }),
+  updateTeamMember: (id: number, payload: Partial<TeamMember>) =>
+    fetchJson<{ message: string; member: TeamMember }>(`${API_BASE_URL}/admin/team-members/${id}`, {
+      method: "PUT", body: JSON.stringify(payload),
+    }),
+  deleteTeamMember: (id: number) =>
+    fetchJson<{ message: string }>(`${API_BASE_URL}/admin/team-members/${id}`, { method: "DELETE" }),
+  uploadTeamPhoto: async (file: File) => {
+    const formData = new FormData();
+    formData.append("photo", file);
+    const token = getToken();
+    const headers: Record<string, string> = { Accept: "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE_URL}/admin/team-members/upload-photo`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || (err.errors?.photo?.[0]) || "Failed to upload photo");
+    }
+    return res.json() as Promise<{ message: string; photo_url: string }>;
+  },
 }
 
 // ─── Affiliate endpoints (auth required) ─────────────────────────────────────

@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\RagController;
 use App\Http\Controllers\Api\BotController;
 use App\Http\Controllers\Api\WhatsAppWebhookController;
 use App\Http\Controllers\Api\InfobipController;
+use App\Http\Controllers\Api\MatchingController;
+use App\Http\Controllers\Api\TeamMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['ok' => true]));
@@ -33,11 +35,17 @@ Route::get('/pin-policy', function () {
 
 // ─── Public endpoints (no auth) ───────────────────────────────────────────────
 Route::get('/theme-settings', [PublicProviderController::class, 'themeSettings']);
+Route::get('/team-members', [TeamMemberController::class, 'index']);
 Route::get('/categories', [PublicProviderController::class, 'categories']);
 Route::get('/registration-fields', [AdminController::class, 'publicRegistrationFields']);
 Route::get('/providers', [PublicProviderController::class, 'index']);
 Route::get('/providers/{id}', [PublicProviderController::class, 'show']);
 Route::get('/providers/{id}/slots', [PublicProviderController::class, 'getSlots']);
+
+// Public On-Demand Matching for Guest Seekers
+Route::post('/matching-requests/guest', [MatchingController::class, 'guestCreateRequest']);
+Route::get('/matching-requests/guest/{id}', [MatchingController::class, 'guestGetRequest']);
+Route::post('/matching-requests/guest/{id}/cancel', [MatchingController::class, 'guestCancelRequest']);
 
 // Public application submission (no auth)
 Route::post('/applications', [ApplicationController::class, 'store']);
@@ -124,6 +132,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/services/{id}/complete', [ProviderController::class, 'completeService']);
         Route::post('/services/{id}/repost', [ProviderController::class, 'repostService']);
         Route::delete('/services/{id}', [ProviderController::class, 'deleteService']);
+
+        // On-Demand Matching
+        Route::get('/matching-requests/available', [MatchingController::class, 'providerAvailableJobs']);
+        Route::get('/matching-requests/my-jobs', [MatchingController::class, 'providerMyJobs']);
+        Route::post('/matching-requests/{id}/accept', [MatchingController::class, 'providerAcceptJob']);
     });
 
     Route::prefix('seeker')->middleware('role:seeker,customer')->group(function (): void {
@@ -144,6 +157,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/settings', [SeekerController::class, 'getSettings']);
         Route::put('/settings', [SeekerController::class, 'updateSettings']);
         Route::delete('/account', [SeekerController::class, 'deleteAccount']);
+
+        // On-Demand Matching
+        Route::post('/matching-requests', [MatchingController::class, 'seekerCreateRequest']);
+        Route::get('/matching-requests', [MatchingController::class, 'seekerListRequests']);
+        Route::get('/matching-requests/{id}', [MatchingController::class, 'seekerGetRequest']);
+        Route::post('/matching-requests/{id}/cancel', [MatchingController::class, 'seekerCancelRequest']);
     });
 
     Route::prefix('agent')->middleware('role:agent')->group(function (): void {
@@ -212,7 +231,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/agents', [AdminController::class, 'getAgents']);
         Route::get('/payments', [AdminController::class, 'getPayments']);
         Route::get('/appointments', [AdminController::class, 'getAppointments']);
-        Route::get('/matching', [AdminController::class, 'getMatchingRequests']);
+        
+        // On-Demand Matching Console
+        Route::get('/matching', [MatchingController::class, 'adminIndex']);
+        Route::post('/matching/{id}/assign', [MatchingController::class, 'adminAssign']);
+        Route::post('/matching/{id}/cancel', [MatchingController::class, 'adminCancel']);
+        Route::post('/matching/{id}/rebroadcast', [MatchingController::class, 'adminRebroadcast']);
 
         // Admin settings & logs (accessible by both admin and super_admin)
         Route::get('/settings', [AdminController::class, 'getSettings']);
@@ -220,16 +244,19 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('/settings/upload-brand-asset', [AdminController::class, 'uploadBrandAsset']);
         Route::get('/sms-logs', [AdminController::class, 'smsLogs']);
         Route::get('/comm-logs', [AdminController::class, 'commLogs']);
+        Route::get('/api-logs', [AdminController::class, 'apiLogs']);
+        Route::get('/theme-settings', [AdminController::class, 'themeSettings']);
+        Route::post('/theme-settings', [AdminController::class, 'updateThemeSettings']);
         Route::get('/knowledge-base', [AdminController::class, 'knowledgeBase']);
         Route::post('/knowledge-base/rebuild', [AdminController::class, 'rebuildKnowledgeBase']);
         Route::post('/knowledge-base/documents', [AdminController::class, 'storeKnowledgeDocument']);
 
-        // Super admin only routes
-        Route::middleware('role:super_admin')->group(function (): void {
-            Route::get('/theme-settings', [AdminController::class, 'themeSettings']);
-            Route::post('/theme-settings', [AdminController::class, 'updateThemeSettings']);
-            Route::get('/api-logs', [AdminController::class, 'apiLogs']);
-        });
+        // Team Members Management
+        Route::get('/team-members', [TeamMemberController::class, 'adminIndex']);
+        Route::post('/team-members', [TeamMemberController::class, 'store']);
+        Route::put('/team-members/{id}', [TeamMemberController::class, 'update']);
+        Route::delete('/team-members/{id}', [TeamMemberController::class, 'destroy']);
+        Route::post('/team-members/upload-photo', [TeamMemberController::class, 'uploadPhoto']);
     });
 
     // ─── Live Chat & RAG AI ─────────────────────────────────────────────────

@@ -223,58 +223,82 @@ export function DashboardProfilePage() {
                   <>
                     <hr className="border-[var(--border-color)]" />
                     <div>
-                      <h3 className="text-xl font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2">
-                        <i className="lnr lnr-magic-wand text-[var(--accent-color)]"></i> Professional Details
-                      </h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                          <i className="lnr lnr-magic-wand text-[var(--accent-color)]"></i> {profile.service_category || 'Trade'} Specific Details
+                        </h3>
+                        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)]">
+                          {profile.service_category || 'Professional'} Journey
+                        </span>
+                      </div>
+                      <p className="text-xs text-[var(--text-secondary)] mb-6">
+                        These details are specific to your trade as a <strong>{profile.service_category}</strong> and will be highlighted to clients when viewing your profile.
+                      </p>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {dynamicFields.map(field => (
-                          <div key={field.name}>
-                            <label className="block text-sm font-bold text-[var(--text-primary)] mb-2">
-                              {field.label} {field.required && <span className="text-red-500">*</span>}
-                            </label>
-                            
-                            {field.type === 'boolean' ? (
-                              <label className="flex items-center gap-3 cursor-pointer mt-3">
+                        {dynamicFields.map(field => {
+                          const isReq = field.is_required || field.required;
+                          return (
+                            <div key={field.name} className={field.type === 'textarea' ? 'col-span-1 md:col-span-2' : ''}>
+                              {field.type !== 'checkbox' && field.type !== 'boolean' && (
+                                <label className="block text-sm font-bold text-[var(--text-primary)] mb-2">
+                                  {field.label} {isReq && <span className="text-red-500">*</span>}
+                                </label>
+                              )}
+                              
+                              {field.type === 'checkbox' || field.type === 'boolean' ? (
+                                <label className="flex items-center gap-3 p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] cursor-pointer hover:bg-[var(--bg-secondary)]/80 transition-colors">
+                                  <input 
+                                    type="checkbox" 
+                                    className="w-5 h-5 rounded border-[var(--border-color)] text-[var(--accent-color)] focus:ring-[var(--accent-color)]"
+                                    checked={!!dynamicData[field.name]}
+                                    onChange={(e) => setDynamicData(prev => ({ ...prev, [field.name]: e.target.checked }))}
+                                  />
+                                  <span className="text-[var(--text-primary)] font-medium text-sm">{field.label}</span>
+                                </label>
+                              ) : field.type === 'number' ? (
                                 <input 
-                                  type="checkbox" 
-                                  className="w-5 h-5 rounded border-[var(--border-color)] text-[var(--accent-color)] focus:ring-[var(--accent-color)]"
-                                  checked={!!dynamicData[field.name]}
-                                  onChange={(e) => setDynamicData(prev => ({ ...prev, [field.name]: e.target.checked }))}
+                                  type="number" 
+                                  required={isReq}
+                                  className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] outline-none transition-all font-medium text-[var(--text-primary)]"
+                                  value={dynamicData[field.name] ?? ''}
+                                  placeholder={field.placeholder || field.label}
+                                  onChange={(e) => setDynamicData(prev => ({ ...prev, [field.name]: e.target.value !== '' ? Number(e.target.value) : '' }))}
                                 />
-                                <span className="text-[var(--text-primary)] font-medium">{field.label}</span>
-                              </label>
-                            ) : field.type === 'number' ? (
-                              <input 
-                                type="number" 
-                                required={field.required}
-                                className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] outline-none transition-all font-medium text-[var(--text-primary)]"
-                                value={dynamicData[field.name] || ''}
-                                onChange={(e) => setDynamicData(prev => ({ ...prev, [field.name]: e.target.value ? Number(e.target.value) : '' }))}
-                              />
-                            ) : field.type === 'select' && field.options ? (
-                              <select 
-                                required={field.required}
-                                className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] outline-none transition-all font-medium text-[var(--text-primary)] appearance-none"
-                                value={dynamicData[field.name] || ''}
-                                onChange={(e) => setDynamicData(prev => ({ ...prev, [field.name]: e.target.value }))}
-                              >
-                                <option value="">Select an option</option>
-                                {(Array.isArray(field.options) ? field.options : []).map((opt: string) => (
-                                  <option key={opt} value={opt}>{opt}</option>
-                                ))}
-                              </select>
-                            ) : (
-                              <input 
-                                type="text" 
-                                required={field.required}
-                                className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] outline-none transition-all font-medium text-[var(--text-primary)]"
-                                value={dynamicData[field.name] || ''}
-                                onChange={(e) => setDynamicData(prev => ({ ...prev, [field.name]: e.target.value }))}
-                              />
-                            )}
-                          </div>
-                        ))}
+                              ) : (field.type === 'dropdown' || field.type === 'select') && field.options ? (
+                                <select 
+                                  required={isReq}
+                                  className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] outline-none transition-all font-medium text-[var(--text-primary)] appearance-none"
+                                  value={dynamicData[field.name] || ''}
+                                  onChange={(e) => setDynamicData(prev => ({ ...prev, [field.name]: e.target.value }))}
+                                >
+                                  <option value="">{field.placeholder || `Select ${field.label}`}</option>
+                                  {(Array.isArray(field.options) ? field.options : []).map((opt: string) => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                  ))}
+                                </select>
+                              ) : field.type === 'textarea' ? (
+                                <textarea 
+                                  required={isReq}
+                                  rows={3}
+                                  className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] outline-none transition-all font-medium text-[var(--text-primary)]"
+                                  value={dynamicData[field.name] || ''}
+                                  placeholder={field.placeholder || field.label}
+                                  onChange={(e) => setDynamicData(prev => ({ ...prev, [field.name]: e.target.value }))}
+                                />
+                              ) : (
+                                <input 
+                                  type="text" 
+                                  required={isReq}
+                                  className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-xl focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] outline-none transition-all font-medium text-[var(--text-primary)]"
+                                  value={dynamicData[field.name] || ''}
+                                  placeholder={field.placeholder || field.label}
+                                  onChange={(e) => setDynamicData(prev => ({ ...prev, [field.name]: e.target.value }))}
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </>

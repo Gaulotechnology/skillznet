@@ -63,9 +63,14 @@ export function RegisterPage() {
   }, [])
 
   useEffect(() => {
-    if (role !== "provider") return;
+    if (role !== "provider" || !serviceCategory) {
+      setDynamicFields([])
+      setDynamicValues({})
+      setFieldsLoading(false)
+      return
+    }
     
-    setFieldsLoading(true);
+    setFieldsLoading(true)
     fetch(`${apiBaseUrl()}/registration-fields?category=${encodeURIComponent(serviceCategory)}`)
       .then(r => r.ok ? r.json() : { fields: [] })
       .then(data => {
@@ -438,40 +443,50 @@ export function RegisterPage() {
             {role === "provider" && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <hr className="border-[var(--border-color)] my-8" />
+                
+                {/* 2. Choose Profession First */}
+                <div className="mb-6 p-4 rounded-2xl bg-amber-50/60 border border-amber-200/70">
+                  <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2 text-sm">
+                    <span className="w-6 h-6 rounded bg-amber-500 text-white flex items-center justify-center text-xs font-bold">2</span>
+                    Select Your Profession / Trade *
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-3">
+                    Choose what you specialize in. Your onboarding journey and client questions will adapt to this profession.
+                  </p>
+                  <div className="relative">
+                    <select
+                      value={serviceCategory}
+                      onChange={(e) => setServiceCategory(e.target.value)}
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-amber-300 outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-white text-sm font-medium text-gray-900 appearance-none shadow-sm"
+                    >
+                      <option value="">-- Choose your profession (e.g. Cleaning / Helper, Plumbing, Electrical...) --</option>
+                      {categories.map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
+                    </select>
+                    <i className="lnr lnr-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 3. Professional Details */}
                 <h3 className="font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded bg-[var(--bg-secondary)] text-[var(--accent-color)] flex items-center justify-center text-xs">2</span>
-                  Professional Details
+                  <span className="w-6 h-6 rounded bg-[var(--bg-secondary)] text-[var(--accent-color)] flex items-center justify-center text-xs font-bold">3</span>
+                  Professional Verification & Location
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">National ID Number</label>
+                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">National ID Number *</label>
                     <input
                       type="text"
                       value={identityNumber}
                       onChange={(e) => setIdentityNumber(e.target.value)}
                       required
-                      placeholder="For verification purposes"
+                      placeholder="For identity verification"
                       className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Service Category</label>
-                    <div className="relative">
-                      <select
-                        value={serviceCategory}
-                        onChange={(e) => setServiceCategory(e.target.value)}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm appearance-none"
-                      >
-                        <option value="">Select a category</option>
-                        {categories.map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
-                      </select>
-                      <i className="lnr lnr-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] pointer-events-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Street Address</label>
+                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Street Address *</label>
                     <input
                       type="text"
                       value={address}
@@ -481,8 +496,8 @@ export function RegisterPage() {
                       className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Working Radius (km)</label>
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Working Radius (km) *</label>
                     <input
                       type="number"
                       value={serviceRadius}
@@ -493,36 +508,54 @@ export function RegisterPage() {
                     />
                   </div>
                   <div className="col-span-1 md:col-span-2">
-                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Bio / Description</label>
+                    <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">Bio / Description *</label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       required
-                      placeholder="Tell potential clients about your experience and skills..."
+                      placeholder="Tell potential clients about your experience, trade skills and services..."
                       rows={3}
                       className="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] outline-none focus:border-[var(--accent-color)] focus:ring-2 focus:ring-[var(--accent-light)] bg-[var(--bg-secondary)] focus:bg-white transition-all text-sm"
                     />
                   </div>
                 </div>
 
-                {!fieldsLoading && dynamicFields.length > 0 && (
-                  <>
-                    <h3 className="font-bold text-[var(--text-primary)] mb-4 mt-8 flex items-center gap-2">
-                      <span className="w-6 h-6 rounded bg-[var(--bg-secondary)] text-[var(--accent-color)] flex items-center justify-center text-xs">3</span>
-                      Additional Information
-                    </h3>
+                {/* 4. Tailored Category Journey Questions */}
+                {!serviceCategory ? (
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-xs flex items-center gap-2.5 mt-6">
+                    <i className="lnr lnr-pointer-up text-base text-[var(--accent-color)]"></i>
+                    <span>Please choose your profession in <strong>Step 2</strong> above to unlock questions and trade requirements tailored specifically to your work.</span>
+                  </div>
+                ) : fieldsLoading ? (
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-xs flex items-center gap-2.5 mt-6">
+                    <span className="w-3.5 h-3.5 border-2 border-[var(--accent-color)] border-t-transparent rounded-full animate-spin"></span>
+                    <span>Loading questions for <strong>{serviceCategory}</strong>...</span>
+                  </div>
+                ) : dynamicFields.length > 0 ? (
+                  <div className="mt-8 pt-6 border-t border-[var(--border-color)]">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2">
+                        <span className="w-6 h-6 rounded bg-[var(--bg-secondary)] text-[var(--accent-color)] flex items-center justify-center text-xs font-bold">4</span>
+                        {serviceCategory} Trade Questions
+                      </h3>
+                      <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[var(--accent-color)]/10 text-[var(--accent-color)]">
+                        {serviceCategory} Onboarding
+                      </span>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {dynamicFields.map(field => (
                         <div key={field.id} className={field.type === 'textarea' ? 'col-span-1 md:col-span-2' : ''}>
-                          <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
-                            {field.label} {field.is_required && <span className="text-[var(--accent-color)]">*</span>}
-                          </label>
+                          {field.type !== 'checkbox' && (
+                            <label className="block text-sm font-semibold text-[var(--text-primary)] mb-1.5">
+                              {field.label} {field.is_required && <span className="text-[var(--accent-color)]">*</span>}
+                            </label>
+                          )}
                           {renderDynamicField(field)}
                         </div>
                       ))}
                     </div>
-                  </>
-                )}
+                  </div>
+                ) : null}
               </div>
             )}
             

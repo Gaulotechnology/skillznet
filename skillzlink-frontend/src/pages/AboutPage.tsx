@@ -1,29 +1,35 @@
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { publicApi, type TeamMember } from "../services/api"
 
-const TEAM = [
+const DEFAULT_TEAM = [
   {
+    id: 1,
     name: "Tinashe Moyo",
     role: "Co-Founder & CEO",
     bio: "Harare native passionate about closing the skills gap in Zimbabwe. Former software engineer turned entrepreneur.",
-    img: "/images/team/team-tinashe.jpg",
+    photo_url: "/images/team/team-tinashe.jpg",
   },
   {
+    id: 2,
     name: "Chipo Ndlovu",
     role: "Head of Marketing",
     bio: "Brand strategist with 6 years experience in Zimbabwean digital markets. Leads growth and community.",
-    img: "/images/team/team-chipo.jpg",
+    photo_url: "/images/team/team-chipo.jpg",
   },
   {
+    id: 3,
     name: "Tafadzwa Chigumba",
     role: "Lead Engineer",
     bio: "Full-stack developer from Bulawayo building the technology that powers SkillzLink's WhatsApp integrations.",
-    img: "/images/team/team-tafadzwa.jpg",
+    photo_url: "/images/team/team-tafadzwa.jpg",
   },
   {
+    id: 4,
     name: "Rudo Makoni",
     role: "Head of Operations",
     bio: "Operations expert ensuring every professional on SkillzLink is vetted, verified, and ready to serve Zimbabwe.",
-    img: "/images/team/team-rudo.jpg",
+    photo_url: "/images/team/team-rudo.jpg",
   },
 ]
 
@@ -35,6 +41,21 @@ const VALUES = [
 ]
 
 export function AboutPage() {
+  const [team, setTeam] = useState<TeamMember[]>([])
+
+  useEffect(() => {
+    publicApi.getTeamMembers()
+      .then(res => {
+        if (res.team && res.team.length > 0) {
+          setTeam(res.team)
+        } else {
+          setTeam(DEFAULT_TEAM as any)
+        }
+      })
+      .catch(() => {
+        setTeam(DEFAULT_TEAM as any)
+      })
+  }, [])
   return (
     <div className="min-h-screen bg-white font-['Inter',sans-serif]">
       {/* Hero */}
@@ -117,17 +138,22 @@ export function AboutPage() {
             <p className="text-[var(--text-secondary)]">The Zimbabweans Building SkillzLink</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TEAM.map(member => (
-              <div key={member.name} className="bg-white rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm">
-                <img
-                  src={member.img}
-                  alt={member.name}
-                  className="w-full h-56 object-cover object-top"
-                />
+            {team.map(member => (
+              <div key={member.id || member.name} className="bg-white rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="w-full h-64 bg-gray-100 relative overflow-hidden">
+                  <img
+                    src={member.photo_url || "/images/team/default.jpg"}
+                    alt={member.name}
+                    className="w-full h-full object-cover object-top"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=00A843&color=fff&size=400`;
+                    }}
+                  />
+                </div>
                 <div className="p-5 text-center">
                   <h3 className="text-base font-bold text-[var(--text-primary)]">{member.name}</h3>
                   <span className="text-sm font-semibold text-[var(--accent-color)] block mt-1 mb-2">{member.role}</span>
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{member.bio}</p>
+                  {member.bio && <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{member.bio}</p>}
                 </div>
               </div>
             ))}

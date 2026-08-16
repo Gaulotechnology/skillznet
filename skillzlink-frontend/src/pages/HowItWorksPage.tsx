@@ -7,6 +7,7 @@ const seekerSteps = [
     title: "Search & Filter",
     desc: "Browse our directory of verified professionals. Filter by city, service category, or price range to find the perfect match for your needs.",
     color: "from-blue-500 to-cyan-500",
+    textColor: "text-blue-600",
     bg: "bg-blue-50",
   },
   {
@@ -15,6 +16,7 @@ const seekerSteps = [
     title: "Review Profiles",
     desc: "Check out their past work, read reviews from other Zimbabweans, and verify their ID status before making contact.",
     color: "from-violet-500 to-purple-500",
+    textColor: "text-violet-600",
     bg: "bg-violet-50",
   },
   {
@@ -23,6 +25,7 @@ const seekerSteps = [
     title: "Chat & Hire on WhatsApp",
     desc: "Click the WhatsApp button to instantly message the professional. Negotiate, share photos, and get the job done — no extra app needed.",
     color: "from-green-500 to-emerald-500",
+    textColor: "text-emerald-600",
     bg: "bg-green-50",
   },
 ]
@@ -34,6 +37,7 @@ const providerSteps = [
     title: "Create Your Profile",
     desc: "Sign up with your phone number, pick your service category, set your working radius, and write a compelling bio that attracts clients.",
     color: "from-amber-500 to-orange-500",
+    textColor: "text-amber-600",
     bg: "bg-amber-50",
   },
   {
@@ -42,6 +46,7 @@ const providerSteps = [
     title: "Get ID Verified",
     desc: "Provide your National ID for verification. Once approved, you'll earn a verified badge that builds instant trust with potential clients.",
     color: "from-sky-500 to-blue-500",
+    textColor: "text-sky-600",
     bg: "bg-sky-50",
   },
   {
@@ -50,6 +55,7 @@ const providerSteps = [
     title: "Receive Client Leads",
     desc: "Clients find you through the directory and message you directly on WhatsApp to discuss their project and negotiate terms.",
     color: "from-pink-500 to-rose-500",
+    textColor: "text-pink-600",
     bg: "bg-pink-50",
   },
   {
@@ -58,6 +64,7 @@ const providerSteps = [
     title: "Build Your Reputation",
     desc: "Complete jobs successfully, collect 5-star reviews, and climb the rankings. Better reviews mean more visibility and more clients.",
     color: "from-yellow-500 to-amber-500",
+    textColor: "text-amber-600",
     bg: "bg-yellow-50",
   },
 ]
@@ -123,11 +130,7 @@ export function HowItWorksPage() {
                     {step.num}
                   </div>
                   <div className={`w-14 h-14 rounded-2xl ${step.bg} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
-                    <i className={`${step.icon} text-2xl`} style={{ 
-                      background: `linear-gradient(to bottom right, var(--tw-gradient-stops))`,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }} />
+                    <i className={`${step.icon} text-2xl ${step.textColor}`} />
                   </div>
                   <h3 className="text-lg font-bold text-[var(--text-primary)] mb-3">{step.title}</h3>
                   <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{step.desc}</p>
@@ -272,7 +275,7 @@ export function HowItWorksPage() {
                         {step.num}
                       </div>
                       <div className={`w-14 h-14 rounded-2xl ${step.bg} flex items-center justify-center mb-4 ${isLeft ? 'lg:ml-auto' : ''} group-hover:scale-110 transition-transform duration-300`}>
-                        <i className={`${step.icon} text-2xl`} />
+                        <i className={`${step.icon} text-2xl ${step.textColor}`} />
                       </div>
                       <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">{step.title}</h3>
                       <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{step.desc}</p>
