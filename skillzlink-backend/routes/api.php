@@ -221,6 +221,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/comm-logs', [AdminController::class, 'commLogs']);
         Route::get('/knowledge-base', [AdminController::class, 'knowledgeBase']);
         Route::post('/knowledge-base/rebuild', [AdminController::class, 'rebuildKnowledgeBase']);
+        Route::post('/knowledge-base/documents', [AdminController::class, 'storeKnowledgeDocument']);
 
         // Super admin only routes
         Route::middleware('role:super_admin')->group(function (): void {

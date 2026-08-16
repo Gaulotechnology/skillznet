@@ -591,6 +591,30 @@ class AdminController extends Controller
         ]);
     }
 
+    public function storeKnowledgeDocument(Request $request): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $validated = $request->validate([
+            'title'   => ['required', 'string', 'max:255'],
+            'content' => ['required', 'string', 'max:200000'],
+            'source'  => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $count = app(\App\Services\RagService::class)->ingest(
+            $validated['title'],
+            $validated['content'],
+            $validated['source'] ?? ''
+        );
+
+        return response()->json([
+            'message' => 'Document indexed successfully.',
+            'chunks_indexed' => $count,
+        ], 201);
+    }
+
     // ─── Roles & Permissions ──────────────────────────────────────────────────
 
     public function permissions(Request $request): JsonResponse

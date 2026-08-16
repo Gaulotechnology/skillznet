@@ -25,6 +25,11 @@ export function DashboardKnowledgeBasePage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [source, setSource] = useState("");
+  const [adding, setAdding] = useState(false);
+
   const fetchData = () => {
     setLoading(true);
     setError("");
@@ -56,6 +61,28 @@ export function DashboardKnowledgeBasePage() {
         setNotice("Rebuild failed. Please try again.");
       })
       .finally(() => setRebuilding(false));
+  };
+
+  const handleAdd = () => {
+    if (!title.trim() || !content.trim()) {
+      setNotice("Title and content are required.");
+      return;
+    }
+    setAdding(true);
+    setNotice("");
+    adminApi.addKnowledgeDocument({ title: title.trim(), content: content.trim(), source: source.trim() || undefined })
+      .then((res) => {
+        setNotice(`${res.message} (${res.chunks_indexed} chunks indexed)`);
+        setTitle("");
+        setContent("");
+        setSource("");
+        fetchData();
+      })
+      .catch((err) => {
+        console.error("Failed to add document:", err);
+        setNotice("Failed to index document. Please try again.");
+      })
+      .finally(() => setAdding(false));
   };
 
   const columns: Column<KnowledgeDocument>[] = [
@@ -111,6 +138,31 @@ export function DashboardKnowledgeBasePage() {
             <p className="text-lg font-semibold text-[var(--text-primary)] mt-1">
               {stats.last_sync ? new Date(stats.last_sync).toLocaleString() : "—"}
             </p>
+          </div>
+        </div>
+
+        {/* Add document */}
+        <div className="bg-white border border-[var(--border-color)] rounded-2xl p-6 mb-6">
+          <h2 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider mb-4">Index New Data</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Title</label>
+              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Refund Policy" className="w-full px-3 py-2 text-sm border border-[var(--border-color)] rounded-lg outline-none focus:border-[var(--accent-color)] bg-[var(--bg-primary)] text-[var(--text-primary)]" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Source / URL (optional)</label>
+              <input value={source} onChange={(e) => setSource(e.target.value)} placeholder="e.g. /refunds" className="w-full px-3 py-2 text-sm border border-[var(--border-color)] rounded-lg outline-none focus:border-[var(--accent-color)] bg-[var(--bg-primary)] text-[var(--text-primary)]" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Content</label>
+            <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={5} placeholder="Paste the content the AI should learn from…" className="w-full px-3 py-2 text-sm border border-[var(--border-color)] rounded-lg outline-none focus:border-[var(--accent-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] resize-y" />
+          </div>
+          <div className="mt-4">
+            <button onClick={handleAdd} disabled={adding} className="px-4 py-2.5 rounded-lg bg-[var(--accent-color)] text-white font-medium text-sm hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-60 flex items-center gap-2">
+              <i className={`lnr lnr-plus-circle ${adding ? "animate-spin" : ""}`}></i>
+              {adding ? "Indexing…" : "Add to Knowledge Base"}
+            </button>
           </div>
         </div>
 

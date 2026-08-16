@@ -530,6 +530,11 @@ export const adminApi = {
     fetchJson<{ message: string; chunks_indexed: number }>(`${API_BASE_URL}/admin/knowledge-base/rebuild`, {
       method: "POST",
     }),
+  addKnowledgeDocument: (payload: { title: string; content: string; source?: string }) =>
+    fetchJson<{ message: string; chunks_indexed: number }>(`${API_BASE_URL}/admin/knowledge-base/documents`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 
   getApplications: () =>
     fetchJson<{ applications: any[]; stats: { total: number; pending: number; approved: number; rejected: number } }>(
