@@ -82,7 +82,7 @@ export function HowItWorksPage() {
             How It Works
           </p>
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[var(--text-primary)] mb-5 tracking-tight leading-tight">
-            Hire talent or grow your business<br />
+            Hire a trusted professional<br />
             <span className="text-[var(--accent-color)]">in just a few steps.</span>
           </h1>
           <p className="text-base md:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
