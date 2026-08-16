@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { UserAvatar } from "../../../components/shared/UserAvatar";
@@ -22,6 +22,8 @@ export function AdminUserDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
@@ -63,6 +65,20 @@ export function AdminUserDetailsPage() {
 
   const handleSave = () =>
     run(() => adminApi.updateUser(Number(id), { name, email }), "Profile updated.").then(() => setEditing(false));
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!file) return;
+    setAvatarUploading(true);
+    try {
+      await adminApi.uploadUserAvatar(Number(id), file);
+      notify("Profile photo updated.");
+      load();
+    } catch (e: any) {
+      notify(e.message || "Failed to upload photo", "error");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const handleToggleActive = () =>
     run(() => adminApi.updateUser(Number(id), { is_active: !user.is_active }), user.is_active ? "User suspended." : "User activated.");
@@ -131,7 +147,27 @@ export function AdminUserDetailsPage() {
         {/* Profile header */}
         <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-3xl p-6 mb-6 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <UserAvatar src={user.avatar} name={user.name} size={88} />
+            <div className="flex flex-col items-center gap-2">
+              <UserAvatar src={user.avatar} name={user.name} size={88} />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={avatarUploading}
+                className="text-xs font-medium text-[var(--accent-color)] hover:underline disabled:opacity-50"
+              >
+                {avatarUploading ? "Uploading..." : "Change Photo"}
+              </button>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleAvatarUpload(file);
+                e.target.value = "";
+              }}
+            />
             <div className="flex-1">
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{user.name || "—"}</h1>

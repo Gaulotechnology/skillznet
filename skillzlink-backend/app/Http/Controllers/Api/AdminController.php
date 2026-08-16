@@ -107,6 +107,28 @@ class AdminController extends Controller
         return response()->json(['message' => 'User deleted successfully']);
     }
 
+    public function uploadAvatar(Request $request, int $id): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $validated = $request->validate([
+            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ]);
+
+        $user = User::findOrFail($id);
+
+        $storedPath = $validated['file']->store('avatars', 'public');
+        $user->update(['avatar' => asset('storage/'.$storedPath)]);
+
+        return response()->json([
+            'message' => 'Avatar updated',
+            'user' => $user->fresh(),
+            'avatar' => $user->avatar,
+        ]);
+    }
+
     public function impersonateUser(Request $request, int $id): JsonResponse
     {
         if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
