@@ -1,10 +1,47 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32" fill="none">
-  <!-- Icon -->
-  <circle cx="16" cy="16" r="14" fill="#7c3aed"/>
-  <circle cx="10" cy="10" r="4" fill="white" opacity="0.9"/>
-  <circle cx="22" cy="22" r="4" fill="white" opacity="0.9"/>
-  <line x1="13" y1="13" x2="19" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
-  <circle cx="16" cy="16" r="1.5" fill="#a78bfa"/>
-  <!-- Text -->
-  <text x="36" y="22" font-family="Inter, Poppins, Arial, sans-serif" font-weight="700" font-size="16" fill="#1a1a2e">SkillzLink</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 36" fill="none">
+  <defs>
+    <linearGradient id="lhcLogoGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00A843"/>
+      <stop offset="100%" stop-color="#007A30"/>
+    </linearGradient>
+    <linearGradient id="lhcLogoGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD600"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="lhcLogoRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="100%" stop-color="#DC2626"/>
+    </linearGradient>
+    <linearGradient id="lhcLogoDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ── Icon Emblem ── -->
+  <g transform="translate(2, 2)">
+    <rect x="0" y="0" width="32" height="32" rx="9" fill="url(#lhcLogoDark)"/>
+    <rect x="0" y="0" width="32" height="32" rx="9" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+
+    <!-- 'S' monogram -->
+    <path d="M10 10 C 10 7, 22 6, 22 10 C 22 13, 10 13, 10 17" fill="none" stroke="url(#lhcLogoGreen)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M11 13 C 14 12, 19 12, 21 16 C 22.5 18, 22.5 21, 22.5 24" fill="none" stroke="url(#lhcLogoGold)" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M22 17 C 22 21, 10 21, 10 24 C 10 27, 22 27, 22 24" fill="none" stroke="url(#lhcLogoRed)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <circle cx="9.5" cy="10" r="1.8" fill="#FFFFFF"/>
+    <circle cx="9.5" cy="10" r="0.8" fill="#00A843"/>
+    
+    <circle cx="22.5" cy="24" r="1.8" fill="#FFFFFF"/>
+    <circle cx="22.5" cy="24" r="0.8" fill="#EF4444"/>
+
+    <circle cx="16" cy="16" r="1.5" fill="#FFFFFF"/>
+    <circle cx="16" cy="16" r="0.8" fill="#FFD600"/>
+  </g>
+
+  <!-- ── Typography ── -->
+  <g transform="translate(42, 0)">
+    <text x="0" y="24" font-family="'Inter', 'Poppins', Arial, sans-serif" font-size="17" font-weight="800" letter-spacing="-0.4">
+      <tspan fill="#0F172A">Skillz</tspan><tspan fill="url(#lhcLogoGreen)">N</tspan><tspan fill="url(#lhcLogoGold)">e</tspan><tspan fill="url(#lhcLogoRed)">t</tspan>
+    </text>
+  </g>
 </svg>

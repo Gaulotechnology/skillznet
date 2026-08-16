@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getCurrentUser, isLoggedIn, logout } from '../../services/api';
 import { LiveChatWidget } from '../common/LiveChatWidget';
+import { SkillzNetLogo } from '../common/SkillzNetLogo';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -213,12 +214,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             <i className={`lnr ${sidebarOpen ? 'lnr-cross' : 'lnr-menu'} text-lg`}></i>
           </button>
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[var(--accent-color)] flex items-center justify-center text-white font-bold text-sm">
-              S
-            </div>
-            <span className="text-lg font-bold tracking-tight text-gray-900 hidden sm:block">SkillzLink</span>
-          </Link>
+          <SkillzNetLogo size="sm" />
         </div>
 
         <div className="flex items-center gap-4">

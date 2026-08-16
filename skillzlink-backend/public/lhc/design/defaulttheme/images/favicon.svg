@@ -1,12 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- Background circle -->
-  <circle cx="32" cy="32" r="30" fill="#7c3aed" />
-  <!-- Left link node -->
-  <circle cx="21" cy="21" r="7" fill="white" opacity="0.9" />
-  <!-- Right link node -->
-  <circle cx="43" cy="43" r="7" fill="white" opacity="0.9" />
-  <!-- Connecting link line -->
-  <line x1="26" y1="26" x2="38" y2="38" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.9" />
-  <!-- Small connecting dot -->
-  <circle cx="32" cy="32" r="3" fill="#a78bfa" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <!-- Zimbabwe Flag Color Gradients -->
+    <linearGradient id="lhcZwGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00A843"/>
+      <stop offset="100%" stop-color="#007A30"/>
+    </linearGradient>
+    <linearGradient id="lhcZwGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD600"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="lhcZwRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="100%" stop-color="#DC2626"/>
+    </linearGradient>
+    <linearGradient id="lhcZwBlack" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <filter id="lhcSubtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Background container circle/squircle -->
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#lhcZwBlack)"/>
+  
+  <!-- Subtle inner boundary border -->
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+
+  <!-- Stylized Geometric "S" Network Link with Zimbabwe Flag Colors -->
+  <g filter="url(#lhcSubtleShadow)">
+    <!-- Top Green Arc (Top curve of S) -->
+    <path d="M40 38 C 40 26, 88 22, 88 38 C 88 50, 40 50, 40 64" fill="none" stroke="url(#lhcZwGreen)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Middle Gold Ribbon / Diagonal Connection -->
+    <path d="M44 48 C 54 44, 74 44, 84 58 C 88 64, 88 74, 88 88" fill="none" stroke="url(#lhcZwGold)" stroke-width="10" stroke-linecap="round"/>
+
+    <!-- Bottom Red Arc (Bottom curve of S) -->
+    <path d="M88 64 C 88 78, 40 78, 40 90 C 40 104, 88 102, 88 90" fill="none" stroke="url(#lhcZwRed)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- White Peace Accent Dots / Network Nodes -->
+    <circle cx="38" cy="38" r="6" fill="#FFFFFF"/>
+    <circle cx="38" cy="38" r="2.5" fill="#00A843"/>
+    
+    <circle cx="90" cy="90" r="6" fill="#FFFFFF"/>
+    <circle cx="90" cy="90" r="2.5" fill="#EF4444"/>
+
+    <!-- Central Gold Node -->
+    <circle cx="64" cy="64" r="5.5" fill="#FFFFFF"/>
+    <circle cx="64" cy="64" r="3" fill="#FFD600"/>
+  </g>
 </svg>

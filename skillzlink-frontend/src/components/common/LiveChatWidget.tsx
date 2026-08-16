@@ -50,7 +50,7 @@ export function LiveChatWidget() {
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-lg">💬</div>
           <div>
-            <p className="font-semibold text-sm">SkillzLink Chat</p>
+            <p className="font-semibold text-sm">SkillzNet Chat</p>
             <p className="text-xs text-white/70">We reply instantly</p>
           </div>
         </div>
