@@ -67,7 +67,7 @@ export function Footer() {
         <div className="py-12 border-b border-[#dddddd]/60 flex flex-col lg:flex-row gap-10 items-start justify-between">
           <div className="max-w-md space-y-4">
             <div className="mb-2">
-              <SkillzNetLogo onClick={scrollTop} />
+              <SkillzNetLogo logoUrl={contact.logoUrl || undefined} onClick={scrollTop} />
             </div>
             <p className="text-[#222222] font-semibold text-lg tracking-tight">Stay in the loop</p>
             <p className="text-[#717171] text-[14px] leading-relaxed">

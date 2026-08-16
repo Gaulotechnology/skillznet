@@ -335,7 +335,7 @@ class AdminController extends Controller
         // Sync theme-related fields to ThemeSetting so public endpoint picks them up
         if ($section === 'general') {
             $themeKeys = [
-                'siteName', 'faviconUrl', 'accentColor', 'accentHover', 'accentLight',
+                'siteName', 'faviconUrl', 'logoUrl', 'accentColor', 'accentHover', 'accentLight',
                 'textPrimary', 'textSecondary', 'bgPrimary', 'bgSecondary', 'borderColor',
             ];
             foreach ($themeKeys as $key) {
@@ -379,6 +379,33 @@ class AdminController extends Controller
         }
 
         return response()->json(['message' => 'Settings updated successfully.']);
+    }
+
+    public function uploadBrandAsset(Request $request): JsonResponse
+    {
+        if (!in_array($request->user()->role, ['admin', 'super_admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $validated = $request->validate([
+            'type' => ['required', 'string', 'in:logo,favicon'],
+            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,svg,ico', 'max:5120'],
+        ]);
+
+        $directory = $validated['type'] === 'favicon' ? 'branding/favicon' : 'branding/logo';
+        $storedPath = $validated['file']->store($directory, 'public');
+        $url = asset('storage/' . $storedPath);
+
+        $key = $validated['type'] === 'favicon' ? 'faviconUrl' : 'logoUrl';
+
+        \App\Models\Setting::set($key, $url, 'general');
+        \App\Models\ThemeSetting::updateOrCreate(['key' => $key], ['value' => $url]);
+
+        return response()->json([
+            'message' => ucfirst($validated['type']) . ' uploaded successfully.',
+            'key' => $key,
+            'url' => $url,
+        ]);
     }
 
     // ─── Registration Form Builder ─────────────────────────────────────────────

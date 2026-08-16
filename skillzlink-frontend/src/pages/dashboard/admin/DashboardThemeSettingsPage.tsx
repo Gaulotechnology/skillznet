@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
+import { adminApi } from "../../../services/api";
 
 const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:18080/api";
 
@@ -137,6 +138,11 @@ export function DashboardThemeSettingsPage() {
     facebook: "", twitter: "", instagram: "", linkedin: "", youtube: "", tiktok: "",
   });
 
+  const logoFileRef = useRef<HTMLInputElement>(null);
+  const faviconFileRef = useRef<HTMLInputElement>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
+
   const token = localStorage.getItem("skillzlink_token");
 
   useEffect(() => {
@@ -166,6 +172,38 @@ export function DashboardThemeSettingsPage() {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(""), 3000);
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    adminApi.uploadBrandAsset("logo", file)
+      .then(res => {
+        setGeneral(s => ({ ...s, logoUrl: res.url }));
+        showToast("Logo uploaded");
+      })
+      .catch(() => showToast("Logo upload failed"))
+      .finally(() => {
+        setUploadingLogo(false);
+        if (logoFileRef.current) logoFileRef.current.value = "";
+      });
+  };
+
+  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingFavicon(true);
+    adminApi.uploadBrandAsset("favicon", file)
+      .then(res => {
+        setGeneral(s => ({ ...s, faviconUrl: res.url }));
+        showToast("Favicon uploaded");
+      })
+      .catch(() => showToast("Favicon upload failed"))
+      .finally(() => {
+        setUploadingFavicon(false);
+        if (faviconFileRef.current) faviconFileRef.current.value = "";
+      });
   };
 
   const handleSave = async (section: string, data: Record<string, any>) => {
@@ -239,20 +277,28 @@ export function DashboardThemeSettingsPage() {
                 ]} />
               </Field>
               <div className="md:col-span-2"><Field label="Site Description"><Textarea value={general.siteDescription} onChange={v => setGeneral(s => ({ ...s, siteDescription: v }))} /></Field></div>
-              <Field label="Favicon URL" hint="URL to a .ico, .png, or .svg file">
+              <Field label="Favicon" hint="Upload an image or provide a URL (.ico, .png, .svg)">
                 <div className="flex gap-4 items-center">
                   <div className="flex-1">
                     <Input value={general.faviconUrl} onChange={v => setGeneral(s => ({ ...s, faviconUrl: v }))} placeholder="https://.../favicon.svg" />
                   </div>
                   {general.faviconUrl && <div className="w-12 h-12 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-center shrink-0"><img src={general.faviconUrl} className="max-w-[24px] max-h-[24px]" alt="favicon" /></div>}
+                  <input ref={faviconFileRef} type="file" accept="image/*,.ico,.svg" className="hidden" onChange={handleFaviconUpload} />
+                  <button type="button" onClick={() => faviconFileRef.current?.click()} disabled={uploadingFavicon} className="shrink-0 px-4 py-3 rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] font-semibold text-sm hover:bg-[var(--bg-secondary)] transition-colors disabled:opacity-60">
+                    {uploadingFavicon ? "Uploading…" : "Upload"}
+                  </button>
                 </div>
               </Field>
-              <Field label="Custom Logo URL (Optional)" hint="URL to a custom logo image file">
+              <Field label="Custom Logo" hint="Upload a logo image or provide a URL">
                 <div className="flex gap-4 items-center">
                   <div className="flex-1">
                     <Input value={general.logoUrl || ""} onChange={v => setGeneral(s => ({ ...s, logoUrl: v }))} placeholder="https://.../logo.svg" />
                   </div>
                   {general.logoUrl && <div className="h-12 px-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-center shrink-0"><img src={general.logoUrl} className="max-h-[28px] object-contain" alt="logo" /></div>}
+                  <input ref={logoFileRef} type="file" accept="image/*,.svg" className="hidden" onChange={handleLogoUpload} />
+                  <button type="button" onClick={() => logoFileRef.current?.click()} disabled={uploadingLogo} className="shrink-0 px-4 py-3 rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] font-semibold text-sm hover:bg-[var(--bg-secondary)] transition-colors disabled:opacity-60">
+                    {uploadingLogo ? "Uploading…" : "Upload"}
+                  </button>
                 </div>
               </Field>
               <Field label="Default Language">

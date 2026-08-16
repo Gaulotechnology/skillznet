@@ -217,6 +217,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         // Admin settings & logs (accessible by both admin and super_admin)
         Route::get('/settings', [AdminController::class, 'getSettings']);
         Route::post('/settings', [AdminController::class, 'updateSettings']);
+        Route::post('/settings/upload-brand-asset', [AdminController::class, 'uploadBrandAsset']);
         Route::get('/sms-logs', [AdminController::class, 'smsLogs']);
         Route::get('/comm-logs', [AdminController::class, 'commLogs']);
         Route::get('/knowledge-base', [AdminController::class, 'knowledgeBase']);

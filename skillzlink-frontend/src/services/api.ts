@@ -415,6 +415,22 @@ export const adminApi = {
     return res.json() as Promise<{ message: string; user: any; avatar: string }>;
   },
 
+  uploadBrandAsset: async (type: "logo" | "favicon", file: File) => {
+    const formData = new FormData();
+    formData.append("type", type);
+    formData.append("file", file);
+    const res = await fetch(`${API_BASE_URL}/admin/settings/upload-brand-asset`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${getToken()}` },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error((err as { message?: string }).message || "Upload failed");
+    }
+    return res.json() as Promise<{ message: string; key: string; url: string }>;
+  },
+
   getCategories: () => fetchJson<{ categories: any[] }>(`${API_BASE_URL}/admin/categories`),
   createCategory: (payload: any) =>
     fetchJson<{ message: string; category: any }>(`${API_BASE_URL}/admin/categories`, {

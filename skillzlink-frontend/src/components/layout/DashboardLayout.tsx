@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getCurrentUser, isLoggedIn, logout } from '../../services/api';
+import { getCurrentUser, isLoggedIn, logout, publicApi } from '../../services/api';
 import { LiveChatWidget } from '../common/LiveChatWidget';
 import { SkillzNetLogo } from '../common/SkillzNetLogo';
 
@@ -22,10 +22,17 @@ interface NavSection {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const user = getCurrentUser();
   const role = user?.role || localStorage.getItem('role') || 'seeker';
+
+  useEffect(() => {
+    publicApi.getThemeSettings().then(res => {
+      if (res.settings?.logoUrl) setLogoUrl(res.settings.logoUrl);
+    }).catch(() => {});
+  }, []);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -214,7 +221,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             <i className={`lnr ${sidebarOpen ? 'lnr-cross' : 'lnr-menu'} text-lg`}></i>
           </button>
-          <SkillzNetLogo size="sm" />
+          <SkillzNetLogo logoUrl={logoUrl || undefined} size="sm" />
         </div>
 
         <div className="flex items-center gap-4">

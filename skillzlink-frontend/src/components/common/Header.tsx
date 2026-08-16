@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
-import { isLoggedIn, getCurrentUser, logout } from "../../services/api"
+import { isLoggedIn, getCurrentUser, logout, publicApi } from "../../services/api"
 
 import { SkillzNetLogo } from "./SkillzNetLogo"
 
@@ -8,8 +8,15 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
   const [user, setUser] = useState<{name: string, role: string} | null>(null)
+  const [logoUrl, setLogoUrl] = useState("")
   const navigate = useNavigate()
   const location = useLocation()
+
+  useEffect(() => {
+    publicApi.getThemeSettings().then(res => {
+      if (res.settings?.logoUrl) setLogoUrl(res.settings.logoUrl)
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     const checkAuth = () => {
@@ -54,7 +61,7 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-white border-b border-[var(--border-color)]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
         {/* Logo */}
-        <SkillzNetLogo onClick={() => setIsMenuOpen(false)} />
+        <SkillzNetLogo logoUrl={logoUrl || undefined} onClick={() => setIsMenuOpen(false)} />
 
         {/* Desktop Navigation */}
         {!location.pathname.startsWith('/dashboard') && (
