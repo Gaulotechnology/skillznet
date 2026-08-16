@@ -58,7 +58,7 @@ export function SkillsFooter() {
 
   return (
     <section className="bg-white border-t border-gray-200 py-12">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {sections.map((section, index) => (
             <div key={index}>

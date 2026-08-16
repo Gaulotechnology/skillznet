@@ -71,7 +71,7 @@ export function Hero() {
       </div>
 
       {/* Hero text — top left */}
-      <div className="relative z-10 container mx-auto px-6 lg:px-10 pt-28 md:pt-36 lg:pt-44 xl:pt-52">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-28 md:pt-36 lg:pt-44 xl:pt-52">
         <div className="max-w-lg">
           <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-white leading-[1.08] tracking-tight drop-shadow-sm">
             Trusted pros,<br />right where you need them.
@@ -84,8 +84,8 @@ export function Hero() {
 
       {/* ── Hero CTA Cards ── */}
       <div className="relative z-10 w-full mt-10 md:mt-14 pb-16">
-        <div className="container mx-auto px-6 lg:px-10">
-          <div className="grid md:grid-cols-2 gap-5 max-w-4xl">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-6 max-w-5xl">
             {/* ── Book a Service Card ── */}
             <Link
               to="/register"

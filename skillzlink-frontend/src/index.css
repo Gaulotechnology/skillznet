@@ -21,6 +21,12 @@ body {
   margin: 0;
 }
 
+.wt-main,
+#wt-main {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 #root {
   min-height: 100vh;
 }

@@ -65,7 +65,7 @@ export function FeaturedProfessionals() {
   if (loading) {
     return (
       <section className="py-24 bg-white relative">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="max-w-2xl mb-12">
             <div className="h-3 w-40 bg-gray-100 rounded mb-4" />
             <div className="h-8 w-96 bg-gray-100 rounded mb-3" />
@@ -91,7 +91,7 @@ export function FeaturedProfessionals() {
 
   return (
     <section className="py-24 bg-white relative">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-2xl">

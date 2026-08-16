@@ -77,7 +77,7 @@ const plans = [
 export function PlatformFeatures({ showPlans = true }: { showPlans?: boolean }) {
   return (
     <section className="bg-white py-20">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Why Choose SkillzLink */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white text-[13px] font-bold tracking-wide mb-8" style={{ backgroundColor: primary }}>

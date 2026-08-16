@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { isLoggedIn, getCurrentUser, logout } from "../../services/api"
 
+import { SkillzNetLogo } from "./SkillzNetLogo"
+
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
@@ -52,12 +54,7 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-white border-b border-[var(--border-color)]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-lg bg-[var(--accent-color)] flex items-center justify-center group-hover:scale-105 transition-transform">
-            <span className="text-white font-black text-xs">SL</span>
-          </div>
-          <span className="font-extrabold text-xl text-[var(--text-primary)] tracking-tight">SkillzLink</span>
-        </Link>
+        <SkillzNetLogo onClick={() => setIsMenuOpen(false)} />
 
         {/* Desktop Navigation */}
         {!location.pathname.startsWith('/dashboard') && (

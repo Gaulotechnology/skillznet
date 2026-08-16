@@ -93,10 +93,10 @@ export function DashboardThemeSettingsPage() {
 
   // Settings state
   const [general, setGeneral] = useState({
-    siteName: "SkillzLink", siteDescription: "", currency: "ZAR", faviconUrl: "",
+    siteName: "SkillzNet", siteDescription: "", currency: "USD", faviconUrl: "", logoUrl: "",
     enableChat: true, maintenanceMode: false, comingSoon: false, defaultLanguage: "English",
     showJoinNetwork: true, showVisibilityLevel: true,
-    accentColor: "#FF385C", accentHover: "#E31C5F", accentLight: "#FFF1F3",
+    accentColor: "#00A843", accentHover: "#007A30", accentLight: "#E8F5E9",
     textPrimary: "#111827", textSecondary: "#6B7280", bgPrimary: "#FFFFFF", bgSecondary: "#F9FAFB", bgAuthPanel: "#F0F4F8", borderColor: "#E5E7EB",
   });
   const [email, setEmail] = useState({
@@ -239,12 +239,20 @@ export function DashboardThemeSettingsPage() {
                 ]} />
               </Field>
               <div className="md:col-span-2"><Field label="Site Description"><Textarea value={general.siteDescription} onChange={v => setGeneral(s => ({ ...s, siteDescription: v }))} /></Field></div>
-              <Field label="Favicon URL" hint="URL to a .ico or .png file">
+              <Field label="Favicon URL" hint="URL to a .ico, .png, or .svg file">
                 <div className="flex gap-4 items-center">
                   <div className="flex-1">
-                    <Input value={general.faviconUrl} onChange={v => setGeneral(s => ({ ...s, faviconUrl: v }))} placeholder="https://..." />
+                    <Input value={general.faviconUrl} onChange={v => setGeneral(s => ({ ...s, faviconUrl: v }))} placeholder="https://.../favicon.svg" />
                   </div>
                   {general.faviconUrl && <div className="w-12 h-12 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-center shrink-0"><img src={general.faviconUrl} className="max-w-[24px] max-h-[24px]" alt="favicon" /></div>}
+                </div>
+              </Field>
+              <Field label="Custom Logo URL (Optional)" hint="URL to a custom logo image file">
+                <div className="flex gap-4 items-center">
+                  <div className="flex-1">
+                    <Input value={general.logoUrl || ""} onChange={v => setGeneral(s => ({ ...s, logoUrl: v }))} placeholder="https://.../logo.svg" />
+                  </div>
+                  {general.logoUrl && <div className="h-12 px-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-center shrink-0"><img src={general.logoUrl} className="max-h-[28px] object-contain" alt="logo" /></div>}
                 </div>
               </Field>
               <Field label="Default Language">

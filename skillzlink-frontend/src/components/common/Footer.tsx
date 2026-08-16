@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { publicApi } from "../../services/api"
+import { SkillzNetLogo } from "./SkillzNetLogo"
 
 const primary = "var(--accent-color, #2563eb)"
 
@@ -61,15 +62,13 @@ export function Footer() {
 
   return (
     <footer className="w-full clear-both bg-[#F7F7F7] border-t border-[#ebebeb] relative">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Newsletter & Brand Area */}
         <div className="py-12 border-b border-[#dddddd]/60 flex flex-col lg:flex-row gap-10 items-start justify-between">
           <div className="max-w-md space-y-4">
-            <Link to="/" onClick={scrollTop} className="inline-block transition-transform hover:scale-105 mb-2">
-              <span className="text-[#222222] font-bold text-xl tracking-tight">
-                Skillz<span style={{ color: primary }}>Link</span>
-              </span>
-            </Link>
+            <div className="mb-2">
+              <SkillzNetLogo onClick={scrollTop} />
+            </div>
             <p className="text-[#222222] font-semibold text-lg tracking-tight">Stay in the loop</p>
             <p className="text-[#717171] text-[14px] leading-relaxed">
               Subscribe for the latest service insights, trusted professionals, and platform updates across Zimbabwe.

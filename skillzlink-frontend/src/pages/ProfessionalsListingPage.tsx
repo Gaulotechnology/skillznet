@@ -309,17 +309,17 @@ export function ProfessionalsListingPage() {
     }`
 
   const secondaryChip = (active: boolean) =>
-    `px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer select-none border ${
+    `flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer select-none border ${
       active
         ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)] shadow-sm"
-        : "bg-transparent text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+        : "bg-white text-[var(--text-primary)] border-[var(--border-color)] hover:border-[var(--text-primary)] shadow-sm"
     }`
 
   const categoryChip = (active: boolean) =>
-    `flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 cursor-pointer select-none border shrink-0 ${
+    `flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium whitespace-nowrap transition-all duration-200 cursor-pointer select-none shrink-0 ${
       active
-        ? "bg-[var(--accent-color)] text-white border-[var(--accent-color)] shadow-md shadow-[var(--accent-color)]/20"
-        : "bg-[var(--bg-primary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--accent-color)]/50 hover:text-[var(--text-primary)] hover:shadow-sm"
+        ? "bg-[var(--accent-color)] text-white font-semibold shadow-sm"
+        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
     }`
 
   return (
@@ -329,25 +329,25 @@ export function ProfessionalsListingPage() {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(var(--accent-rgb,99,102,241),0.08),transparent_50%)]" />
         </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-          <Link to="/" className="text-[var(--accent-color)] font-medium text-sm mb-3 inline-block hover:underline">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+          <Link to="/" className="text-[var(--accent-color)] font-medium text-sm mb-2 inline-block hover:underline">
             ← Back to Home
           </Link>
-          <h1 className="text-2xl md:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
             Find Professionals <span className="text-[var(--accent-color)]">Near You</span>
           </h1>
-          <p className="text-[var(--text-secondary)] text-sm md:text-base mt-2 max-w-lg">
+          <p className="text-[var(--text-secondary)] text-sm mt-1 max-w-lg">
             Discover trusted, verified experts in your area. Filter by location, category, experience, and more.
           </p>
           
           {/* Inline Search + Location */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-6 max-w-2xl">
+          <div className="flex flex-col sm:flex-row gap-3 mt-4 max-w-2xl">
             {/* Search — flex wrapper avoids absolute-icon + main.css padding conflict */}
             <div
               className="flex-1 flex items-center gap-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 shadow-sm transition-all focus-within:border-[var(--accent-color)] focus-within:ring-4 focus-within:ring-[var(--accent-light)]/50"
-              style={{ height: '48px' }}
+              style={{ height: '44px' }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[var(--text-secondary)]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[var(--text-secondary)]">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
               <input
@@ -406,16 +406,16 @@ export function ProfessionalsListingPage() {
       </div>
 
       {/* Sticky Filter Bar */}
-      <div className="sticky top-0 z-20 bg-[var(--bg-primary)]/80 backdrop-blur-lg border-b border-[var(--border-color)] shadow-sm">
+      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border-b border-[var(--border-color)] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-3 py-3 overflow-visible">
+          <div className="flex items-center gap-3 py-2 overflow-visible">
             {/* Category Chips - Horizontal Scroll */}
-            <div className="flex-1 flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
+            <div className="flex-1 flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1">
               <button
                 onClick={() => setCategoryFilter("All")}
                 className={categoryChip(categoryFilter === "All")}
               >
-                <i className="lnr lnr-grid text-sm" />
+                <i className="lnr lnr-grid text-xs" />
                 All
               </button>
               {categories.slice(0, categoryScrollOpen ? categories.length : 8).map((c: any) => {
@@ -426,18 +426,20 @@ export function ProfessionalsListingPage() {
                     onClick={() => setCategoryFilter(c.name === categoryFilter ? "All" : c.name)}
                     className={categoryChip(categoryFilter === c.name)}
                   >
-                    <i className={`${categoryIcons[c.name] || "lnr lnr-tag"} text-sm`} />
-                    {c.name}
-                    <span className={`text-[10px] ml-0.5 font-normal ${categoryFilter === c.name ? "text-white/70" : "text-[var(--text-secondary)]"}`}>
-                      {count}
-                    </span>
+                    {categoryIcons[c.name] && <i className={`${categoryIcons[c.name]} text-xs opacity-75`} />}
+                    <span>{c.name}</span>
+                    {count > 0 && (
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ml-0.5 ${categoryFilter === c.name ? "bg-white/25 text-white" : "bg-black/5 text-[var(--text-secondary)]"}`}>
+                        {count}
+                      </span>
+                    )}
                   </button>
                 )
               })}
               {categories.length > 8 && !categoryScrollOpen && (
                 <button
                   onClick={() => setCategoryScrollOpen(true)}
-                  className="shrink-0 px-3 py-2 text-xs text-[var(--accent-color)] font-medium hover:underline"
+                  className="shrink-0 px-3 py-1.5 text-xs text-[var(--accent-color)] font-medium hover:underline"
                 >
                   +{categories.length - 8} more
                 </button>

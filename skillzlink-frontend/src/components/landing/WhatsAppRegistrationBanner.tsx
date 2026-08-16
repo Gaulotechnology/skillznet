@@ -43,7 +43,7 @@ const ArrowRight = ({ size = 13, className = "", style }: { size?: number; class
 
 export function WhatsAppRegistrationBanner() {
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
+    <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
       <div className="w-full rounded-[2rem] overflow-hidden border border-[#ebebeb] bg-[#F7F7F7]">
         <div className="grid grid-cols-1 lg:grid-cols-2">
           {/* Content Side */}

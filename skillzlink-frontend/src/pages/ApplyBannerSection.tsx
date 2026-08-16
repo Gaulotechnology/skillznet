@@ -24,7 +24,7 @@ const cards = [
 export function ApplyBannerSection() {
   return (
     <section className="bg-gray-50 py-16">
-      <div className="max-w-4xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <h2 className="text-2xl font-semibold text-gray-900 text-center mb-2">Join the SkillzLink Network</h2>
         <p className="text-sm text-gray-500 text-center mb-8">Choose how you'd like to partner with us</p>
 
